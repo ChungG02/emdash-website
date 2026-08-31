@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+.astro/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# Local database
+*.db
+*.db-shm
+*.db-wal
+
+# Cloudflare local data
+.wrangler/
+
+# Logs
+*.log
+
+# Editor and system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
