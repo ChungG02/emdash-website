@@ -1,0 +1,94 @@
+---
+import { getEmDashCollection } from "emdash";
+import type { Product } from "../../../.emdash/types";
+
+import Base from "../../layouts/Base.astro";
+import ProductCard from "../../modules/products/components/ProductCard.astro";
+
+const {
+  entries: products,
+  error,
+  cacheHint,
+} = await getEmDashCollection<"products", Product>("products", {
+  status: "published",
+});
+
+if (Astro.cache?.enabled) {
+  Astro.cache.set(cacheHint);
+}
+
+if (error) {
+  console.error("Không thể tải danh sách sản phẩm:", error);
+}
+---
+
+<Base title="Sản phẩm" description="Danh sách sản phẩm">
+  <main class="products-page">
+    <header class="products-page__header">
+      <h1>Sản phẩm</h1>
+      <p>Hiện có {products.length} sản phẩm</p>
+    </header>
+
+    {
+      error ? (
+        <p>Không thể tải danh sách sản phẩm.</p>
+      ) : products.length === 0 ? (
+        <p>Chưa có sản phẩm nào được xuất bản.</p>
+      ) : (
+        <div class="products-grid">
+          {products.map((product) => (
+            <ProductCard
+              title={product.data.title}
+              href={`/products/${product.data.slug ?? product.id}`}
+              featuredImage={product.data.featured_image}
+            />
+          ))}
+        </div>
+      )
+    }
+  </main>
+</Base>
+
+<style>
+  .products-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+
+  .products-page__header {
+    margin-bottom: 32px;
+  }
+
+  .products-page__header h1 {
+    margin: 0 0 8px;
+    font-size: 36px;
+  }
+
+  .products-page__header p {
+    margin: 0;
+    color: #6b7280;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .products-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 600px) {
+    .products-page {
+      padding: 32px 16px;
+    }
+
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

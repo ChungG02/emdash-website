@@ -1,0 +1,128 @@
+---
+import { decodeSlug, getEmDashEntry } from "emdash";
+import type { Product } from "../../../.emdash/types";
+import ProductGallery from "../../modules/products/components/ProductGallery.astro";
+import Base from "../../layouts/Base.astro";
+import ProductDescription from "../../modules/products/components/ProductDescription.astro";
+import ProductSpecifications from "../../modules/products/components/ProductSpecifications.astro";
+
+const slug = decodeSlug(Astro.params.slug); // Astro lấy slug trên URL
+
+if (!slug) {
+  return Astro.redirect("/404");
+}
+
+const {
+  entry: product,
+  error,
+  cacheHint,
+} = await getEmDashEntry<"products", Product>("products", slug);
+
+if (error) {
+  console.error("Không thể/đọc được sản phẩm:", error);
+
+  return new Response("Không thể tải sản phẩm", {
+    status: 500,
+  });
+}
+
+if (!product) {
+  return Astro.redirect("/404");
+}
+
+if (Astro.cache?.enabled) {
+  Astro.cache.set(cacheHint);
+}
+---
+
+<Base
+  title={product.data.title}
+  description={`Thông tin sản phẩm ${product.data.title}`}
+>
+  <main class="product-detail">
+    <a href="/products" class="back-link"> ← Quay lại danh sách sản phẩm </a>
+
+    <section class="product-detail__main">
+      <ProductGallery
+        title={product.data.title}
+        featuredImage={product.data.featured_image}
+        galleryImages={product.data.gallery_images}
+      />
+
+      <div class="product-detail__information">
+        <p class="product-detail__label">Sản phẩm</p>
+
+        <h1 class="product-detail__title">
+          {product.data.title}
+        </h1>
+
+        <ProductSpecifications
+          origin={product.data.origin}
+          availability={product.data.availability}
+          sizes={product.data.sizes}
+        />
+      </div>
+    </section>
+    <ProductDescription description={product.data.description} />
+  </main>
+</Base>
+
+<style>
+  .product-detail {
+    max-width: 1200px;
+    min-height: 500px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 32px;
+    color: #1477b9;
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  .product-detail__main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+
+  .product-detail__information {
+    padding-top: 16px;
+  }
+
+  .product-detail__label {
+    margin: 0 0 8px;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .product-detail__title {
+    margin: 0;
+    font-size: 42px;
+    line-height: 1.2;
+  }
+
+  @media (max-width: 768px) {
+    .product-detail {
+      padding: 32px 16px;
+    }
+
+    .product-detail__main {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .product-detail__title {
+      font-size: 32px;
+    }
+  }
+</style>

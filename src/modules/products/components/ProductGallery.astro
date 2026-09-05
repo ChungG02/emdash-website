@@ -1,0 +1,250 @@
+---
+import type { MediaValue } from "emdash";
+import { Image } from "emdash/ui";
+
+interface Props {
+  title: string;
+  featuredImage?: MediaValue | string;
+  galleryImages?: unknown;
+}
+
+const { title, featuredImage, galleryImages } = Astro.props;
+
+type GalleryImage = MediaValue | string;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isMediaValue(value: unknown): value is GalleryImage {
+  if (typeof value === "string") {
+    return value.length > 0;
+  }
+
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return typeof value.id === "string" || typeof value.src === "string";
+}
+
+function getImageFromRepeaterItem(item: unknown): GalleryImage | null {
+  if (!isRecord(item)) {
+    return null;
+  }
+
+  // EmDash có thể tự tạo một trong các slug này.
+  const knownKeys = ["image", "hinh_anh"];
+
+  for (const key of knownKeys) {
+    const value = item[key];
+
+    if (isMediaValue(value)) {
+      return value;
+    }
+  }
+
+  // Dự phòng nếu EmDash sinh một slug khác.
+  for (const value of Object.values(item)) {
+    if (isMediaValue(value)) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+const additionalImages = Array.isArray(galleryImages)
+  ? galleryImages
+      .map(getImageFromRepeaterItem)
+      .filter((image): image is GalleryImage => image !== null)
+  : [];
+
+const images: GalleryImage[] = [];
+
+if (featuredImage) {
+  images.push(featuredImage);
+}
+
+images.push(...additionalImages);
+---
+
+<div class="product-gallery" data-product-gallery>
+  <div class="product-gallery__main">
+    {
+      images.length > 0 ? (
+        images.map((image, index) => (
+          <div
+            class="product-gallery__slide"
+            data-gallery-slide
+            hidden={index !== 0}
+          >
+            <Image
+              image={image}
+              alt={`${title} - ảnh ${index + 1}`}
+              width={900}
+              height={900}
+              class="product-gallery__main-image"
+            />
+          </div>
+        ))
+      ) : (
+        <div class="product-gallery__placeholder">Chưa có hình ảnh</div>
+      )
+    }
+  </div>
+
+  {
+    images.length > 1 && (
+      <div
+        class="product-gallery__thumbnails"
+        aria-label="Các hình ảnh sản phẩm"
+      >
+        {images.map((image, index) => (
+          <button
+            type="button"
+            class="product-gallery__thumbnail"
+            data-gallery-thumbnail
+            data-index={index}
+            aria-label={`Xem ảnh ${index + 1} của ${title}`}
+            aria-pressed={index === 0 ? "true" : "false"}
+          >
+            <Image
+              image={image}
+              alt=""
+              width={120}
+              height={120}
+              placeholder={false}
+              class="product-gallery__thumbnail-image"
+            />
+          </button>
+        ))}
+      </div>
+    )
+  }
+</div>
+
+<script>
+  const galleries = document.querySelectorAll<HTMLElement>(
+    "[data-product-gallery]",
+  );
+
+  galleries.forEach((gallery) => {
+    const slides = gallery.querySelectorAll<HTMLElement>(
+      "[data-gallery-slide]",
+    );
+
+    const thumbnails = gallery.querySelectorAll<HTMLButtonElement>(
+      "[data-gallery-thumbnail]",
+    );
+
+    thumbnails.forEach((thumbnail) => {
+      thumbnail.addEventListener("click", () => {
+        const selectedIndex = Number(thumbnail.dataset.index);
+
+        slides.forEach((slide, index) => {
+          slide.hidden = index !== selectedIndex;
+        });
+
+        thumbnails.forEach((button, index) => {
+          button.setAttribute(
+            "aria-pressed",
+            index === selectedIndex ? "true" : "false",
+          );
+        });
+      });
+    });
+  });
+</script>
+
+<style>
+  .product-gallery {
+    min-width: 0;
+  }
+
+  .product-gallery__main {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+  }
+
+  .product-gallery__slide {
+    width: 100%;
+    height: 100%;
+  }
+
+  .product-gallery__slide[hidden] {
+    display: none;
+  }
+
+  .product-gallery__slide :global(img) {
+    display: block;
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    padding: 6px;
+    object-fit: contain;
+  }
+
+  .product-gallery__placeholder {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+  }
+
+  .product-gallery__thumbnails {
+    display: flex;
+    gap: 12px;
+    margin-top: 14px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+  }
+
+  .product-gallery__thumbnail {
+    width: 82px;
+    height: 82px;
+    flex: 0 0 82px;
+    overflow: hidden;
+    padding: 3px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    background: #ffffff;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .product-gallery__thumbnail:hover {
+    border-color: #60a5fa;
+  }
+
+  .product-gallery__thumbnail[aria-pressed="true"] {
+    border-color: #1477b9;
+    box-shadow: 0 0 0 1px #1477b9;
+  }
+
+  .product-gallery__thumbnail :global(img) {
+    display: block;
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    padding: 2px;
+    object-fit: contain;
+  }
+
+  @media (max-width: 600px) {
+    .product-gallery__thumbnail {
+      width: 68px;
+      height: 68px;
+      flex-basis: 68px;
+    }
+  }
+</style>
