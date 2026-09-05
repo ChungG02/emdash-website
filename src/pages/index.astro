@@ -1,4 +1,35 @@
 ---
+import ProductSection from "../modules/products/components/ProductSection.astro";
+
+const productCategories = [
+  {
+    title: "Hạt nhựa nguyên sinh",
+    slug: "hat-nhua-nguyen-sinh",
+  },
+  {
+    title: "Màng quấn PE",
+    slug: "mang-quan-pe",
+  },
+  {
+    title: "Dây đai PET",
+    slug: "day-pet",
+  },
+  {
+    title: "Băng dính",
+    slug: "bang-dinh",
+  },
+  {
+    title: "Thanh nẹp",
+    slug: "thanh-nep",
+  },
+  {
+    title: "Sản phẩm khác",
+    slug: "san-pham-khac",
+  },
+];
+---
+
+<!-- ---
 import {
 	getEmDashCollection,
 	getTermsForEntries,
@@ -9,6 +40,7 @@ import Base from "../layouts/Base.astro";
 import PostCard from "../components/PostCard.astro";
 import { getReadingTime } from "../utils/reading-time";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import ProductSection from "../modules/products/components/ProductSection.astro";
 
 // Limit to what we render (1 featured + 6 grid). The DB does the slicing
 // instead of fetching every post and discarding the tail in JS.
@@ -460,4 +492,153 @@ function formatDate(date: Date | null | undefined) {
 			gap: var(--spacing-8);
 		}
 	}
+</style> --><!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <meta
+      name="description"
+      content="Sản phẩm đóng gói và vật tư công nghiệp"
+    />
+
+    <title>Trang chủ | Sản phẩm công nghiệp</title>
+  </head>
+
+  <body>
+    <main>
+      <section class="hero">
+        <div class="hero__content">
+          <p class="hero__eyebrow">Giải pháp đóng gói</p>
+
+          <h1>Sản phẩm chất lượng cho doanh nghiệp</h1>
+
+          <p class="hero__description">
+            Cung cấp băng dính, hạt chống ẩm, màng quấn PE và các giải pháp đóng
+            gói phù hợp với nhu cầu sản xuất.
+          </p>
+
+          <a href="/products" class="hero__button"> Xem tất cả sản phẩm </a>
+        </div>
+      </section>
+
+      <div class="product-sections">
+        {
+          productCategories.map((category) => (
+            <ProductSection
+              title={category.title}
+              categorySlug={category.slug}
+              limit={4}
+            />
+          ))
+        }
+      </div>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    font-family: Arial, Helvetica, sans-serif;
+
+    color: #1f2937;
+    background: #ffffff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: #ffffff;
+  }
+
+  .hero {
+    display: flex;
+    min-height: 420px;
+    align-items: center;
+    padding: 72px 24px;
+    color: #ffffff;
+    background: linear-gradient(
+      120deg,
+      rgba(9, 74, 119, 0.96),
+      rgba(20, 119, 185, 0.85)
+    );
+  }
+
+  .hero__content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero__eyebrow {
+    margin: 0 0 12px;
+    color: #bfdbfe;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    max-width: 700px;
+    margin: 0;
+    font-size: clamp(36px, 6vw, 60px);
+    line-height: 1.1;
+  }
+
+  .hero__description {
+    max-width: 650px;
+    margin: 24px 0 0;
+    color: #e5f2fb;
+    font-size: 19px;
+    line-height: 1.7;
+  }
+
+  .hero__button {
+    display: inline-flex;
+    margin-top: 32px;
+    padding: 14px 24px;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .hero__button:hover {
+    color: #1477b9;
+    background: #ffffff;
+  }
+
+  .product-sections {
+    padding: 24px 0 64px;
+  }
+
+  .product-sections > .product-section:nth-child(even) {
+    background: #f8fafc;
+  }
+
+  @media (max-width: 600px) {
+    .hero {
+      min-height: 360px;
+      padding: 56px 16px;
+    }
+
+    .hero__description {
+      font-size: 17px;
+    }
+  }
 </style>

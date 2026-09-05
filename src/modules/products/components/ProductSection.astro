@@ -1,0 +1,135 @@
+---
+import ProductCard from "./ProductCard.astro";
+import { getProductsByCategory } from "../../services/product.service";
+
+interface Props {
+  title: string;
+  categorySlug: string;
+  limit?: number;
+}
+
+const { title, categorySlug, limit = 4 } = Astro.props;
+
+const { entries: products, error } = await getProductsByCategory(
+  categorySlug,
+  limit,
+);
+
+if (error) {
+  console.error(
+    `Không thể tải sản phẩm thuộc danh mục ${categorySlug}:`,
+    error,
+  );
+}
+---
+
+<section class="product-section">
+  <header class="product-section__header">
+    <h2>{title}</h2>
+    <span aria-hidden="true"></span>
+  </header>
+
+  {
+    error ? (
+      <p class="product-section__message">Không thể tải sản phẩm.</p>
+    ) : products.length === 0 ? (
+      <p class="product-section__message">
+        Chưa có sản phẩm trong danh mục này.
+      </p>
+    ) : (
+      <div class="product-section__grid">
+        {products.map((product) => (
+          <ProductCard
+            title={product.data.title}
+            href={`/products/${product.data.slug ?? product.id}`}
+            featuredImage={product.data.featured_image}
+          />
+        ))}
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .product-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  .product-section__header {
+    margin-bottom: 24px;
+  }
+
+  .product-section__header h2 {
+    margin: 0;
+    color: #1477b9;
+    font-size: 26px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .product-section__header span {
+    display: block;
+    width: 64px;
+    height: 3px;
+    margin-top: 10px;
+    background: #ef4444;
+  }
+
+  /* .product-section__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+  } */
+
+  .product-section__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 292px));
+    gap: 22px;
+    justify-content: start;
+  }
+
+  .product-section__message {
+    margin: 0;
+    padding: 24px;
+    color: #6b7280;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .product-section__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .product-section {
+      padding: 32px 16px;
+    }
+
+    .product-section__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 1000px) {
+    .product-section__grid {
+      grid-template-columns: repeat(3, minmax(0, 292px));
+    }
+  }
+
+  @media (max-width: 760px) {
+    .product-section__grid {
+      grid-template-columns: repeat(2, minmax(0, 292px));
+    }
+  }
+
+  @media (max-width: 520px) {
+    .product-section__grid {
+      grid-template-columns: minmax(0, 292px);
+      justify-content: center;
+    }
+  }
+</style>
