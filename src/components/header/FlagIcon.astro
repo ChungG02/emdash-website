@@ -1,0 +1,59 @@
+---
+interface Props {
+  code: "vi" | "en" | "zh";
+}
+
+const { code } = Astro.props;
+---
+
+<span
+  class="block h-8 w-12 shrink-0 overflow-hidden lg:h-9 lg:w-14 xl:h-10 xl:w-16"
+  aria-hidden="true"
+>
+  {
+    code === "vi" && (
+      <svg viewBox="0 0 30 20" class="size-full">
+        <rect width="30" height="20" fill="#da251d" />
+
+        <polygon
+          points="15,3.5 16.8,7.8 21.5,7.8 17.7,10.5 19.2,15 15,12.3 10.8,15 12.3,10.5 8.5,7.8 13.2,7.8"
+          fill="#ffeb00"
+        />
+      </svg>
+    )
+  }
+
+  {
+    code === "en" && (
+      <svg viewBox="0 0 60 40" class="size-full">
+        <rect width="60" height="40" fill="#21468b" />
+
+        <path d="M0 0 60 40M60 0 0 40" stroke="#fff" stroke-width="9" />
+
+        <path d="M0 0 60 40M60 0 0 40" stroke="#cf142b" stroke-width="4" />
+
+        <path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="13" />
+
+        <path d="M30 0v40M0 20h60" stroke="#cf142b" stroke-width="7" />
+      </svg>
+    )
+  }
+
+  {
+    code === "zh" && (
+      <svg viewBox="0 0 30 20" class="size-full">
+        <rect width="30" height="20" fill="#ee1c25" />
+
+        <polygon
+          points="6,2 7.1,4.5 10,4.5 7.7,6.2 8.6,9 6,7.3 3.4,9 4.3,6.2 2,4.5 4.9,4.5"
+          fill="#ffff00"
+        />
+
+        <circle cx="12" cy="3" r="0.9" fill="#ffff00" />
+        <circle cx="14" cy="5.2" r="0.9" fill="#ffff00" />
+        <circle cx="14" cy="8" r="0.9" fill="#ffff00" />
+        <circle cx="12" cy="10" r="0.9" fill="#ffff00" />
+      </svg>
+    )
+  }
+</span>

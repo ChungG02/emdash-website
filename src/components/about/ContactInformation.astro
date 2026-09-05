@@ -1,0 +1,54 @@
+---
+import type {
+  ContactInformationItem,
+} from "../../data/contact";
+
+interface Props {
+  items: ContactInformationItem[];
+  title?: string;
+}
+
+const {
+  items,
+  title = "Liên hệ",
+} = Astro.props;
+---
+
+<section aria-labelledby="contact-information-title">
+  <h2
+    id="contact-information-title"
+    class="mb-5 text-xl font-bold uppercase text-[#2589bd]"
+  >
+    {title}
+  </h2>
+
+  <dl class="overflow-hidden border border-slate-200 bg-white">
+    {
+      items.map((item) => (
+        <div
+          class="grid gap-1 border-b border-slate-100 px-4 py-3
+                 sm:grid-cols-[220px_1fr]
+                 sm:gap-6 sm:px-5"
+        >
+          <dt class="font-semibold text-slate-700">
+            {item.label}
+          </dt>
+
+          <dd class="text-slate-700">
+            {item.href ? (
+              <a
+                href={item.href}
+                class="font-medium text-[#1477b9] transition
+                       hover:text-[#ef4a2f] hover:underline"
+              >
+                {item.value}
+              </a>
+            ) : (
+              item.value
+            )}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>

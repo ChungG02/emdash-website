@@ -1,0 +1,272 @@
+---
+import Container from "../common/Container.astro";
+import BrandLogo from "./BrandLogo.astro";
+import Hotline from "./Hotline.astro";
+import Navigation from "./Navigation.astro";
+import SearchBar from "./SearchBar.astro";
+
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import MobileMenu from "./MobileMenu.astro";
+import { siteConfig } from "../../data/site";
+
+interface Props {
+  logoSrc?: string;
+  companyName?: string;
+  phone?: string;
+  phoneHref?: string;
+}
+
+const {
+  logoSrc = "/images/logo.png",
+  companyName = "THÁI SƠN",
+  phone = siteConfig.phone,
+  phoneHref = siteConfig.phoneHref,
+} = Astro.props;
+---
+
+<!-- ---
+import Container from "../common/Container.astro";
+import BrandLogo from "./BrandLogo.astro";
+import Hotline from "./Hotline.astro";
+import Navigation from "./Navigation.astro";
+import SearchBar from "./SearchBar.astro";
+import { siteConfig } from "../../data/site";
+
+interface Props {
+  logoSrc?: string;
+  companyName?: string;
+  phone?: string;
+  phoneHref?: string;
+}
+
+const {
+  logoSrc = "/images/logo.png",
+  companyName = siteConfig.name,
+  phone = siteConfig.phone,
+  phoneHref = siteConfig.phoneHref,
+} = Astro.props;
+---
+
+<header class="site-header" id="site-header">
+  <div class="header-top">
+    <Container class="header-top-inner">
+      <BrandLogo
+        href="#home"
+        logoSrc={logoSrc}
+        companyName={companyName}
+        tagline={siteConfig.tagline}
+      />
+
+      <SearchBar id="header-search-input" />
+
+      <div class="hotline">
+        <Hotline
+          label="Hotline đặt hàng / tư vấn"
+          phone={phone}
+          phoneHref={phoneHref}
+        />
+      </div>
+
+      <button
+        type="button"
+        class="mobile-menu-button"
+        aria-label="Mở menu"
+        aria-controls="main-navigation"
+        aria-expanded="false"
+        data-mobile-menu
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+    </Container>
+  </div>
+
+  <Navigation />
+</header>
+
+<script>
+  const showToast = (message: string) => {
+    document.dispatchEvent(
+      new CustomEvent("site:toast", { detail: { message } }),
+    );
+  };
+
+  const initializeHeader = (header: HTMLElement) => {
+    if (header.dataset.initialized === "true") return;
+    header.dataset.initialized = "true";
+
+    const menuButton =
+      header.querySelector<HTMLButtonElement>("[data-mobile-menu]");
+    const navigation = header.querySelector<HTMLElement>("#main-navigation");
+    const mobileQuery = window.matchMedia("(max-width: 860px)");
+
+    const setMenuOpen = (isOpen: boolean) => {
+      header.classList.toggle("is-open", isOpen);
+      menuButton?.setAttribute("aria-expanded", String(isOpen));
+      menuButton?.setAttribute("aria-label", isOpen ? "Đóng menu" : "Mở menu");
+    };
+
+    const closeDropdowns = (except?: HTMLElement) => {
+      header
+        .querySelectorAll<HTMLElement>(".nav-item.is-open")
+        .forEach((item) => {
+          if (item === except) return;
+          item.classList.remove("is-open");
+          item
+            .querySelector<HTMLElement>("[data-nav-trigger]")
+            ?.setAttribute("aria-expanded", "false");
+        });
+    };
+
+    menuButton?.addEventListener("click", () => {
+      setMenuOpen(!header.classList.contains("is-open"));
+    });
+
+    header
+      .querySelectorAll<HTMLAnchorElement>("[data-nav-trigger]")
+      .forEach((link) => {
+        link.addEventListener("click", (event) => {
+          if (!mobileQuery.matches) return;
+
+          const item = link.closest<HTMLElement>(".nav-item");
+          if (!item) return;
+
+          if (!item.classList.contains("is-open")) {
+            event.preventDefault();
+            closeDropdowns(item);
+            item.classList.add("is-open");
+            link.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
+
+    navigation?.querySelectorAll<HTMLAnchorElement>("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        if (!mobileQuery.matches || link.matches("[data-nav-trigger]")) return;
+        setMenuOpen(false);
+        closeDropdowns();
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!(event.target instanceof Node) || header.contains(event.target))
+        return;
+      setMenuOpen(false);
+      closeDropdowns();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      setMenuOpen(false);
+      closeDropdowns();
+      menuButton?.focus();
+    });
+
+    mobileQuery.addEventListener("change", (event) => {
+      if (!event.matches) {
+        setMenuOpen(false);
+        closeDropdowns();
+      }
+    });
+
+    const searchForm =
+      header.querySelector<HTMLFormElement>("[data-site-search]");
+    const searchInput = searchForm?.querySelector<HTMLInputElement>(
+      "input[type='search']",
+    );
+
+    searchForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const keyword = searchInput?.value.trim().toLocaleLowerCase("vi") ?? "";
+
+      if (!keyword) {
+        showToast("Nhập tên sản phẩm cần tìm.");
+        searchInput?.focus();
+        return;
+      }
+
+      const product = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-product-card]"),
+      ).find((card) =>
+        card.textContent?.toLocaleLowerCase("vi").includes(keyword),
+      );
+
+      document
+        .querySelectorAll<HTMLElement>(".is-search-match")
+        .forEach((card) => card.classList.remove("is-search-match"));
+
+      if (!product) {
+        showToast("Chưa tìm thấy sản phẩm phù hợp trên trang.");
+        return;
+      }
+
+      product.classList.add("is-search-match");
+      product.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(
+        () => product.classList.remove("is-search-match"),
+        2400,
+      );
+    });
+  };
+
+  const initializeAllHeaders = () => {
+    document
+      .querySelectorAll<HTMLElement>("#site-header")
+      .forEach(initializeHeader);
+  };
+
+  initializeAllHeaders();
+  document.addEventListener("astro:page-load", initializeAllHeaders);
+</script> -->
+<header class="site-header relative z-50">
+
+
+  <div class="border-b border-slate-100 bg-white">
+    <Container class="flex min-h-24 items-center justify-between gap-2 py-4 sm:gap-4 md:gap-8">
+      <div class="hidden shrink-0 min-[821px]:block">
+        <BrandLogo logoSrc={logoSrc} companyName={companyName} />
+      </div>
+      <div class="shrink-0 min-[821px]:hidden">
+        <a href="/" class="block">
+          <img src={logoSrc} alt={companyName} width="46" height="46" class="object-contain" />
+        </a>
+      </div>
+
+      <div class="flex-1 min-w-0 px-1 sm:px-4">
+        <SearchBar id="desktop-header-search" />
+      </div>
+
+      {/* Phần bên phải - Desktop */}
+      <div class="hidden min-[821px]:flex items-center gap-4 shrink-0">
+        <Hotline
+          label="Hotline"
+          phone={phone}
+          phoneHref={phoneHref}
+        />
+        <span class="h-[3.25rem] w-px bg-slate-200" aria-hidden="true"></span>
+        <LanguageSwitcher />
+      </div>
+
+      {/* Phần bên phải - Mobile */}
+      <div class="flex shrink-0 items-center min-[821px]:hidden">
+        <Hotline
+          label="Hotline"
+          phone={phone}
+          phoneHref={phoneHref}
+          compact
+        />
+      </div>
+    </Container>
+  </div>
+
+  <div class="hidden min-[821px]:block">
+    <Navigation />
+  </div>
+
+  <div class="nav-shell relative min-[821px]:hidden">
+    <Container>
+      <MobileMenu />
+    </Container>
+  </div>
+</header>

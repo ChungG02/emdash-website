@@ -1,0 +1,100 @@
+---
+import type { CompanyLocation } from "../../data/contact";
+
+interface Props {
+  location: CompanyLocation;
+}
+
+const { location } = Astro.props;
+---
+
+<article>
+  <h3
+    class="mb-4 text-xl font-bold uppercase leading-7 text-[#3498c8]"
+  >
+    {location.name}
+  </h3>
+
+  <div class="space-y-5 text-base leading-7 text-slate-900">
+    <p>{location.address}</p>
+
+    <p>
+      Hotline:
+
+      {
+        location.phoneHref ? (
+          <a
+            href={location.phoneHref}
+            class="ml-1 transition hover:text-[#1477b9] hover:underline"
+          >
+            {location.phone}
+          </a>
+        ) : (
+          <span class="ml-1">{location.phone}</span>
+        )
+      }
+    </p>
+
+    <p>
+      Email:
+
+      {
+        location.emailHref ? (
+          <a
+            href={location.emailHref}
+            class="ml-1 break-all transition
+                   hover:text-[#1477b9] hover:underline"
+          >
+            {location.email}
+          </a>
+        ) : (
+          <span class="ml-1">{location.email}</span>
+        )
+      }
+    </p>
+
+    {
+      location.mapUrl ? (
+        <a
+          href={location.mapUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 text-[#3498c8]
+                 transition hover:text-[#1477b9] hover:underline"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="size-5 shrink-0"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M12 2a7 7 0 0 0-7 7c0 5.25 5.64 11.1 6.28 11.75a1 1 0 0 0 1.44 0C13.36 20.1 19 14.25 19 9a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+
+          <span>[ Vị trí bản đồ ]</span>
+        </a>
+      ) : (
+        <span class="inline-flex items-center gap-2 text-slate-400">
+          <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="size-5"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M12 2a7 7 0 0 0-7 7c0 5.25 5.64 11.1 6.28 11.75a1 1 0 0 0 1.44 0C13.36 20.1 19 14.25 19 9a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+
+          <span>[ Vị trí bản đồ ]</span>
+        </span>
+      )
+    }
+  </div>
+</article>

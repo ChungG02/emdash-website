@@ -1,0 +1,219 @@
+---
+import CarouselSlide from "./CarouselSlide.astro";
+import Container from "../common/Container.astro";
+import { heroSlides, type HeroSlide } from "../../data/heroSlides";
+import { siteConfig } from "../../data/site";
+
+interface Props {
+  id?: string;
+  slides?: HeroSlide[];
+  autoplayMs?: number;
+}
+
+const {
+  id = "hero-carousel",
+  slides = heroSlides,
+  autoplayMs = 5000,
+} = Astro.props;
+---
+
+<section class="hero" id="home" aria-label="Giới thiệu Thái Sơn Plastic">
+  <h1 class="visually-hidden">
+    Thái Sơn Plastic - Nhà máy sản xuất màng PE và giải pháp đóng gói công
+    nghiệp
+  </h1>
+
+  {
+    slides.length > 0 && (
+      <div
+        id={id}
+        class="hero-carousel"
+        data-carousel
+        data-autoplay={autoplayMs}
+        aria-label="Banner nổi bật"
+        aria-roledescription="carousel"
+      >
+        <div class="hero-stage">
+          {slides.map((slide, index) => (
+            <CarouselSlide slide={slide} index={index} isActive={index === 0} />
+          ))}
+        </div>
+
+        {slides.length > 1 && (
+          <>
+            <button
+              type="button"
+              class="carousel-control carousel-control-prev"
+              data-carousel-prev
+              aria-label="Hiển thị slide trước"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="carousel-control carousel-control-next"
+              data-carousel-next
+              aria-label="Hiển thị slide tiếp theo"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+
+            <div class="carousel-dots" aria-label="Chọn slide">
+              {slides.map((_, index) => (
+                <button
+                  type="button"
+                  class:list={["carousel-dot", index === 0 && "is-active"]}
+                  data-carousel-dot={index}
+                  aria-label={`Hiển thị slide ${index + 1}`}
+                  aria-current={index === 0 ? "true" : undefined}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    )
+  }
+</section>
+
+<script>
+  const initializeCarousel = (carousel: HTMLElement) => {
+    if (carousel.dataset.initialized === "true") return;
+    carousel.dataset.initialized = "true";
+
+    const slides = Array.from(
+      carousel.querySelectorAll<HTMLElement>("[data-carousel-slide]"),
+    );
+    const dots = Array.from(
+      carousel.querySelectorAll<HTMLButtonElement>("[data-carousel-dot]"),
+    );
+    const previousButton = carousel.querySelector<HTMLButtonElement>(
+      "[data-carousel-prev]",
+    );
+    const nextButton = carousel.querySelector<HTMLButtonElement>(
+      "[data-carousel-next]",
+    );
+    const autoplayValue = Number(carousel.dataset.autoplay);
+    const autoplayMs = Number.isFinite(autoplayValue) ? autoplayValue : 5000;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    let currentIndex = 0;
+    let autoplayTimer: number | undefined;
+    let touchStartX = 0;
+
+    const showSlide = (newIndex: number) => {
+      if (slides.length === 0) return;
+      currentIndex = (newIndex + slides.length) % slides.length;
+
+      slides.forEach((slide, index) => {
+        const isActive = index === currentIndex;
+        slide.classList.toggle("is-active", isActive);
+        slide.setAttribute("aria-hidden", String(!isActive));
+      });
+
+      dots.forEach((dot, index) => {
+        const isActive = index === currentIndex;
+        dot.classList.toggle("is-active", isActive);
+        if (isActive) dot.setAttribute("aria-current", "true");
+        else dot.removeAttribute("aria-current");
+      });
+    };
+
+    const stopAutoplay = () => {
+      if (autoplayTimer === undefined) return;
+      window.clearInterval(autoplayTimer);
+      autoplayTimer = undefined;
+    };
+
+    const startAutoplay = () => {
+      stopAutoplay();
+
+      if (slides.length <= 1 || autoplayMs <= 0) {
+        return;
+      }
+
+      autoplayTimer = window.setInterval(() => {
+        showSlide(currentIndex + 1);
+      }, autoplayMs);
+    };
+
+    previousButton?.addEventListener("click", () => {
+      showSlide(currentIndex - 1);
+      startAutoplay();
+    });
+
+    nextButton?.addEventListener("click", () => {
+      showSlide(currentIndex + 1);
+      startAutoplay();
+    });
+
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        showSlide(Number(dot.dataset.carouselDot));
+        startAutoplay();
+      });
+    });
+
+    carousel.addEventListener("focusin", stopAutoplay);
+    carousel.addEventListener("focusout", (event) => {
+      const nextFocus = event.relatedTarget;
+      if (!(nextFocus instanceof Node) || !carousel.contains(nextFocus))
+        startAutoplay();
+    });
+
+    carousel.addEventListener(
+      "touchstart",
+      (event) => {
+        touchStartX = event.touches[0]?.clientX ?? 0;
+        stopAutoplay();
+      },
+      { passive: true },
+    );
+
+    carousel.addEventListener(
+      "touchend",
+      (event) => {
+        const distance = (event.changedTouches[0]?.clientX ?? 0) - touchStartX;
+        if (Math.abs(distance) >= 50) {
+          showSlide(distance > 0 ? currentIndex - 1 : currentIndex + 1);
+        }
+        startAutoplay();
+      },
+      { passive: true },
+    );
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopAutoplay();
+      else startAutoplay();
+    });
+    reduceMotion.addEventListener("change", startAutoplay);
+
+    showSlide(0);
+    startAutoplay();
+  };
+
+  const initializeAllCarousels = () => {
+    document
+      .querySelectorAll<HTMLElement>("[data-carousel]")
+      .forEach(initializeCarousel);
+  };
+
+  initializeAllCarousels();
+
+  document.addEventListener("astro:page-load", initializeAllCarousels);
+</script>

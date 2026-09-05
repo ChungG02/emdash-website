@@ -1,0 +1,93 @@
+---
+import FlagIcon from "./FlagIcon.astro";
+import { languages } from "../../data/languages";
+
+const currentPath = Astro.url.pathname;
+
+const isCurrentLanguage = (code: "vi" | "en" | "zh") => {
+  if (code === "vi") {
+    return !currentPath.startsWith("/en") && !currentPath.startsWith("/zh");
+  }
+
+  return currentPath.startsWith(`/${code}`);
+};
+
+const currentLang = languages.find((lang) => isCurrentLanguage(lang.code)) || languages[0];
+const otherLangs = languages.filter((lang) => !isCurrentLanguage(lang.code));
+---
+
+<!-- Mobile version: Row of flags -->
+<div
+  class="flex items-center gap-2 min-[821px]:hidden"
+  role="navigation"
+  aria-label="Chọn ngôn ngữ"
+>
+  {
+    languages.map((language) => {
+      const isCurrent = isCurrentLanguage(language.code);
+
+      return (
+        <a
+          href={language.href}
+          lang={language.code}
+          hreflang={language.code}
+          title={language.label}
+          aria-label={`Chuyển sang ${language.label}`}
+          aria-current={isCurrent ? "page" : undefined}
+          class:list={[
+            "block overflow-hidden rounded-sm border border-slate-200 shadow-sm",
+            "transition duration-150 hover:-translate-y-0.5 hover:shadow-md",
+            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1477b9]",
+            isCurrent && "ring-2 ring-[#1477b9] ring-offset-1",
+          ]}
+        >
+          <FlagIcon code={language.code} />
+        </a>
+      );
+    })
+  }
+</div>
+
+<!-- Desktop version: Dropdown -->
+<div
+  class="relative group hidden min-[821px]:block"
+  role="navigation"
+  aria-label="Chọn ngôn ngữ"
+>
+  <button
+    type="button"
+    class="flex items-center gap-2 py-2 cursor-pointer focus:outline-none"
+    aria-expanded="false"
+    aria-haspopup="true"
+  >
+    <div class="block overflow-hidden rounded-sm shadow-sm transition hover:shadow-md border border-slate-200">
+      <FlagIcon code={currentLang.code} />
+    </div>
+    <span class="font-bold text-[15px] uppercase text-[#005b9f]">{currentLang.code}</span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#005b9f] transition-transform duration-200 group-hover:rotate-180">
+      <path d="m6 9 6 6 6-6"/>
+    </svg>
+  </button>
+
+  <div class="absolute right-0 top-full pt-2 z-50 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200">
+    <div class="w-max bg-white rounded-md shadow-lg border border-slate-200 py-2 flex flex-col">
+      {
+        otherLangs.map((language) => (
+          <a
+            href={language.href}
+            lang={language.code}
+            hreflang={language.code}
+            title={language.label}
+            aria-label={`Chuyển sang ${language.label}`}
+            class="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors"
+          >
+            <div class="block overflow-hidden rounded-sm border border-slate-200 shadow-sm">
+              <FlagIcon code={language.code} />
+            </div>
+            <span class="text-sm font-medium uppercase text-slate-700">{language.code}</span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</div>

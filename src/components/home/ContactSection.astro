@@ -1,0 +1,179 @@
+---
+import Container from "../common/Container.astro";
+import { siteConfig } from "../../data/site";
+---
+
+<section class="contact-section" id="lien-he">
+  <Container>
+    <div class="contact-heading">
+      <span>{siteConfig.name}</span>
+      <h2>Đăng ký thông tin liên hệ</h2>
+      <p>
+        Hotline <a href={"tel:" + siteConfig.phoneHref}>{siteConfig.phone}</a>
+        <b aria-hidden="true"> · </b>
+        {siteConfig.address}
+      </p>
+    </div>
+
+    <form class="contact-form" data-contact-form novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label class="visually-hidden" for="contact-name">Họ và tên</label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder="Họ và tên *"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label class="visually-hidden" for="contact-phone"
+            >Số điện thoại</label
+          >
+          <input
+            id="contact-phone"
+            name="phone"
+            type="tel"
+            autocomplete="tel"
+            inputmode="tel"
+            placeholder="Số điện thoại *"
+            required
+          />
+        </div>
+
+        <div class="field field-full">
+          <label class="visually-hidden" for="contact-email">Email</label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="Email *"
+            required
+          />
+        </div>
+        <div class="field field-full">
+          <label class="visually-hidden" for="contact-company">Tên công ty</label>
+          <input
+            id="contact-company"
+            name="company"
+            type="text"
+            autocomplete="company"
+            placeholder="Tên công ty *"
+            required
+          />
+        </div>
+
+        <div class="field field-full">
+          <label class="visually-hidden" for="contact-address">Địa chỉ</label>
+          <input
+            id="contact-address"
+            name="address"
+            type="text"
+            autocomplete="address"
+            placeholder="Địa chỉ *"
+            required
+          />
+        </div>
+
+        <div class="field field-full">
+          <label class="visually-hidden" for="contact-message"
+            >Nội dung cần tư vấn</label
+          >
+          <textarea
+            id="contact-message"
+            name="message"
+            placeholder="Nội dung / sản phẩm cần tư vấn *"
+            required></textarea>
+        </div>
+      </div>
+
+      <label class="consent">
+        <input type="checkbox" name="consent" required />
+        <span>
+          Tôi đồng ý cung cấp thông tin để Thái Sơn Plastic liên hệ tư vấn.
+        </span>
+      </label>
+
+      <div class="submit-wrap">
+        <button class="submit-button" type="submit">Gửi yêu cầu</button>
+      </div>
+
+      <p class="form-demo-note">
+        Form đang ở chế độ giao diện demo, chưa kết nối email hoặc cơ sở dữ
+        liệu.
+      </p>
+    </form>
+  </Container>
+</section>
+
+<script>
+  const notify = (message: string) => {
+    document.dispatchEvent(
+      new CustomEvent("site:toast", { detail: { message } }),
+    );
+  };
+
+  const initializeContactForm = (form: HTMLFormElement) => {
+    if (form.dataset.initialized === "true") return;
+    form.dataset.initialized = "true";
+
+    const phone = form.querySelector<HTMLInputElement>("[name='phone']");
+    const message = form.querySelector<HTMLTextAreaElement>("[name='message']");
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (!form.reportValidity()) {
+        notify("Vui lòng nhập đầy đủ thông tin bắt buộc.");
+        return;
+      }
+
+      const phonePattern = /^[0-9+\s().-]{8,20}$/;
+      if (!phonePattern.test(phone?.value.trim() ?? "")) {
+        notify("Vui lòng kiểm tra lại số điện thoại.");
+        phone?.focus();
+        return;
+      }
+
+      notify(
+        "Thông tin đã được kiểm tra. Vui lòng gọi hotline để được hỗ trợ ngay; form demo chưa gửi dữ liệu.",
+      );
+      form.reset();
+    });
+
+    document
+      .querySelectorAll<HTMLElement>("[data-product-request]")
+      .forEach((link) => {
+        link.addEventListener("click", () => {
+          const productName = link.dataset.productRequest;
+          if (message && productName) {
+            message.value =
+              "Tôi cần tư vấn và báo giá sản phẩm: " + productName + ".";
+          }
+        });
+      });
+
+    document
+      .querySelectorAll<HTMLElement>("[data-catalogue-request]")
+      .forEach((link) => {
+        link.addEventListener("click", () => {
+          if (message)
+            message.value =
+              "Tôi muốn nhận catalogue sản phẩm Thái Sơn Plastic.";
+        });
+      });
+  };
+
+  const initializeAllContactForms = () => {
+    document
+      .querySelectorAll<HTMLFormElement>("[data-contact-form]")
+      .forEach(initializeContactForm);
+  };
+
+  initializeAllContactForms();
+  document.addEventListener("astro:page-load", initializeAllContactForms);
+</script>

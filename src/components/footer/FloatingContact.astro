@@ -1,0 +1,187 @@
+---
+import { siteConfig } from "../../data/site";
+---
+
+<div class="floating-contact" data-floating-contact>
+  <a
+    href={"tel:" + siteConfig.phoneHref}
+    class="floating-button phone-button"
+    title="Gọi hotline"
+    aria-label={"Gọi hotline " + siteConfig.phone}
+  >
+    <span class="floating-button__ring" aria-hidden="true"></span>
+    <span class="floating-button__pulse" aria-hidden="true"></span>
+    <span
+      class="floating-button__pulse floating-button__pulse--delayed"
+      aria-hidden="true"
+    ></span>
+    <span class="floating-button__icon">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path
+          d="M7.1 3.8 9.4 8c.3.6.2 1.2-.3 1.7l-1.2 1.2c1.3 2.5 2.8 4 5.3 5.3l1.2-1.2c.5-.5 1.1-.6 1.7-.3l4.1 2.3c.7.4 1 1.2.7 1.9-.6 1.5-2 2.7-3.7 2.8-6.6.4-14.3-7.3-13.9-13.9.1-1.7 1.3-3.1 2.8-3.7.7-.3 1.5 0 1.9.7Z"
+        ></path>
+      </svg>
+    </span>
+  </a>
+
+  <a
+    href={siteConfig.whatsappHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="floating-button whatsapp-button"
+    title="Liên hệ WhatsApp"
+    aria-label="Liên hệ qua WhatsApp"
+  >
+    <span class="floating-button__ring" aria-hidden="true"></span>
+    <span class="floating-button__pulse" aria-hidden="true"></span>
+    <span
+      class="floating-button__pulse floating-button__pulse--delayed"
+      aria-hidden="true"
+    ></span>
+    <span class="floating-button__icon">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.4-4.3a8.5 8.5 0 1 1 15.6-4.5Z"
+          fill="#fff"
+        ></path>
+        <path
+          d="M8.2 7.4c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.8 2c.1.3.1.5-.1.7l-.7.8c-.2.2-.1.4 0 .6.8 1.5 2 2.6 3.5 3.3.3.1.5.1.7-.1l.9-1.1c.2-.2.4-.3.7-.2l2 .9c.3.1.4.3.4.5 0 .5-.2 1.5-.7 2-.6.6-1.4.9-2.3.9-1.2 0-3.2-.6-5.2-2.4-2.3-2-3.7-4.5-3.8-6.3 0-.7.2-1.2.5-1.6.4-.4.8-.5 1.2-.5Z"
+          fill="currentColor"
+        ></path>
+      </svg>
+    </span>
+  </a>
+
+  <a
+    href={siteConfig.zaloHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="floating-button zalo-button"
+    title="Liên hệ Zalo"
+    aria-label="Liên hệ qua Zalo"
+  >
+    <span class="floating-button__ring" aria-hidden="true"></span>
+    <span class="floating-button__pulse" aria-hidden="true"></span>
+    <span
+      class="floating-button__pulse floating-button__pulse--delayed"
+      aria-hidden="true"
+    ></span>
+    <span class="floating-button__icon floating-button__zalo">Zalo</span>
+  </a>
+</div>
+
+<div class="site-toast" data-site-toast role="status" aria-live="polite"></div>
+
+<script>
+  interface ToastDetail {
+    message?: string;
+  }
+
+  const startContactAnimations = (root: HTMLElement) => {
+    const buttons = root.querySelectorAll<HTMLElement>(".floating-button");
+
+    buttons.forEach((button, buttonIndex) => {
+      const ring = button.querySelector<HTMLElement>(
+        ".floating-button__ring",
+      );
+      const pulses = button.querySelectorAll<HTMLElement>(
+        ".floating-button__pulse",
+      );
+      const icon = button.querySelector<HTMLElement>(
+        ".floating-button__icon",
+      );
+
+      [ring, icon, ...pulses].forEach((element) => {
+        element?.getAnimations().forEach((animation) => animation.cancel());
+      });
+
+      ring?.animate(
+        [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+        {
+          duration: 4500,
+          iterations: Infinity,
+          easing: "linear",
+          delay: buttonIndex * -1500,
+        },
+      );
+
+      pulses.forEach((pulse, pulseIndex) => {
+        pulse.animate(
+          [
+            {
+              opacity: 0,
+              transform: "translate(-50%, -50%) scale(0.2)",
+              offset: 0,
+            },
+            { opacity: 0.72, offset: 0.12 },
+            { opacity: 0.18, offset: 0.72 },
+            {
+              opacity: 0,
+              transform: "translate(-50%, -50%) scale(7.5)",
+              offset: 1,
+            },
+          ],
+          {
+            duration: 1800,
+            iterations: Infinity,
+            easing: "cubic-bezier(0.18, 0.68, 0.35, 1)",
+            delay: buttonIndex * 220 + pulseIndex * 900,
+          },
+        );
+      });
+
+      icon?.animate(
+        [
+          { transform: "rotate(0deg) scale(1)", offset: 0 },
+          { transform: "rotate(0deg) scale(1)", offset: 0.72 },
+          { transform: "rotate(-7deg) scale(1.05)", offset: 0.78 },
+          { transform: "rotate(7deg) scale(1.05)", offset: 0.84 },
+          { transform: "rotate(-4deg) scale(1.02)", offset: 0.9 },
+          { transform: "rotate(4deg) scale(1.02)", offset: 0.96 },
+          { transform: "rotate(0deg) scale(1)", offset: 1 },
+        ],
+        {
+          duration: 3600,
+          iterations: Infinity,
+          easing: "ease-in-out",
+          delay: buttonIndex * -800,
+        },
+      );
+    });
+  };
+
+  const initializeFloatingContact = (root: HTMLElement) => {
+    startContactAnimations(root);
+
+    if (root.dataset.initialized === "true") return;
+    root.dataset.initialized = "true";
+
+    const toast = document.querySelector<HTMLElement>("[data-site-toast]");
+    let toastTimer: number | undefined;
+
+    const showToast = (message: string) => {
+      if (!toast) return;
+      if (toastTimer !== undefined) window.clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add("is-visible");
+      toastTimer = window.setTimeout(
+        () => toast.classList.remove("is-visible"),
+        4000,
+      );
+    };
+
+    document.addEventListener("site:toast", (event) => {
+      const detail = (event as CustomEvent<ToastDetail>).detail;
+      if (detail?.message) showToast(detail.message);
+    });
+  };
+
+  const initializeAllFloatingContacts = () => {
+    document
+      .querySelectorAll<HTMLElement>("[data-floating-contact]")
+      .forEach(initializeFloatingContact);
+  };
+
+  initializeAllFloatingContacts();
+  document.addEventListener("astro:page-load", initializeAllFloatingContacts);
+</script>

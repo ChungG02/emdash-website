@@ -1,0 +1,176 @@
+---
+import { siteConfig } from "../../data/site";
+
+interface Props {
+  label?: string;
+  phone?: string;
+  phoneHref?: string;
+  compact?: boolean;
+}
+
+const {
+  label = "Hotline",
+  phone = siteConfig.phone,
+  phoneHref = siteConfig.phoneHref,
+  compact = false,
+} = Astro.props;
+---
+
+<a
+  href={`tel:${phoneHref}`}
+  class:list={["header-hotline", { "header-hotline--compact": compact }]}
+  title={`${label}: ${phone}`}
+  aria-label={`${label}: ${phone}`}
+>
+  <span class="header-hotline__icon" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path
+        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92Z"
+      ></path>
+    </svg>
+  </span>
+
+  <span class="header-hotline__content">
+    <span class="header-hotline__label">{label}</span>
+    <strong class="header-hotline__phone">{phone}</strong>
+  </span>
+</a>
+
+<style>
+  .header-hotline {
+    display: inline-flex;
+    min-width: 0;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.75rem;
+    color: #075b9f;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .header-hotline::before {
+    width: 1px;
+    height: 3.25rem;
+    margin-right: 0.4rem;
+    content: "";
+    flex: 0 0 1px;
+    background: #d8e0e7;
+  }
+
+  .header-hotline__icon {
+    width: 3rem;
+    height: 3rem;
+    display: grid;
+    flex: 0 0 3rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #edf7ff;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .header-hotline__icon svg {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+
+  .header-hotline__content,
+  .header-hotline__label,
+  .header-hotline__phone {
+    display: block;
+  }
+
+  .header-hotline__content {
+    min-width: 0;
+  }
+
+  .header-hotline__label {
+    margin-bottom: 0.2rem;
+    color: #697b8b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .header-hotline__phone {
+    color: #073563;
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .header-hotline:hover,
+  .header-hotline:focus-visible {
+    color: #f58220;
+  }
+
+  .header-hotline:hover .header-hotline__icon,
+  .header-hotline:focus-visible .header-hotline__icon {
+    color: #fff;
+    background: #075b9f;
+    transform: translateY(-1px);
+  }
+
+  .header-hotline:hover .header-hotline__phone,
+  .header-hotline:focus-visible .header-hotline__phone {
+    color: #075b9f;
+  }
+
+  .header-hotline:focus-visible {
+    border-radius: 0.5rem;
+    outline: 2px solid #075b9f;
+    outline-offset: 0.3rem;
+  }
+
+  .header-hotline--compact {
+    gap: 0.55rem;
+  }
+
+  .header-hotline--compact::before {
+    height: 2.25rem;
+    margin-right: 0;
+  }
+
+  .header-hotline--compact .header-hotline__icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    flex-basis: 2.4rem;
+  }
+
+  .header-hotline--compact .header-hotline__icon svg {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .header-hotline--compact .header-hotline__label {
+    display: none;
+  }
+
+  .header-hotline--compact .header-hotline__phone {
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 479px) {
+    .header-hotline--compact .header-hotline__content {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header-hotline,
+    .header-hotline__icon {
+      transition: none;
+    }
+  }
+</style>

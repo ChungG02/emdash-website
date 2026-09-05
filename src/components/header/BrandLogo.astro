@@ -1,0 +1,137 @@
+---
+interface Props {
+  href?: string;
+  logoSrc?: string;
+  alt?: string;
+  companyName?: string;
+  tagline?: string;
+}
+
+const {
+  href = "/",
+  logoSrc = "/images/logo.png",
+  alt,
+  companyName = "THÁI SƠN",
+  tagline = "Giải pháp đóng gói công nghiệp",
+} = Astro.props;
+
+const logoAlt = alt ?? `Logo ${companyName}`;
+---
+
+<a href={href} class="brand" aria-label={`Về trang chủ ${companyName}`}>
+  <img
+    src={logoSrc}
+    alt={logoAlt}
+    width="76"
+    height="76"
+    loading="eager"
+    decoding="async"
+    fetchpriority="high"
+    class="brand__logo"
+  />
+
+  <span class="brand__copy">
+    <strong class="brand__name">{companyName}</strong>
+    <span class="brand__tagline">{tagline}</span>
+  </span>
+</a>
+
+<style>
+  .brand {
+    --brand-logo-size: 4.75rem;
+
+    display: inline-flex;
+    width: max-content;
+    max-width: 100%;
+    height: var(--brand-logo-size);
+    min-width: 0;
+    flex: 0 1 auto;
+    align-items: stretch;
+  }
+
+  .brand__logo {
+    width: var(--brand-logo-size);
+    height: var(--brand-logo-size);
+    flex: 0 0 var(--brand-logo-size);
+    object-fit: contain;
+  }
+
+  .brand__copy {
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    padding-block: 0.35rem;
+    padding-left: clamp(0.65rem, 1.2vw, 0.9rem);
+    margin-left: clamp(0.65rem, 1.2vw, 0.9rem);
+    border-left: 1px solid var(--line, #e3eaf0);
+  }
+
+  .brand__name,
+  .brand__tagline {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .brand__name {
+    color: var(--navy, #073563);
+    font-size: clamp(1.7rem, 2.5vw, 2.25rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.025em;
+    white-space: nowrap;
+  }
+
+  .brand__tagline {
+    color: var(--muted, #6d7f8e);
+    font-size: clamp(0.7rem, 1vw, 0.825rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    padding-bottom: 0.2rem;
+  }
+
+  @media (max-width: 767px) {
+    .brand {
+      --brand-logo-size: 3.75rem;
+    }
+
+    .brand__copy {
+      padding-block: 0.3rem;
+      padding-left: clamp(0.5rem, 2.5vw, 0.7rem);
+      margin-left: clamp(0.5rem, 2.5vw, 0.7rem);
+    }
+
+    .brand__name {
+      font-size: clamp(1.35rem, 5.5vw, 1.65rem);
+    }
+
+    .brand__tagline {
+      font-size: clamp(0.625rem, 2.4vw, 0.72rem);
+    }
+  }
+
+  @media (max-width: 359px) {
+    .brand {
+      --brand-logo-size: 3.25rem;
+    }
+
+    .brand__copy {
+      padding-block: 0.25rem;
+      padding-left: 0.45rem;
+      margin-left: 0.45rem;
+    }
+
+    .brand__name {
+      font-size: 1.15rem;
+    }
+
+    .brand__tagline {
+      font-size: 0.575rem;
+    }
+  }
+</style>

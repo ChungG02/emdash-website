@@ -1,0 +1,30 @@
+---
+import Container from "../common/Container.astro";
+
+const commitments = [
+  { icon: "▦", lineOne: "NHÀ SẢN XUẤT", lineTwo: "CHUYÊN NGHIỆP" },
+  { icon: "✓", lineOne: "CHẤT LƯỢNG", lineTwo: "ỔN ĐỊNH" },
+  { icon: "◇", lineOne: "ĐỐI TÁC TIN CẬY", lineTwo: "CỦA DOANH NGHIỆP" },
+  { icon: "↗", lineOne: "GIAO HÀNG", lineTwo: "TOÀN QUỐC" },
+  { icon: "☎", lineOne: "HỖ TRỢ", lineTwo: "TẬN TÂM" },
+];
+---
+
+<section class="factory-strip" aria-label="Cam kết của Thái Sơn Plastic">
+  <Container class="factory-grid">
+    {
+      commitments.map((commitment) => (
+        <div class="factory-item">
+          <span class="factory-icon" aria-hidden="true">
+            {commitment.icon}
+          </span>
+          <span>
+            {commitment.lineOne}
+            <br />
+            {commitment.lineTwo}
+          </span>
+        </div>
+      ))
+    }
+  </Container>
+</section>

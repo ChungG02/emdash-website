@@ -1,0 +1,41 @@
+---
+interface Props {
+  facebookPageUrl?: string;
+}
+
+const { facebookPageUrl } = Astro.props;
+
+const facebookEmbedUrl = facebookPageUrl
+  ? `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(
+      facebookPageUrl,
+    )}&tabs=timeline&width=500&height=400&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`
+  : undefined;
+---
+
+<section aria-labelledby="facebook-page-title">
+  <h2 id="facebook-page-title" class="mb-5 text-2xl font-bold text-slate-800">
+    Fanpage
+  </h2>
+
+  {
+    facebookEmbedUrl ? (
+      <div class="flex h-[400px] justify-center overflow-hidden border border-slate-200 bg-white">
+        <iframe
+          src={facebookEmbedUrl}
+          title="Fanpage Công ty Thái Sơn"
+          width="500"
+          height="400"
+          loading="lazy"
+          scrolling="no"
+          class="h-[400px] w-full max-w-[500px] border-0"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          allowfullscreen
+        />
+      </div>
+    ) : (
+      <div class="flex h-[400px] items-center justify-center border border-slate-200 bg-slate-50 px-5 text-center text-slate-500">
+        <p class="font-medium">Fanpage đang được cập nhật</p>
+      </div>
+    )
+  }
+</section>

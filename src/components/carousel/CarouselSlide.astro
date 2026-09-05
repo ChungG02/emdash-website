@@ -1,0 +1,49 @@
+---
+import type { HeroSlide } from "../../data/heroSlides";
+
+interface Props {
+  slide: HeroSlide;
+  index: number;
+  isActive?: boolean;
+}
+
+const { slide, index, isActive = false } = Astro.props;
+---
+
+<div
+  data-carousel-slide
+  data-index={index}
+  class:list={["carousel-slide", isActive && "is-active"]}
+  role="group"
+  aria-roledescription="slide"
+  aria-label={`Slide ${index + 1}`}
+  aria-hidden={!isActive}
+>
+  {
+    slide.href ? (
+      <a href={slide.href} aria-label={slide.alt}>
+        <img
+          src={slide.image}
+          alt={slide.alt}
+          width="2172"
+          height="724"
+          loading={index === 0 ? "eager" : "lazy"}
+          fetchpriority={index === 0 ? "high" : "auto"}
+          decoding="async"
+          draggable={false}
+        />
+      </a>
+    ) : (
+      <img
+        src={slide.image}
+        alt={slide.alt}
+        width="2172"
+        height="724"
+        loading={index === 0 ? "eager" : "lazy"}
+        fetchpriority={index === 0 ? "high" : "auto"}
+        decoding="async"
+        draggable={false}
+      />
+    )
+  }
+</div>

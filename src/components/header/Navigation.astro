@@ -1,0 +1,70 @@
+---
+import Container from "../common/Container.astro";
+import { navigationItems } from "../../data/navigation";
+---
+
+<div class="nav-shell" id="main-navigation">
+  <nav aria-label="Điều hướng chính">
+    <Container>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="/" class="nav-link home-link" style="font-weight: normal;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            Trang chủ
+          </a>
+        </li>
+
+        {
+          navigationItems.map((item, index) => (
+            <li class:list={["nav-item", item.children && "has-dropdown"]}>
+              <a
+                href={item.href}
+                class="nav-link"
+                style="font-weight: normal;"
+                data-nav-trigger={item.children ? true : undefined}
+                aria-haspopup={item.children ? "true" : undefined}
+                aria-expanded={item.children ? "false" : undefined}
+                aria-controls={
+                  item.children ? `nav-dropdown-${index}` : undefined
+                }
+              >
+                {item.label}
+
+                {item.children && (
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    class="nav-arrow"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06Z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                )}
+              </a>
+
+              {item.children && (
+                <div
+                  id={`nav-dropdown-${index}`}
+                  class:list={[
+                    "nav-dropdown",
+                    item.children.length > 10 && "nav-dropdown-mega",
+                  ]}
+                >
+                  {item.children.map((child) => (
+                    <a href={child.href}>{child.label}</a>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </nav>
+</div>

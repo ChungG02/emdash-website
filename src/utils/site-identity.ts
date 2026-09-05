@@ -12,13 +12,27 @@ export interface BlogSiteIdentitySettings {
 	favicon?: MediaReference;
 }
 
-const DEFAULT_SITE_TITLE = "My Blog";
-const DEFAULT_SITE_TAGLINE = "Thoughts, stories, and ideas.";
+const DEFAULT_SITE_TITLE = "THÁI SƠN PLASTIC";
+const DEFAULT_SITE_TAGLINE = "Giải pháp đóng gói công nghiệp";
+
+const STARTER_TITLES = new Set(["", "My Blog"]);
+const STARTER_TAGLINES = new Set([
+	"",
+	"Thoughts, stories, and ideas.",
+	"Thoughts on building for the web",
+]);
 
 export function resolveBlogSiteIdentity(settings?: BlogSiteIdentitySettings) {
+	const configuredTitle = settings?.title?.trim() ?? "";
+	const configuredTagline = settings?.tagline?.trim() ?? "";
+
 	return {
-		siteTitle: settings?.title ?? DEFAULT_SITE_TITLE,
-		siteTagline: settings?.tagline ?? DEFAULT_SITE_TAGLINE,
+		siteTitle: STARTER_TITLES.has(configuredTitle)
+			? DEFAULT_SITE_TITLE
+			: configuredTitle,
+		siteTagline: STARTER_TAGLINES.has(configuredTagline)
+			? DEFAULT_SITE_TAGLINE
+			: configuredTagline,
 		siteLogo: settings?.logo?.url ? settings.logo : null,
 	};
 }

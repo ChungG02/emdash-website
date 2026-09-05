@@ -1,0 +1,45 @@
+---
+interface Props {
+  id?: string;
+  formId?: string;
+  action?: string;
+  inputName?: string;
+  placeholder?: string;
+}
+
+const {
+  id = "product-search",
+  formId = "site-search-form",
+  action = "/search",
+  inputName = "q",
+  placeholder = "Tìm kiếm sản phẩm...",
+} = Astro.props;
+---
+
+<form
+  id={formId}
+  action={action}
+  method="get"
+  role="search"
+  class="search-box w-full"
+  data-site-search
+>
+  <label for={id} class="visually-hidden"> Tìm kiếm sản phẩm </label>
+
+  <input id={id} type="search" name={inputName} placeholder={placeholder} />
+
+  <button type="submit" aria-label="Tìm kiếm">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      width="22"
+      height="22"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7"></circle>
+      <path d="m20 20-3.5-3.5"></path>
+    </svg>
+  </button>
+</form>

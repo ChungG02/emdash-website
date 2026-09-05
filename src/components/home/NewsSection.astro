@@ -1,0 +1,59 @@
+---
+import type { MediaValue } from "emdash";
+import { Image } from "emdash/ui";
+import Container from "../common/Container.astro";
+import SectionHeading from "./SectionHeading.astro";
+import { newsItems } from "../../data/news";
+
+interface NewsCardData {
+  title: string;
+  description: string;
+  image: string | MediaValue;
+  fallbackImage: string;
+  alt: string;
+  href?: string;
+  date?: string;
+}
+
+interface Props {
+  items?: NewsCardData[];
+}
+
+const { items = newsItems } = Astro.props;
+---
+
+<section class="news-section" id="tin-tuc">
+  <Container>
+    <SectionHeading title="TIN TỨC" linkHref="/posts" />
+
+    <div class="news-grid">
+      {
+        items.map((item) => (
+          <article class="news-card">
+            <a href={item.href ?? "/posts"} class="news-image" aria-label={`Đọc ${item.title}`}>
+              {typeof item.image === "string" ? (
+                <img
+                  src={item.image}
+                  data-fallback-src={item.fallbackImage}
+                  alt={item.alt}
+                  width="850"
+                  height="500"
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <Image image={item.image} alt={item.alt} width={850} height={500} />
+              )}
+            </a>
+
+            <div class="news-body">
+              {item.date && <small>{item.date}</small>}
+              <h3><a href={item.href ?? "/posts"}>{item.title}</a></h3>
+              <p>{item.description}</p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </Container>
+</section>

@@ -1,0 +1,160 @@
+---
+import Container from "../common/Container.astro";
+import { isNavigationItemActive, navigationItems } from "../../data/navigation";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+
+const currentPath = Astro.url.pathname;
+
+const isActive = (href: string) => isNavigationItemActive(currentPath, href);
+---
+
+<details class="group/mobile" id="mobile-menu-details">
+  <summary
+    class="flex min-h-12 cursor-pointer list-none items-center justify-between text-white"
+  >
+    <span class="flex items-center gap-2 text-sm font-bold uppercase">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        class="size-5"
+        aria-hidden="true"
+      >
+        <path d="M4 6h16"></path>
+        <path d="M4 12h16"></path>
+        <path d="M4 18h16"></path>
+      </svg>
+
+      Danh mục
+    </span>
+
+    <svg
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      class="size-5 transition-transform group-open/mobile:rotate-180"
+      aria-hidden="true"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06Z"
+        clip-rule="evenodd"></path>
+    </svg>
+  </summary>
+
+  <div
+    class="absolute left-0 right-0 top-full max-h-[calc(100vh-140px)] overflow-y-auto border-t border-white/20 bg-white shadow-xl"
+  >
+    <Container class="py-4">
+      <ul class="divide-y divide-slate-100">
+        <li>
+          <a
+            href="/"
+            class:list={[
+              "block py-3 text-sm font-semibold uppercase text-slate-700",
+              "transition hover:text-[#1477b9]",
+              currentPath === "/" && "text-[#1477b9]",
+            ]}
+          >
+            Trang chủ
+          </a>
+        </li>
+
+        {
+          navigationItems.map((item) => (
+            <li>
+              {item.children ? (
+                <details class="group/item">
+                  <summary
+                    class:list={[
+                      "flex cursor-pointer list-none items-center justify-between py-3 text-sm font-semibold uppercase",
+                      "text-slate-700 [&::-webkit-details-marker]:hidden",
+                      isActive(item.href) && "text-[#1477b9]",
+                    ]}
+                  >
+                    {item.label}
+
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      class="size-4 transition-transform group-open/item:rotate-180"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </summary>
+
+                  <ul class="mb-3 border-l-2 border-[#1477b9] bg-slate-50">
+                    <li>
+                      <a
+                        href={item.href}
+                        class="block px-4 py-2.5 text-sm font-semibold text-[#1477b9]"
+                      >
+                        Xem tất cả {item.label}
+                      </a>
+                    </li>
+
+                    {item.children.map((child) => (
+                      <li>
+                        <a
+                          href={child.href}
+                          class:list={[
+                            "block px-4 py-2.5 text-sm text-slate-600 transition",
+                            "hover:bg-slate-100 hover:text-[#1477b9]",
+                            isActive(child.href) &&
+                              "bg-slate-100 font-semibold text-[#1477b9]",
+                          ]}
+                        >
+                          {child.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              ) : (
+                <a
+                  href={item.href}
+                  class:list={[
+                    "block py-3 text-sm font-semibold uppercase text-slate-700",
+                    "transition hover:text-[#1477b9]",
+                    isActive(item.href) && "text-[#1477b9]",
+                  ]}
+                >
+                  {item.label}
+                </a>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+
+      <div
+        class="mt-4 flex items-center justify-between border-t border-slate-200 pt-4"
+      >
+        <span class="text-sm font-semibold text-slate-600">Ngôn ngữ</span>
+        <LanguageSwitcher />
+      </div>
+    </Container>
+  </div>
+</details>
+
+<script>
+  function setupMobileMenuAutoClose() {
+    const mobileMenu = document.getElementById("mobile-menu-details");
+    if (!mobileMenu) return;
+
+    const links = mobileMenu.querySelectorAll("a");
+    links.forEach((link) => {
+      link.addEventListener("click", () => {
+        mobileMenu.removeAttribute("open");
+      });
+    });
+  }
+
+  setupMobileMenuAutoClose();
+  document.addEventListener("astro:page-load", setupMobileMenuAutoClose);
+</script>

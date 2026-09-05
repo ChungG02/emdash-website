@@ -1,0 +1,37 @@
+---
+import type { CompanyOverviewItem } from "../../data/companyProfile";
+
+interface Props {
+  items: CompanyOverviewItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<section aria-labelledby="company-overview-title">
+  <h2
+    id="company-overview-title"
+    class="mb-4 text-xl font-bold uppercase text-[#2589bd]"
+  >
+    Tổng quan công ty
+  </h2>
+
+  <dl class="border-y border-slate-200">
+    {
+      items.map((item) => (
+        <div
+          class="grid gap-1 border-b border-slate-100 py-3
+                 sm:grid-cols-[220px_1fr] sm:gap-6"
+        >
+          <dt class="font-medium text-slate-600">
+            {item.label}
+          </dt>
+
+          <dd class="text-slate-900">
+            {item.value}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>

@@ -1,0 +1,449 @@
+---
+import Container from "../common/Container.astro";
+import { siteConfig } from "../../data/site";
+
+const currentYear = new Date().getFullYear();
+
+const productLinks = [
+  { label: "Các loại băng dính", href: "/#bang-dinh" },
+  { label: "Hạt nhựa nguyên sinh", href: "/#hat-nhua-nguyen-sinh" },
+  { label: "Màng quấn PE", href: "/#mang-pe" },
+  { label: "Thanh nẹp góc", href: "/#thanh-nep-goc" },
+  { label: "Sản phẩm khác", href: "/#san-pham-khac" },
+];
+
+const quickLinks = [
+  { label: "Trang chủ", href: "/" },
+  { label: "Giới thiệu", href: "/gioi-thieu" },
+  { label: "Tin tức", href: "/#tin-tuc" },
+  { label: "Catalogue", href: "/#catalogue" },
+  { label: "Liên hệ", href: "/lien-he" },
+];
+---
+
+<footer class="ts-footer">
+  <div class="ts-footer__decoration" aria-hidden="true"></div>
+
+  <Container>
+    <div class="ts-footer__grid">
+      <section
+        class="ts-footer__contact"
+        aria-labelledby="footer-contact-title"
+      >
+        <h2 id="footer-contact-title" class="ts-footer__title">
+          Thái Sơn Plastic
+        </h2>
+
+        <address class="ts-footer__address">
+          <ul class="ts-footer__contact-list">
+            <li>
+              <span class="ts-footer__contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M8.7 3.5 10.4 7a1.5 1.5 0 0 1-.35 1.75L8.8 10a13.2 13.2 0 0 0 5.2 5.2l1.25-1.25A1.5 1.5 0 0 1 17 13.6l3.5 1.7a1.5 1.5 0 0 1 .82 1.57l-.3 2.18a2 2 0 0 1-1.98 1.72C10.3 20.77 3.23 13.7 3.23 4.96A2 2 0 0 1 4.95 3l2.18-.3a1.5 1.5 0 0 1 1.57.8Z"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"></path>
+                </svg>
+              </span>
+              <span>
+                <strong>Hotline:</strong>{" "}
+                <a href={`tel:${siteConfig.phoneHref}`}>{siteConfig.phone}</a>
+              </span>
+            </li>
+
+            <li>
+              <span class="ts-footer__contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <rect
+                    x="3"
+                    y="5"
+                    width="18"
+                    height="14"
+                    rx="2"
+                    stroke="currentColor"
+                    stroke-width="1.7"></rect>
+                  <path
+                    d="m4 7 8 6 8-6"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"></path>
+                </svg>
+              </span>
+              <span>
+                <strong>Email:</strong>{" "}
+                <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
+              </span>
+            </li>
+
+            <li>
+              <span class="ts-footer__contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"></path>
+                  <circle
+                    cx="12"
+                    cy="10"
+                    r="2.5"
+                    stroke="currentColor"
+                    stroke-width="1.7"></circle>
+                </svg>
+              </span>
+              <span>
+                <strong>Địa chỉ ĐKKD:</strong>{" "}
+                {siteConfig.address}
+              </span>
+            </li>
+            <li>
+              <span class="ts-footer__contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M6 3h9l3 3v15H6V3Z"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linejoin="round"></path>
+                  <path
+                    d="M9 10h6M9 14h6M9 18h4"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"></path>
+                </svg>
+              </span>
+
+              <span>
+                <strong>Mã số doanh nghiệp:</strong>{" "}
+                {siteConfig.businessRegistrationNumber}
+              </span>
+            </li>
+          </ul>
+        </address>
+      </section>
+
+      <nav class="ts-footer__column" aria-labelledby="footer-products-title">
+        <h2 id="footer-products-title" class="ts-footer__title">Sản phẩm</h2>
+        <ul class="ts-footer__links">
+          {
+            productLinks.map((item) => (
+              <li>
+                <a href={item.href}>{item.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <nav class="ts-footer__column" aria-labelledby="footer-links-title">
+        <h2 id="footer-links-title" class="ts-footer__title">Liên kết nhanh</h2>
+        <ul class="ts-footer__links">
+          {
+            quickLinks.map((item) => (
+              <li>
+                <a href={item.href}>{item.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </Container>
+
+  <Container>
+    <div class="ts-footer__bottom">
+      <span class="ts-footer__copyright">
+        © {currentYear}
+        {siteConfig.shortName}
+      </span>
+      <p>{siteConfig.tagline}</p>
+    </div>
+  </Container>
+</footer>
+
+<style>
+  .ts-footer {
+    position: relative;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.78);
+    background:
+      radial-gradient(
+        circle at 92% 10%,
+        rgba(39, 161, 223, 0.2),
+        transparent 24rem
+      ),
+      linear-gradient(135deg, #052947 0%, #07516d 58%, #086c96 125%);
+  }
+
+  .ts-footer::before,
+  .ts-footer::after,
+  .ts-footer__decoration::before {
+    position: absolute;
+    content: "";
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .ts-footer::before {
+    bottom: -18rem;
+    left: -12rem;
+    width: 36rem;
+    height: 36rem;
+  }
+
+  .ts-footer::after {
+    right: -10rem;
+    bottom: -14rem;
+    width: 30rem;
+    height: 30rem;
+    border-color: rgba(245, 130, 32, 0.15);
+  }
+
+  .ts-footer__decoration::before {
+    right: 7%;
+    bottom: 9%;
+    width: 8rem;
+    height: 8rem;
+    border-width: 1.5rem;
+    border-color: rgba(255, 255, 255, 0.035);
+  }
+
+  .ts-footer__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) repeat(2, minmax(0, 0.8fr));
+    gap: clamp(2.5rem, 5vw, 5.5rem);
+    padding-block: clamp(4.75rem, 8vw, 7rem) clamp(3.5rem, 6vw, 5rem);
+  }
+
+  .ts-footer__contact,
+  .ts-footer__column {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ts-footer__title {
+    padding-bottom: clamp(1rem, 2vw, 1.35rem);
+    margin: 0 0 clamp(1.5rem, 3vw, 2.3rem);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: clamp(1.65rem, 2.3vw, 2.25rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
+  .ts-footer__title--large {
+    font-size: clamp(2.25rem, 4vw, 3.35rem);
+  }
+
+  .ts-footer__company {
+    color: #fff;
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+    font-weight: 800;
+    line-height: 1.4;
+  }
+
+  .ts-footer__description {
+    max-width: 42rem;
+    margin-top: 0.65rem;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.025rem);
+  }
+
+  .ts-footer__address {
+    display: flex;
+    flex: 1;
+    margin-top: 0;
+    font-style: normal;
+  }
+
+  .ts-footer__contact-list,
+  .ts-footer__links {
+    display: grid;
+    flex: 1;
+    align-content: space-between;
+    gap: clamp(0.95rem, 1.3vw, 1.2rem);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .ts-footer__contact-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: clamp(0.925rem, 0.88rem + 0.2vw, 1rem);
+    line-height: 1.55;
+  }
+
+  .ts-footer__contact-list strong {
+    color: #fff;
+  }
+
+  .ts-footer__contact-icon {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    flex: 0 0 2rem;
+    place-items: center;
+    border-radius: 0.65rem;
+    color: #ffad64;
+    background: rgba(245, 130, 32, 0.14);
+  }
+
+  .ts-footer__contact-icon svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .ts-footer__contact-list a,
+  .ts-footer__links a {
+    transition:
+      color 0.2s ease,
+      background 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .ts-footer__contact-list a {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .ts-footer__contact-list a:hover,
+  .ts-footer__contact-list a:focus-visible {
+    color: #ffad64;
+  }
+
+  .ts-footer__links a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.65rem;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: clamp(0.925rem, 0.88rem + 0.2vw, 1rem);
+    line-height: 1.45;
+  }
+
+  .ts-footer__links a::before {
+    width: 0.38rem;
+    height: 0.38rem;
+    content: "";
+    flex: 0 0 0.38rem;
+    border-radius: 50%;
+    background: var(--orange, #f58220);
+    transform: translateY(-0.08rem);
+  }
+
+  .ts-footer__links a:hover,
+  .ts-footer__links a:focus-visible {
+    outline: 0;
+    color: #fff;
+    transform: translateX(0.25rem);
+  }
+
+  .ts-footer__bottom {
+    position: relative;
+    z-index: 1;
+    min-height: 6.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-block: 1.6rem 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .ts-footer__bottom p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.64);
+    font-size: clamp(0.825rem, 0.79rem + 0.15vw, 0.875rem);
+    text-align: right;
+  }
+
+  .ts-footer__copyright {
+    display: inline-flex;
+    color: rgba(255, 255, 255, 0.78);
+    background: transparent;
+    font-size: clamp(0.825rem, 0.79rem + 0.15vw, 0.875rem);
+    font-weight: 750;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 900px) {
+    .ts-footer__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 3rem clamp(2rem, 8vw, 4.5rem);
+    }
+
+    .ts-footer__contact {
+      grid-column: 1 / -1;
+    }
+
+    .ts-footer__contact-list {
+      max-width: 42rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ts-footer__contact-list li:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .ts-footer__grid {
+      grid-template-columns: 1fr;
+      gap: 2.75rem;
+      padding-block: 3.75rem 3rem;
+    }
+
+    .ts-footer__contact {
+      grid-column: auto;
+    }
+
+    .ts-footer__contact-list {
+      grid-template-columns: 1fr;
+    }
+
+    .ts-footer__contact-list li:last-child {
+      grid-column: auto;
+    }
+
+    .ts-footer__title {
+      padding-bottom: 1rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .ts-footer__title--large {
+      font-size: clamp(2rem, 10vw, 2.65rem);
+    }
+
+    .ts-footer__bottom {
+      min-height: 0;
+      align-items: flex-start;
+      flex-direction: column;
+      padding-block: 1.5rem 2.25rem;
+    }
+
+    .ts-footer__bottom p {
+      text-align: left;
+    }
+
+    .ts-footer__copyright {
+      white-space: normal;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ts-footer__contact-list a,
+    .ts-footer__links a {
+      transition: none;
+    }
+  }
+</style>

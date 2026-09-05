@@ -1,0 +1,57 @@
+---
+import type { MapLocation } from "../../data/contact";
+
+interface Props {
+  locations: MapLocation[];
+}
+
+const { locations } = Astro.props;
+---
+
+<section aria-labelledby="map-title">
+  <h2 id="map-title" class="mb-5 text-2xl font-bold text-slate-800">Bản đồ</h2>
+
+  <div class:list={["grid gap-6", locations.length > 1 && "lg:grid-cols-2"]}>
+    {
+      locations.map((location) => (
+        <article class="overflow-hidden border border-slate-200 bg-white">
+          <div class="border-b border-slate-200 px-5 py-4">
+            <h3 class="font-bold uppercase text-[#2589bd]">{location.title}</h3>
+
+            <p class="mt-1 text-sm text-slate-500">{location.address}</p>
+          </div>
+
+          {location.embedUrl ? (
+            <iframe
+              src={location.embedUrl}
+              title={`Bản đồ ${location.title}`}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              class="h-80 w-full border-0"
+              allowfullscreen
+            />
+          ) : (
+            <div
+              class="flex h-80 flex-col items-center justify-center
+                     bg-slate-100 px-5 text-center text-slate-500"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                class="mb-3 size-12 text-slate-400"
+                aria-hidden="true"
+              >
+                <path d="M12 21s7-5.2 7-12a7 7 0 1 0-14 0c0 6.8 7 12 7 12Z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+
+              <p class="font-medium">Bản đồ đang được cập nhật</p>
+            </div>
+          )}
+        </article>
+      ))
+    }
+  </div>
+</section>

@@ -1,0 +1,29 @@
+---
+interface Props {
+  title: string;
+  linkHref?: string;
+  linkLabel?: string;
+}
+
+const { title, linkHref = "#lien-he", linkLabel = "Xem thêm" } = Astro.props;
+---
+
+<div class="section-title-row" style="margin-top: -10px; margin-bottom: 20px;">
+  <div class="title-group">
+    <span class="title-decoration" aria-hidden="true"></span>
+    <h2 class="section-title">{title}</h2>
+  </div>
+
+  {
+    linkHref && (
+      <a
+        href={linkHref}
+        class="view-more"
+        style="font-size: clamp(12px, 1.5vw + 8px, 18px);"
+      >
+        {linkLabel}
+        <span aria-hidden="true">→</span>
+      </a>
+    )
+  }
+</div>
