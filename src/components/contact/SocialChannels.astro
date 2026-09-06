@@ -18,8 +18,8 @@ const facebookEmbedUrl = facebookPageUrl
   </h2>
 
   {
-    facebookEmbedUrl ? (
-      <div class="flex h-[400px] justify-center overflow-hidden border border-slate-200 bg-white">
+    facebookEmbedUrl && facebookPageUrl ? (
+      <div class="relative flex h-[400px] justify-center overflow-hidden border border-slate-200 bg-white">
         <iframe
           src={facebookEmbedUrl}
           title="Fanpage Công ty Thái Sơn"
@@ -31,6 +31,18 @@ const facebookEmbedUrl = facebookPageUrl
           allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
           allowfullscreen
         />
+        <a
+          href={facebookPageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="absolute inset-x-0 top-0 z-10 h-40 cursor-pointer
+                 focus-visible:outline-2
+                 focus-visible:outline-offset-[-2px]
+                 focus-visible:outline-[#1477b9]"
+          aria-label="Mở Fanpage Thái Sơn Plastic trong tab mới"
+        >
+          <span class="sr-only">Theo dõi trang</span>
+        </a>
       </div>
     ) : (
       <div class="flex h-[400px] items-center justify-center border border-slate-200 bg-slate-50 px-5 text-center text-slate-500">
