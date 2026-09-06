@@ -6,6 +6,33 @@ export interface NavigationItem {
 
 export const navigationItems: NavigationItem[] = [
   {
+    label: "Hạt nhựa nguyên sinh",
+    href: "/#hat-nhua-nguyen-sinh",
+    children: [
+      { label: "Hạt nhựa PE", href: "/#hat-nhua-nguyen-sinh" },
+      { label: "Hạt nhựa PP", href: "/#hat-nhua-nguyen-sinh" },
+      { label: "Hạt nhựa PVC", href: "/#hat-nhua-nguyen-sinh" },
+      { label: "Hạt nhựa PET", href: "/#hat-nhua-nguyen-sinh" },
+    ],
+  },
+  {
+    label: "Màng quấn PE",
+    href: "/#mang-pe",
+    children: [
+      { label: "Màng PE công nghiệp", href: "/#mang-pe" },
+      { label: "Màng căng công nghiệp", href: "/#mang-pe" },
+      { label: "Màng quấn pallet", href: "/#mang-pe" },
+      { label: "Màng bọc PE công nghiệp", href: "/#mang-pe" },
+    ],
+  },
+  {
+    label: "Dây đai PET",
+    href: "/#day-dai-pet",
+    children: [
+      { label: "Dây đai PET", href: "/#day-dai-pet" },
+    ],
+  },
+  {
     label: "Băng dính",
     href: "/#bang-dinh",
     children: [
@@ -34,26 +61,13 @@ export const navigationItems: NavigationItem[] = [
     ],
   },
   {
-    label: "Hạt nhựa nguyên sinh",
-    href: "/#hat-nhua-nguyen-sinh",
-  },
-  {
-    label: "Màng quấn PE",
-    href: "/#mang-pe",
-  },
-  {
-    label: "Thanh nẹp góc",
+    label: "Thanh nẹp",
     href: "/#thanh-nep-goc",
-  },
-  {
-    label: "Sản phẩm khác",
-    href: "/#san-pham-khac",
     children: [
-      { label: "Dây đai PP, PET", href: "/#san-pham-khac" },
-      { label: "Túi PE, HDPE, PP, LDPE", href: "/#san-pham-khac" },
-      { label: "Thùng Carton", href: "/#san-pham-khac" },
-      { label: "Ống giấy, ống lõi", href: "/#san-pham-khac" },
-      { label: "Màng POF, PVC, PE", href: "/#san-pham-khac" },
+      { label: "Thanh nẹp góc chữ V", href: "/#thanh-nep-goc" },
+      { label: "Nẹp giấy bảo vệ góc", href: "/#thanh-nep-goc" },
+      { label: "Thanh nẹp đóng pallet", href: "/#thanh-nep-goc" },
+      { label: "Nẹp góc công nghiệp", href: "/#thanh-nep-goc" },
     ],
   },
   { label: "Tin tức", href: "/#tin-tuc" },
