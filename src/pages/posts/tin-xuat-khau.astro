@@ -1,0 +1,58 @@
+---
+import { getEmDashCollection } from "emdash";
+import { Image } from "emdash/ui";
+import Container from "../../components/common/Container.astro";
+import PageHeading from "../../components/common/PageHeading.astro";
+import BaseLayout from "../../layouts/Base.astro";
+
+const { entries: exportArticles, error, cacheHint } = await getEmDashCollection("posts", {
+  status: "published",
+  where: { category: "tin-xuat-khau" },
+  orderBy: { published_at: "desc" },
+  limit: 50,
+});
+
+if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+if (error) console.error("Không thể tải bài viết Tin xuất khẩu:", error);
+---
+
+<BaseLayout
+  title="Tin xuất khẩu"
+  description="Thông tin về hoạt động xuất khẩu và giải pháp đóng gói của Thái Sơn Plastic."
+>
+  <Container>
+    <article class="mx-auto max-w-5xl py-10 lg:py-14">
+      <PageHeading eyebrow="Tin tức" title="Tin xuất khẩu" />
+
+      {exportArticles.length > 0 ? (
+        <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {exportArticles.map((article) => (
+            <article class="news-card">
+              {article.data.featured_image && (
+                <a
+                  href={`/posts/${article.id}`}
+                  class="news-image"
+                  aria-label={`Đọc bài viết: ${article.data.title}`}
+                  {...article.edit.featured_image}
+                >
+                  <Image image={article.data.featured_image} />
+                </a>
+              )}
+
+              <div class="news-body">
+                <h3 {...article.edit.title}>
+                  <a href={`/posts/${article.id}`}>{article.data.title}</a>
+                </h3>
+                {article.data.excerpt && <p {...article.edit.excerpt}>{article.data.excerpt}</p>}
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="mt-10 rounded border border-slate-200 p-8 text-center text-slate-600">
+          Chưa có bài viết Tin xuất khẩu nào được xuất bản.
+        </div>
+      )}
+    </article>
+  </Container>
+</BaseLayout>
