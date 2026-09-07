@@ -2,26 +2,37 @@
 import Container from "../common/Container.astro";
 import SectionHeading from "./SectionHeading.astro";
 import ProductCard from "./ProductCard.astro";
-import type { ProductSectionData } from "../../data/products";
+import type { ProductSectionData } from "../../modules/types/product.type";
 
 interface Props {
   section: ProductSectionData;
 }
 
 const { section } = Astro.props;
-const isCarousel = section.id === "bang-dinh" && section.products.length > 4;
+
+const isCarousel =
+  section.id === "bang-dinh" &&
+  section.products.length > 4;
 ---
 
 <section
-  class:list={["product-section", section.alternate && "is-alternate"]}
+  class:list={[
+    "product-section",
+    section.alternate && "is-alternate",
+  ]}
   id={section.id}
 >
   <Container>
-    <SectionHeading title={section.title} linkHref="/products" />
+    <SectionHeading
+      title={section.title}
+      linkHref={`/product-category/${section.id}`}
+    />
 
     {
       section.products.length === 0 ? (
-        <p class="product-section__empty">Chưa có sản phẩm trong danh mục này.</p>
+        <p class="product-section__empty">
+          Chưa có sản phẩm trong danh mục này.
+        </p>
       ) : isCarousel ? (
         <div class="product-carousel" data-product-carousel>
           <div
@@ -43,8 +54,13 @@ const isCarousel = section.id === "bang-dinh" && section.products.length > 4;
             data-product-carousel-next
             aria-label="Xem các sản phẩm tiếp theo"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-              <path d="m9 18 6-6-6-6" />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path d="m9 18 6-6-6-6"></path>
             </svg>
           </button>
         </div>
@@ -72,11 +88,13 @@ const isCarousel = section.id === "bang-dinh" && section.products.length > 4;
 <script>
   const initializeProductCarousel = (carousel: HTMLElement) => {
     if (carousel.dataset.initialized === "true") return;
+
     carousel.dataset.initialized = "true";
 
     const viewport = carousel.querySelector<HTMLElement>(
       "[data-product-carousel-viewport]",
     );
+
     const nextButton = carousel.querySelector<HTMLButtonElement>(
       "[data-product-carousel-next]",
     );
@@ -84,32 +102,48 @@ const isCarousel = section.id === "bang-dinh" && section.products.length > 4;
     if (!viewport || !nextButton) return;
 
     const updateButtonVisibility = () => {
-      nextButton.hidden = viewport.scrollWidth <= viewport.clientWidth + 1;
+      nextButton.hidden =
+        viewport.scrollWidth <= viewport.clientWidth + 1;
     };
 
     nextButton.addEventListener("click", () => {
-      const maxScroll = viewport.scrollWidth - viewport.clientWidth;
-      const isAtEnd = viewport.scrollLeft >= maxScroll - 2;
+      const maxScroll =
+        viewport.scrollWidth - viewport.clientWidth;
+
+      const isAtEnd =
+        viewport.scrollLeft >= maxScroll - 2;
 
       viewport.scrollTo({
         left: isAtEnd
           ? 0
-          : Math.min(viewport.scrollLeft + viewport.clientWidth, maxScroll),
+          : Math.min(
+              viewport.scrollLeft + viewport.clientWidth,
+              maxScroll,
+            ),
         behavior: "smooth",
       });
     });
 
-    const resizeObserver = new ResizeObserver(updateButtonVisibility);
+    const resizeObserver = new ResizeObserver(
+      updateButtonVisibility,
+    );
+
     resizeObserver.observe(viewport);
     updateButtonVisibility();
   };
 
   const initializeAllProductCarousels = () => {
     document
-      .querySelectorAll<HTMLElement>("[data-product-carousel]")
+      .querySelectorAll<HTMLElement>(
+        "[data-product-carousel]",
+      )
       .forEach(initializeProductCarousel);
   };
 
   initializeAllProductCarousels();
-  document.addEventListener("astro:page-load", initializeAllProductCarousels);
+
+  document.addEventListener(
+    "astro:page-load",
+    initializeAllProductCarousels,
+  );
 </script>

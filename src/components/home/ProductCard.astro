@@ -1,43 +1,38 @@
 ---
 import { Image } from "emdash/ui";
-import type { Product } from "../../data/products";
+import type { ProductCardItem } from "../../modules/types/product.type";
 
 interface Props {
-  product: Product;
+  product: ProductCardItem;
 }
 
 const { product } = Astro.props;
-const href = product.href ?? "#lien-he";
 ---
 
 <article class="product-card" data-product-card>
-  <a href={href} class="product-image" aria-label={`Xem ${product.name}`}>
+  <a
+    href={product.href}
+    class="product-image"
+    aria-label={`Xem ${product.name}`}
+  >
     {
-      typeof product.image === "string" ? (
-        <img
-          src={product.image}
-          data-fallback-src={product.fallbackImage}
-          alt={product.alt}
-          width="650"
-          height="650"
-          loading="lazy"
-          decoding="async"
-          style={product.objectPosition
-            ? `object-position:${product.objectPosition}`
-            : undefined}
-        />
-      ) : (
+      product.image ? (
         <Image image={product.image} />
+      ) : (
+        <div class="product-image__placeholder">
+          Chưa có hình ảnh
+        </div>
       )
     }
   </a>
 
   <div class="product-body">
     <h3 class="product-name">
-      <a href={href}>{product.name}</a>
+      <a href={product.href}>{product.name}</a>
     </h3>
+
     <a
-      href={href}
+      href={product.href}
       class="product-action"
       data-product-request={product.name}
     >
@@ -46,23 +41,14 @@ const href = product.href ?? "#lien-he";
   </div>
 </article>
 
-<script>
-  const initializeFallbackImages = () => {
-    document
-      .querySelectorAll<HTMLImageElement>("img[data-fallback-src]")
-      .forEach((image) => {
-        if (image.dataset.fallbackInitialized === "true") return;
-        image.dataset.fallbackInitialized = "true";
-
-        image.addEventListener("error", () => {
-          const fallback = image.dataset.fallbackSrc;
-          if (!fallback || image.getAttribute("src") === fallback) return;
-          image.dataset.fallbackApplied = "true";
-          image.src = fallback;
-        });
-      });
-  };
-
-  initializeFallbackImages();
-  document.addEventListener("astro:page-load", initializeFallbackImages);
-</script>
+<style>
+  .product-image__placeholder {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    background: #f3f4f6;
+  }
+</style>

@@ -1,21 +1,27 @@
 import { getEmDashCollection } from "emdash";
-import type { Product } from "../../../.emdash/types";
+
+import type {
+  Product,
+} from "../../../.emdash/types";
 
 export async function getProductsByCategory(
   categorySlug: string,
-  limit = 4,
+  limit = 100,
 ) {
-  return getEmDashCollection<"products", Product>("products", {
-    status: "published",
+  return getEmDashCollection<"products", Product>(
+    "products",
+    {
+      status: "published",
 
-    where: {
-      product_category: categorySlug,
+      where: {
+        product_category: categorySlug,
+      },
+
+      orderBy: {
+        published_at: "desc",
+      },
+
+      limit,
     },
-
-    orderBy: {
-      published_at: "desc",
-    },
-
-    limit,
-  });
+  );
 }
