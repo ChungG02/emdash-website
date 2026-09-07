@@ -70,7 +70,16 @@ export const navigationItems: NavigationItem[] = [
       { label: "Nẹp góc công nghiệp", href: "/#thanh-nep-goc" },
     ],
   },
-  { label: "Tin tức", href: "/#tin-tuc" },
+  { 
+    label: "Tin tức", 
+    href: "/#tin-tuc",
+    children: [
+      { label: "Giới thiệu về chúng tôi", href: "/gioi-thieu" },
+      { label: "Tin xuất khẩu", href: "/posts/tin-xuat-khau" },
+      { label: "Thông tin sản xuất", href: "/posts/thong-tin-san-xuat" },
+      { label: "Tuyển dụng", href: "/posts/tuyen-dung" },
+    ],
+  },
   // { label: "CATALOGUE", href: "#catalogue" },
   { label: "Liên hệ", href: "/lien-he" },
 ];

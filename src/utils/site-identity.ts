@@ -12,10 +12,10 @@ export interface BlogSiteIdentitySettings {
 	favicon?: MediaReference;
 }
 
-const DEFAULT_SITE_TITLE = "THÁI SƠN PLASTIC";
+const DEFAULT_SITE_TITLE = "THÁI SƠN";
 const DEFAULT_SITE_TAGLINE = "Giải pháp đóng gói công nghiệp";
 
-const STARTER_TITLES = new Set(["", "My Blog"]);
+const STARTER_TITLES = new Set(["", "My Blog", "EmDash Website"]);
 const STARTER_TAGLINES = new Set([
 	"",
 	"Thoughts, stories, and ideas.",

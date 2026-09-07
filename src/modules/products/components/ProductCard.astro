@@ -66,11 +66,10 @@ const { title, href, featuredImage } = Astro.props;
 
   .product-card__image {
     width: 100%;
-    height: auto;
-    aspect-ratio: 1 / 1;
-    padding: 6px;
+    height: 245px;
+    padding: 14px;
     overflow: hidden;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #edf0f2;
     background: #ffffff;
     box-sizing: border-box;
   }
@@ -80,9 +79,10 @@ const { title, href, featuredImage } = Astro.props;
     width: 100%;
     height: 100%;
     padding: 0;
-    object-fit: contain;
+    object-fit: cover;
+    aspect-ratio: 1 / 1;
     box-sizing: border-box;
-    transition: transform 0.25s ease;
+    transition: transform 0.3s ease;
   }
 
   .product-card:hover .product-card__image :global(img) {
@@ -152,11 +152,20 @@ const { title, href, featuredImage } = Astro.props;
     text-transform: uppercase;
     transition:
       color 0.2s ease,
+      border-color 0.2s ease,
       background 0.2s ease;
   }
 
   .product-card__button:hover {
+    border-color: var(--orange);
     color: #ffffff;
-    background: #0878c1;
+    background: var(--orange);
+  }
+
+  @media (max-width: 560px) {
+    .product-card__image {
+      height: 165px;
+      padding: 7px;
+    }
   }
 </style>

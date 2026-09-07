@@ -1,6 +1,12 @@
 ---
-import { getEmDashCollection, getSiteSettings } from "emdash";
+import {
+  getEmDashCollection,
+  getSiteSettings,
+  getTermsForEntries,
+} from "emdash";
+
 import type { Product as EmDashProduct } from "../../.emdash/types";
+
 import Base from "../layouts/Base.astro";
 import HeroCarousel from "../components/carousel/HeroCarousel.astro";
 import ProductSection from "../components/home/ProductSection.astro";
@@ -8,24 +14,39 @@ import TrustStrip from "../components/home/TrustStrip.astro";
 import CatalogueBanner from "../components/home/CatalogueBanner.astro";
 import NewsSection from "../components/home/NewsSection.astro";
 import ContactSection from "../components/home/ContactSection.astro";
+
 import { newsItems } from "../data/news";
-import { productSections } from "../data/products";
+
+import type { ProductSectionData } from "../modules/types/product.type";
+
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+
+const HOME_PRODUCTS_PER_CATEGORY = 4;
 
 const [productResult, postResult, settings] = await Promise.all([
   getEmDashCollection<"products", EmDashProduct>("products", {
     status: "published",
-    orderBy: { published_at: "desc" },
+    orderBy: {
+      published_at: "desc",
+    },
     limit: 50,
   }),
+
   getEmDashCollection("posts", {
     status: "published",
-    orderBy: { published_at: "desc" },
-    where: { category: "tin-tuc" },
+    orderBy: {
+      published_at: "desc",
+    },
+    where: {
+      category: "tin-tuc",
+    },
     limit: 3,
   }),
+
   getSiteSettings(),
 ]);
+
+console.log("[Homepage] Số sản phẩm:", productResult.entries.length);
 
 if (Astro.cache?.enabled) {
   Astro.cache.set(productResult.cacheHint);
@@ -35,52 +56,73 @@ if (Astro.cache?.enabled) {
 if (productResult.error) {
   console.error("Không thể tải sản phẩm từ EmDash:", productResult.error);
 }
+
 if (postResult.error) {
   console.error("Không thể tải tin tức từ EmDash:", postResult.error);
 }
 
-const taxonomyAliases: Record<string, string[]> = {
-  "bang-dinh": ["bang-dinh"],
-  "hat-nhua-nguyen-sinh": ["hat-nhua-nguyen-sinh"],
-  "mang-pe": ["mang-pe", "mang-quan-pe"],
-  "day-dai-pet": ["day-dai-pet", "day-pet"],
-  "thanh-nep-goc": ["thanh-nep-goc", "thanh-nep"],
-};
+/*
+ * Nhóm các sản phẩm theo taxonomy product_category.
+ *
+ * Không sử dụng dữ liệu cố định trong
+ * src/data/products.ts.
+ */
+const categoryTermsByProduct = await getTermsForEntries(
+  "products",
+  productResult.entries.map((product) => product.data.id),
+  "product_category",
+);
 
-const displaySections = productSections.map((fallbackSection) => {
-  const aliases = taxonomyAliases[fallbackSection.id] ?? [fallbackSection.id];
-  const matchingProducts = productResult.entries.filter((entry) => {
-    const terms = entry.data.terms?.product_category ?? [];
-    return terms.some((term) => aliases.includes(term.slug));
-  });
+const sectionsBySlug = new Map<string, ProductSectionData>();
 
-  if (matchingProducts.length === 0) return fallbackSection;
+for (const entry of productResult.entries) {
+  const categories = categoryTermsByProduct.get(entry.data.id) ?? [];
 
-  return {
-    ...fallbackSection,
-    products: matchingProducts.map((entry, index) => {
-      const fallback = fallbackSection.products[index % fallbackSection.products.length];
-      return {
+  for (const category of categories) {
+    const existingSection = sectionsBySlug.get(category.slug);
+
+    const section: ProductSectionData = existingSection ?? {
+      id: category.slug,
+      title: category.label,
+      products: [],
+    };
+
+    if (section.products.length < HOME_PRODUCTS_PER_CATEGORY) {
+      section.products.push({
         name: entry.data.title,
-        image: entry.data.featured_image ?? fallback.image,
+        image: entry.data.featured_image,
         alt: entry.data.featured_image?.alt ?? entry.data.title,
-        fallbackImage: fallback.fallbackImage,
-        objectPosition: fallback.objectPosition,
         href: `/products/${entry.id}`,
-      };
-    }),
-  };
-});
+      });
+    }
+
+    sectionsBySlug.set(category.slug, section);
+  }
+}
+
+const displaySections = Array.from(sectionsBySlug.values()).map(
+  (section, index) => ({
+    ...section,
+    alternate: index % 2 === 1,
+  }),
+);
 
 const cmsNews = postResult.entries.map((post, index) => {
   const fallback = newsItems[index % newsItems.length];
+
   return {
     title: post.data.title,
+
     description: post.data.excerpt ?? fallback.description,
+
     image: post.data.featured_image ?? fallback.image,
+
     fallbackImage: fallback.fallbackImage,
+
     alt: post.data.featured_image?.alt ?? post.data.title,
+
     href: `/posts/${post.id}`,
+
     date: post.data.publishedAt?.toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "2-digit",
@@ -95,17 +137,23 @@ const { siteTitle, siteTagline } = resolveBlogSiteIdentity(settings);
 <Base title={siteTitle} description={siteTagline}>
   <HeroCarousel />
 
-  {displaySections.slice(0, 3).map((section) => (
-    <ProductSection section={section} />
-  ))}
+  {
+    displaySections
+      .slice(0, 3)
+      .map((section) => <ProductSection section={section} />)
+  }
 
   <TrustStrip />
 
-  {displaySections.slice(3).map((section) => (
-    <ProductSection section={section} />
-  ))}
+  {
+    displaySections
+      .slice(3)
+      .map((section) => <ProductSection section={section} />)
+  }
 
   <CatalogueBanner />
+
   <NewsSection items={cmsNews.length > 0 ? cmsNews : newsItems} />
+
   <ContactSection />
 </Base>

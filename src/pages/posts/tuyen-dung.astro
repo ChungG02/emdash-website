@@ -1,0 +1,58 @@
+---
+import { getEmDashCollection } from "emdash";
+import { Image } from "emdash/ui";
+import Container from "../../components/common/Container.astro";
+import PageHeading from "../../components/common/PageHeading.astro";
+import BaseLayout from "../../layouts/Base.astro";
+
+const { entries: recruitmentPosts, error, cacheHint } = await getEmDashCollection("posts", {
+  status: "published",
+  where: { category: "tuyen-dung" },
+  orderBy: { published_at: "desc" },
+  limit: 50,
+});
+
+if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+if (error) console.error("Không thể tải bài viết Tuyển dụng:", error);
+---
+
+<BaseLayout
+  title="Tuyển dụng"
+  description="Cơ hội nghề nghiệp và thông tin tuyển dụng mới nhất tại Thái Sơn Plastic."
+>
+  <Container>
+    <article class="mx-auto max-w-5xl py-10 lg:py-14">
+      <PageHeading eyebrow="Cơ hội nghề nghiệp" title="Tuyển dụng" />
+
+      {recruitmentPosts.length > 0 ? (
+        <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {recruitmentPosts.map((post) => (
+            <article class="news-card">
+              {post.data.featured_image && (
+                <a
+                  href={`/posts/${post.id}`}
+                  class="news-image"
+                  aria-label={`Xem tin tuyển dụng: ${post.data.title}`}
+                  {...post.edit.featured_image}
+                >
+                  <Image image={post.data.featured_image} />
+                </a>
+              )}
+
+              <div class="news-body">
+                <h3 {...post.edit.title}>
+                  <a href={`/posts/${post.id}`}>{post.data.title}</a>
+                </h3>
+                {post.data.excerpt && <p {...post.edit.excerpt}>{post.data.excerpt}</p>}
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="mt-10 rounded border border-slate-200 p-8 text-center text-slate-600">
+          Hiện chưa có vị trí tuyển dụng nào được đăng.
+        </div>
+      )}
+    </article>
+  </Container>
+</BaseLayout>

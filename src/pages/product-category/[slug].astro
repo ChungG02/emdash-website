@@ -1,0 +1,179 @@
+---
+import {
+  decodeSlug,
+  getTerm,
+} from "emdash";
+
+import Base from "../../layouts/Base.astro";
+
+import ProductCard from "../../modules/products/components/ProductCard.astro";
+
+import {
+  getProductsByCategory,
+} from "../../modules/services/product.service";
+
+const slug = decodeSlug(Astro.params.slug);
+
+const category = slug
+  ? await getTerm("product_category", slug)
+  : null;
+
+if (!category) {
+  return Astro.redirect("/404");
+}
+
+const {
+  entries: products,
+  error,
+  cacheHint,
+} = await getProductsByCategory(category.slug);
+
+if (Astro.cache?.enabled) {
+  Astro.cache.set(cacheHint);
+}
+
+if (error) {
+  console.error(
+    `Không thể tải danh mục sản phẩm ${category.slug}:`,
+    error,
+  );
+}
+---
+
+<Base
+  title={category.label}
+  description={`Danh sách sản phẩm thuộc danh mục ${category.label}`}
+>
+  <main class="category-page">
+    <!-- <a href="/" class="category-page__back">
+      ← Quay lại trang chủ
+    </a> -->
+
+    <header class="category-page__header">
+      <!-- <span class="category-page__eyebrow">
+        Danh mục sản phẩm
+      </span> -->
+
+      <h1>{category.label}</h1>
+
+      <p>
+        Hiện có {products.length} sản phẩm
+      </p>
+    </header>
+
+    {
+      error ? (
+        <p class="category-page__message">
+          Không thể tải danh sách sản phẩm.
+        </p>
+      ) : products.length === 0 ? (
+        <p class="category-page__message">
+          Danh mục này chưa có sản phẩm nào được xuất bản.
+        </p>
+      ) : (
+        <div class="category-page__grid">
+          {products.map((product) => (
+            <ProductCard
+              title={product.data.title}
+              href={`/products/${product.id}`}
+              featuredImage={
+                product.data.featured_image
+              }
+            />
+          ))}
+        </div>
+      )
+    }
+  </main>
+</Base>
+
+<style>
+  .category-page {
+    width: min(
+      1200px,
+      calc(100% - 32px)
+    );
+    margin: 0 auto;
+    padding: 40px 0 64px;
+  }
+
+  .category-page__back {
+    display: inline-flex;
+    margin-bottom: 28px;
+    color: #0878c1;
+    text-decoration: none;
+  }
+
+  .category-page__back:hover {
+    color: #075e96;
+    text-decoration: underline;
+  }
+
+  .category-page__header {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .category-page__eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: #0878c1;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .category-page__header h1 {
+    margin: 0 0 8px;
+    font-size: clamp(
+      30px,
+      4vw,
+      42px
+    );
+  }
+
+  .category-page__header p,
+  .category-page__message {
+    margin: 0;
+    color: #64748b;
+  }
+
+  .category-page__grid {
+    display: grid;
+    grid-template-columns:
+      repeat(4, minmax(0, 292px));
+    gap: 24px;
+  }
+
+  @media (max-width: 1050px) {
+    .category-page__grid {
+      grid-template-columns:
+        repeat(3, minmax(0, 292px));
+    }
+  }
+
+  @media (max-width: 780px) {
+    .category-page__grid {
+      grid-template-columns:
+        repeat(2, minmax(0, 292px));
+    }
+  }
+
+  @media (max-width: 520px) {
+    .category-page {
+      width: min(
+        calc(100% - 24px),
+        1200px
+      );
+      padding-top: 28px;
+    }
+
+    .category-page__grid {
+      grid-template-columns:
+        minmax(0, 292px);
+      justify-content: center;
+    }
+  }
+</style>

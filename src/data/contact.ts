@@ -35,6 +35,16 @@ const mainOfficeAddress =
 const mainOfficeMapQuery = encodeURIComponent(mainOfficeAddress);
 
 export const contactSummary: ContactInformationItem[] = [
+  {
+    label: "Tên công ty",
+    value:
+      "CÔNG TY TNHH SẢN XUẤT THƯƠNG MẠI VÀ XUẤT NHẬP KHẨU THÁI SƠN",
+  },
+  {
+    label: "Số đăng ký kinh doanh",
+    value:
+      "0111184458 – Sở Kế hoạch & Đầu Tư TP Hà Nội cấp lần đầu ngày 19/08/2025",
+  },
   // {
   //   label: "Điện thoại",
   //   value: "Đang cập nhật",
@@ -59,13 +69,6 @@ export const companyLocations: CompanyLocation[] = [
     phoneHref: "tel:0965190888",
     email: "info@thaisonplastic.com",
     mapUrl: `https://www.google.com/maps/search/?api=1&query=${mainOfficeMapQuery}`,
-  },
-  {
-    id: "branch-office",
-    name: "Chi nhánh",
-    address: "Đang cập nhật",
-    phone: "Đang cập nhật",
-    email: "Đang cập nhật",
   },
   {
     id: "factory",
