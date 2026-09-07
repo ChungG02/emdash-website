@@ -1,182 +1,674 @@
 ---
 export const prerender = false;
 
-import { search } from "emdash";
+import {
+  getEmDashCollection,
+  getEmDashEntry,
+  search,
+  type SearchResult,
+} from "emdash";
+import { Image } from "emdash/ui";
+import type { Product } from "../../.emdash/types";
+
 import Base from "../layouts/Base.astro";
 
-const query = Astro.url.searchParams.get("q")?.trim() || "";
+const SEARCH_LIMIT = 24;
+const FALLBACK_LIMIT = 250;
 
-// Use the FTS-backed search() API instead of loading every post and
-// filtering in JS. FTS scales as the post count grows, returns ranked
-// results, and handles tokenization/stemming. Templates that grep all
-// post bodies in JS quickly become unusable past a few hundred posts.
-const { items: results } = query
-	? await search(query, { collections: ["posts"], limit: 30 })
-	: { items: [] };
+interface ProductSearchItem {
+  slug: string;
+  title: string;
+  featuredImage?: Product["featured_image"];
+  origin?: string;
+  availability?: Product["availability"];
+  snippetHtml?: string;
+  snippetText?: string;
+}
+
+const query = (Astro.url.searchParams.get("q")?.trim() ?? "").slice(0, 120);
+const cursor = Astro.url.searchParams.get("cursor") ?? undefined;
+
+const normalizeSearchText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/đ/gi, "d")
+    .toLocaleLowerCase("vi")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const portableTextToPlainText = (value: unknown): string => {
+  if (typeof value === "string") return value;
+
+  if (Array.isArray(value)) {
+    return value.map(portableTextToPlainText).filter(Boolean).join(" ");
+  }
+
+  if (!value || typeof value !== "object") return "";
+
+  const block = value as { text?: unknown; children?: unknown };
+
+  if (typeof block.text === "string") return block.text;
+  if (block.children) return portableTextToPlainText(block.children);
+
+  return "";
+};
+
+const createExcerpt = (text: string, maxLength = 170) => {
+  const compactText = text.replace(/\s+/g, " ").trim();
+
+  if (compactText.length <= maxLength) return compactText;
+  return `${compactText.slice(0, maxLength).trimEnd()}…`;
+};
+
+const toSearchItem = (
+  entry: { id: string; data: Product },
+  result?: SearchResult,
+): ProductSearchItem => ({
+  slug: entry.id,
+  title: entry.data.title,
+  featuredImage: entry.data.featured_image,
+  origin: entry.data.origin,
+  availability: entry.data.availability,
+  snippetHtml: result?.snippet,
+  snippetText: result?.snippet
+    ? undefined
+    : createExcerpt(portableTextToPlainText(entry.data.description)),
+});
+
+let products: ProductSearchItem[] = [];
+let nextCursor: string | undefined;
+let hasSearchError = false;
+
+if (query) {
+  let ftsResults: SearchResult[] = [];
+
+  try {
+    const response = await search(query, {
+      collections: ["products"],
+      status: "published",
+      limit: SEARCH_LIMIT,
+      cursor,
+    });
+
+    ftsResults = response.items;
+    nextCursor = response.nextCursor;
+  } catch (error) {
+    console.error("Không thể tìm kiếm sản phẩm bằng chỉ mục EmDash:", error);
+  }
+
+  if (ftsResults.length > 0) {
+    const detailResults = await Promise.all(
+      ftsResults.map(async (result) => {
+        if (!result.slug) {
+          return {
+            entry: null,
+            result,
+            cacheHint: null,
+            error: undefined,
+          };
+        }
+
+        const detail = await getEmDashEntry<"products", Product>(
+          "products",
+          result.slug,
+        );
+
+        return { ...detail, result };
+      }),
+    );
+
+    for (const detail of detailResults) {
+      if (detail.cacheHint) Astro.cache.set(detail.cacheHint);
+
+      if (detail.error) {
+        console.error("Không thể tải chi tiết sản phẩm tìm kiếm:", detail.error);
+      }
+
+      if (detail.entry) {
+        products.push(toSearchItem(detail.entry, detail.result));
+      }
+    }
+  }
+
+  // Dữ liệu cũ có thể chưa được bật chỉ mục FTS trong trang quản trị.
+  // Khi đó vẫn bảo đảm tìm kiếm hoạt động bằng cách lọc danh sách sản phẩm.
+  if (products.length === 0 && !cursor) {
+    const fallback = await getEmDashCollection<"products", Product>(
+      "products",
+      {
+        status: "published",
+        orderBy: { published_at: "desc" },
+        limit: FALLBACK_LIMIT,
+      },
+    );
+
+    Astro.cache.set(fallback.cacheHint);
+
+    if (fallback.error) {
+      hasSearchError = true;
+      console.error("Không thể tải sản phẩm để tìm kiếm:", fallback.error);
+    } else {
+      const normalizedQuery = normalizeSearchText(query);
+
+      products = fallback.entries
+        .filter((entry) => {
+          const searchableText = [
+            entry.data.title,
+            entry.data.origin,
+            entry.data.availability,
+            ...(entry.data.sizes ?? []),
+            portableTextToPlainText(entry.data.description),
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          return normalizeSearchText(searchableText).includes(normalizedQuery);
+        })
+        .slice(0, SEARCH_LIMIT)
+        .map((entry) => toSearchItem(entry));
+    }
+  }
+}
+
+const nextPageUrl = nextCursor
+  ? `/search?${new URLSearchParams({ q: query, cursor: nextCursor })}`
+  : undefined;
 ---
 
 <Base
-	title={query ? `Search: ${query}` : "Search"}
-	description="Search blog posts"
+  title={query ? `Tìm kiếm: ${query}` : "Tìm kiếm sản phẩm"}
+  description="Tìm kiếm sản phẩm và giải pháp đóng gói công nghiệp"
 >
-	<section class="search-page">
-		<h1 class="search-title">Search</h1>
+  <section class="product-search-page" aria-labelledby="product-search-title">
+    <header class="product-search-page__header">
+      <p class="product-search-page__eyebrow">Danh mục sản phẩm</p>
+      <h1 id="product-search-title">Tìm kiếm sản phẩm</h1>
+      <p>
+        Nhập tên, xuất xứ, tình trạng hoặc kích thước sản phẩm bạn đang cần.
+      </p>
+    </header>
 
-		<form method="get" action="/search" class="search-form">
-			<input
-				type="search"
-				name="q"
-				value={query}
-				placeholder="Search posts..."
-				class="search-input"
-				autofocus
-			/>
-			<button type="submit" class="search-button">Search</button>
-		</form>
+    <form method="get" action="/search" role="search" class="product-search-form">
+      <label for="search-page-input" class="visually-hidden">
+        Từ khóa tìm kiếm sản phẩm
+      </label>
+      <div class="product-search-form__field">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.5-3.5"></path>
+        </svg>
+        <input
+          id="search-page-input"
+          type="search"
+          name="q"
+          value={query}
+          placeholder="Ví dụ: băng dính, màng PE, hạt nhựa..."
+          maxlength="120"
+          autocomplete="off"
+          autofocus
+        />
+      </div>
+      <button type="submit">Tìm kiếm</button>
+    </form>
 
-		{
-			query && (
-				<p class="search-summary">
-					{results.length === 0
-						? `No results for "${query}"`
-						: `${results.length} result${results.length === 1 ? "" : "s"} for "${query}"`}
-				</p>
-			)
-		}
+    {
+      !query ? (
+        <div class="product-search-state">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+          <h2>Bạn đang tìm sản phẩm nào?</h2>
+          <p>Nhập từ khóa vào ô phía trên để bắt đầu tìm kiếm.</p>
+          <a href="/products">Xem tất cả sản phẩm</a>
+        </div>
+      ) : hasSearchError ? (
+        <div class="product-search-state product-search-state--error" role="alert">
+          <h2>Chưa thể thực hiện tìm kiếm</h2>
+          <p>Vui lòng thử lại sau ít phút hoặc liên hệ với chúng tôi để được hỗ trợ.</p>
+        </div>
+      ) : products.length === 0 ? (
+        <div class="product-search-state" aria-live="polite">
+          <h2>Không tìm thấy sản phẩm phù hợp</h2>
+          <p>
+            Không có kết quả cho “<strong>{query}</strong>”. Hãy thử từ khóa ngắn hơn
+            hoặc tên nhóm sản phẩm.
+          </p>
+          <a href="/products">Xem tất cả sản phẩm</a>
+        </div>
+      ) : (
+        <div class="product-search-results">
+          <div class="product-search-results__summary" aria-live="polite">
+            <p>
+              Hiển thị <strong>{products.length}</strong> sản phẩm phù hợp với “<strong
+                >{query}</strong
+              >”
+            </p>
+            <a href="/products">Xem tất cả sản phẩm</a>
+          </div>
 
-		{
-			results.length > 0 && (
-				<ol class="search-results">
-					{results.map((result) => (
-						<li class="search-result">
-							<a
-								href={`/posts/${result.slug ?? result.id}`}
-								class="result-link"
-							>
-								<h2 class="result-title">
-									{result.title ?? "Untitled"}
-								</h2>
-								{result.snippet && (
-									<p class="result-snippet" set:html={result.snippet} />
-								)}
-							</a>
-						</li>
-					))}
-				</ol>
-			)
-		}
+          <ol class="product-search-grid">
+            {products.map((product) => (
+              <li>
+                <article class="product-search-card">
+                  <a
+                    href={`/products/${product.slug}`}
+                    class="product-search-card__image"
+                    aria-label={`Xem chi tiết ${product.title}`}
+                  >
+                    {product.featuredImage ? (
+                      <Image image={product.featuredImage} />
+                    ) : (
+                      <span>Chưa có hình ảnh</span>
+                    )}
+                  </a>
 
-		{!query && <p class="search-hint">Enter a search term to find posts.</p>}
-	</section>
+                  <div class="product-search-card__content">
+                    <h2>
+                      <a href={`/products/${product.slug}`}>{product.title}</a>
+                    </h2>
+
+                    {(product.origin || product.availability) && (
+                      <div class="product-search-card__meta">
+                        {product.origin && <span>Xuất xứ: {product.origin}</span>}
+                        {product.availability && (
+                          <span class="product-search-card__status">
+                            {product.availability}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {product.snippetHtml && (
+                      <p
+                        class="product-search-card__description"
+                        set:html={product.snippetHtml}
+                      />
+                    )}
+                    {!product.snippetHtml && product.snippetText && (
+                      <p class="product-search-card__description">
+                        {product.snippetText}
+                      </p>
+                    )}
+
+                    <a href={`/products/${product.slug}`} class="product-search-card__link">
+                      Xem chi tiết
+                      <span aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ol>
+
+          {nextPageUrl && (
+            <div class="product-search-results__more">
+              <a href={nextPageUrl}>Xem thêm kết quả</a>
+            </div>
+          )}
+        </div>
+      )
+    }
+  </section>
 </Base>
 
 <style>
-	.search-page {
-		max-width: var(--max-width);
-		margin: 0 auto;
-		padding: var(--spacing-8) var(--spacing-6) var(--spacing-16);
-	}
+  .product-search-page {
+    width: min(1200px, calc(100% - 32px));
+    min-height: 520px;
+    margin: 0 auto;
+    padding: 48px 0 72px;
+  }
 
-	.search-title {
-		font-size: var(--font-size-2xl);
-		margin-bottom: var(--spacing-6);
-	}
+  .product-search-page__header {
+    max-width: 720px;
+    margin-bottom: 28px;
+  }
 
-	.search-form {
-		display: flex;
-		gap: var(--spacing-2);
-		margin-bottom: var(--spacing-8);
-	}
+  .product-search-page__eyebrow {
+    margin-bottom: 6px;
+    color: var(--color-brand);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
 
-	.search-input {
-		flex: 1;
-		padding: var(--spacing-2) var(--spacing-4);
-		font-size: var(--font-size-base);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius);
-		background: var(--color-bg);
-		color: var(--color-text);
-	}
+  .product-search-page__header h1 {
+    margin: 0 0 10px;
+    color: var(--navy);
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.15;
+  }
 
-	.search-input:focus {
-		outline: none;
-		border-color: var(--color-brand);
-	}
+  .product-search-page__header > p:last-child {
+    color: var(--color-text-secondary);
+  }
 
-	.search-button {
-		padding: var(--spacing-2) var(--spacing-6);
-		font-size: var(--font-size-base);
-		background: var(--color-brand);
-		color: var(--color-on-brand);
-		border: none;
-		border-radius: var(--radius);
-		cursor: pointer;
-		font-weight: 500;
-	}
+  .product-search-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 14px;
+    margin-bottom: 34px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-bg-subtle);
+  }
 
-	.search-button:hover {
-		opacity: 0.9;
-	}
+  .product-search-form__field {
+    min-width: 0;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-muted);
+    background: #fff;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
 
-	.search-summary {
-		color: var(--color-muted);
-		margin-bottom: var(--spacing-6);
-	}
+  .product-search-form__field:focus-within {
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px var(--color-brand-ring);
+  }
 
-	.search-hint {
-		color: var(--color-muted);
-	}
+  .product-search-form__field svg {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+  }
 
-	.search-results {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: flex;
-		flex-direction: column;
-	}
+  .product-search-form input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    color: var(--color-text);
+    background: transparent;
+    font-size: 16px;
+  }
 
-	.search-result {
-		padding: var(--spacing-6) 0;
-		border-bottom: 1px solid var(--color-border-subtle);
-	}
+  .product-search-form button {
+    min-width: 126px;
+    min-height: 52px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    background: var(--color-brand);
+    font-weight: 700;
+    transition:
+      background 0.2s ease,
+      transform 0.2s ease;
+  }
 
-	.search-result:first-child {
-		padding-top: 0;
-	}
+  .product-search-form button:hover,
+  .product-search-form button:focus-visible {
+    outline: 0;
+    background: var(--color-brand-hover);
+    transform: translateY(-1px);
+  }
 
-	.search-result:last-child {
-		border-bottom: none;
-	}
+  .product-search-state {
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 44px 24px;
+    flex-direction: column;
+    border: 1px dashed var(--color-border);
+    border-radius: 12px;
+    text-align: center;
+    background: var(--color-bg-subtle);
+  }
 
-	.result-link {
-		display: block;
-		text-decoration: none;
-		color: inherit;
-	}
+  .product-search-state svg {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 18px;
+    color: var(--color-brand);
+  }
 
-	.result-title {
-		font-size: var(--font-size-xl);
-		font-weight: var(--font-weight-heading);
-		line-height: var(--leading-snug);
-		margin-bottom: var(--spacing-2);
-		transition: color var(--transition-fast);
-	}
+  .product-search-state h2 {
+    margin: 0 0 8px;
+    color: var(--navy);
+    font-size: 23px;
+  }
 
-	.result-link:hover .result-title {
-		color: var(--color-brand);
-	}
+  .product-search-state p {
+    max-width: 620px;
+    color: var(--color-text-secondary);
+  }
 
-	.result-snippet {
-		font-size: var(--font-size-base);
-		line-height: var(--leading-relaxed);
-		color: var(--color-text-secondary);
-	}
+  .product-search-state a {
+    margin-top: 20px;
+    color: var(--color-brand);
+    font-weight: 700;
+  }
 
-	/* FTS returns <mark> wrapping the matched terms */
-	.result-snippet :global(mark) {
-		background: var(--color-brand-ring);
-		color: inherit;
-		padding: 0 0.1em;
-		border-radius: 2px;
-	}
+  .product-search-state a:hover {
+    text-decoration: underline;
+  }
+
+  .product-search-state--error {
+    border-style: solid;
+  }
+
+  .product-search-results__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--color-border-subtle);
+    color: var(--color-text-secondary);
+  }
+
+  .product-search-results__summary a {
+    flex: 0 0 auto;
+    color: var(--color-brand);
+    font-weight: 700;
+  }
+
+  .product-search-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .product-search-grid > li {
+    min-width: 0;
+  }
+
+  .product-search-card {
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgb(15 23 42 / 6%);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .product-search-card:hover {
+    border-color: #83bce3;
+    box-shadow: 0 14px 30px rgb(15 23 42 / 12%);
+    transform: translateY(-4px);
+  }
+
+  .product-search-card__image {
+    height: 230px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--color-border-subtle);
+    color: var(--color-muted);
+    background: #f6f8fb;
+  }
+
+  .product-search-card__image :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .product-search-card:hover .product-search-card__image :global(img) {
+    transform: scale(1.035);
+  }
+
+  .product-search-card__content {
+    display: flex;
+    padding: 20px;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .product-search-card h2 {
+    margin: 0;
+    color: var(--color-brand);
+    font-size: 19px;
+    line-height: 1.4;
+  }
+
+  .product-search-card h2 a:hover {
+    color: var(--color-brand-hover);
+  }
+
+  .product-search-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-top: 12px;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .product-search-card__status {
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: var(--navy);
+    background: var(--color-bg-subtle);
+    font-weight: 600;
+  }
+
+  .product-search-card__description {
+    display: -webkit-box;
+    margin-top: 14px;
+    overflow: hidden;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .product-search-card__description :global(mark) {
+    padding: 0 0.12em;
+    border-radius: 2px;
+    color: inherit;
+    background: var(--color-brand-ring);
+  }
+
+  .product-search-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 18px;
+    color: var(--color-brand);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .product-search-card__link:hover {
+    color: var(--color-brand-hover);
+  }
+
+  .product-search-results__more {
+    margin-top: 34px;
+    text-align: center;
+  }
+
+  .product-search-results__more a {
+    display: inline-flex;
+    min-height: 46px;
+    padding: 10px 22px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-brand);
+    border-radius: 6px;
+    color: var(--color-brand);
+    font-weight: 700;
+  }
+
+  .product-search-results__more a:hover {
+    color: #fff;
+    background: var(--color-brand);
+  }
+
+  @media (max-width: 900px) {
+    .product-search-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 600px) {
+    .product-search-page {
+      width: min(100% - 24px, 1200px);
+      padding: 32px 0 52px;
+    }
+
+    .product-search-form {
+      grid-template-columns: 1fr;
+      padding: 10px;
+    }
+
+    .product-search-form button {
+      width: 100%;
+    }
+
+    .product-search-results__summary {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .product-search-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .product-search-card__image {
+      height: 220px;
+    }
+  }
 </style>

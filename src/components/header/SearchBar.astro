@@ -26,7 +26,14 @@ const {
 >
   <label for={id} class="visually-hidden"> Tìm kiếm sản phẩm </label>
 
-  <input id={id} type="search" name={inputName} placeholder={placeholder} />
+  <input
+    id={id}
+    type="search"
+    name={inputName}
+    placeholder={placeholder}
+    maxlength="120"
+    autocomplete="off"
+  />
 
   <button type="submit" aria-label="Tìm kiếm">
     <svg
