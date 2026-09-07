@@ -61,13 +61,13 @@ export const navigationItems: NavigationItem[] = [
     ],
   },
   {
-    label: "Thanh nẹp",
-    href: "/#thanh-nep-goc",
+    label: "Sản phẩm khác",
+    href: "/#san-pham-khac",
     children: [
-      { label: "Thanh nẹp góc chữ V", href: "/#thanh-nep-goc" },
-      { label: "Nẹp giấy bảo vệ góc", href: "/#thanh-nep-goc" },
-      { label: "Thanh nẹp đóng pallet", href: "/#thanh-nep-goc" },
-      { label: "Nẹp góc công nghiệp", href: "/#thanh-nep-goc" },
+      { label: "Thanh nẹp", href: "/#thanh-nep" },
+      { label: "Cuộn xốp nổ", href: "/#cuon-xop-no" },
+      // { label: "Thanh nẹp đóng pallet", href: "/#thanh-nep-goc" },
+      // { label: "Nẹp góc công nghiệp", href: "/#thanh-nep-goc" },
     ],
   },
   { 
@@ -80,7 +80,7 @@ export const navigationItems: NavigationItem[] = [
       { label: "Tuyển dụng", href: "/posts/tuyen-dung" },
     ],
   },
-  // { label: "CATALOGUE", href: "#catalogue" },
+  // { label: "Sản phẩm khác", href: "#catalogue" },
   { label: "Liên hệ", href: "/lien-he" },
 ];
 

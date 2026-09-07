@@ -300,7 +300,7 @@ button {
   min-height: 52px;
   display: flex;
   align-items: stretch;
-  justify-content: space-between;
+  justify-content: space-around;
   list-style: none;
 }
 
