@@ -157,15 +157,6 @@ import { siteConfig } from "../../data/site";
         });
       });
 
-    document
-      .querySelectorAll<HTMLElement>("[data-catalogue-request]")
-      .forEach((link) => {
-        link.addEventListener("click", () => {
-          if (message)
-            message.value =
-              "Tôi muốn nhận catalogue sản phẩm Thái Sơn Plastic.";
-        });
-      });
   };
 
   const initializeAllContactForms = () => {
