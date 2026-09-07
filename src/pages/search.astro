@@ -7,26 +7,36 @@ import {
   search,
   type SearchResult,
 } from "emdash";
-import { Image } from "emdash/ui";
 import type { Product } from "../../.emdash/types";
 
 import Base from "../layouts/Base.astro";
+import ProductCard from "../modules/products/components/ProductCard.astro";
 
-const SEARCH_LIMIT = 24;
-const FALLBACK_LIMIT = 250;
+const PAGE_SIZE = 12;
+const SEARCH_BATCH_SIZE = 100;
+const COLLECTION_BATCH_SIZE = 100;
+const MAX_BATCHES = 100;
+
+type ProductEntry = {
+  id: string;
+  data: Product;
+};
 
 interface ProductSearchItem {
   slug: string;
   title: string;
   featuredImage?: Product["featured_image"];
-  origin?: string;
-  availability?: Product["availability"];
-  snippetHtml?: string;
-  snippetText?: string;
 }
 
 const query = (Astro.url.searchParams.get("q")?.trim() ?? "").slice(0, 120);
-const cursor = Astro.url.searchParams.get("cursor") ?? undefined;
+const requestedPageValue = Number.parseInt(
+  Astro.url.searchParams.get("page") ?? "1",
+  10,
+);
+const requestedPage =
+  Number.isFinite(requestedPageValue) && requestedPageValue > 0
+    ? requestedPageValue
+    : 1;
 
 const normalizeSearchText = (value: string) =>
   value
@@ -54,169 +64,197 @@ const portableTextToPlainText = (value: unknown): string => {
   return "";
 };
 
-const createExcerpt = (text: string, maxLength = 170) => {
-  const compactText = text.replace(/\s+/g, " ").trim();
+const getProductMatchScore = (
+  entry: ProductEntry,
+  normalizedQuery: string,
+  queryTerms: string[],
+) => {
+  const normalizedTitle = normalizeSearchText(entry.data.title);
+  const normalizedContent = normalizeSearchText(
+    [
+      entry.data.title,
+      entry.data.origin,
+      entry.data.availability,
+      ...(entry.data.sizes ?? []),
+      portableTextToPlainText(entry.data.description),
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
 
-  if (compactText.length <= maxLength) return compactText;
-  return `${compactText.slice(0, maxLength).trimEnd()}…`;
+  if (normalizedTitle === normalizedQuery) return 0;
+  if (normalizedTitle.startsWith(normalizedQuery)) return 1;
+  if (normalizedTitle.includes(normalizedQuery)) return 2;
+  if (queryTerms.every((term) => normalizedTitle.includes(term))) return 3;
+  if (normalizedContent.includes(normalizedQuery)) return 4;
+  if (queryTerms.every((term) => normalizedContent.includes(term))) return 5;
+
+  return null;
 };
 
-const toSearchItem = (
-  entry: { id: string; data: Product },
-  result?: SearchResult,
-): ProductSearchItem => ({
+const toSearchItem = (entry: ProductEntry): ProductSearchItem => ({
   slug: entry.id,
   title: entry.data.title,
   featuredImage: entry.data.featured_image,
-  origin: entry.data.origin,
-  availability: entry.data.availability,
-  snippetHtml: result?.snippet,
-  snippetText: result?.snippet
-    ? undefined
-    : createExcerpt(portableTextToPlainText(entry.data.description)),
 });
 
 let products: ProductSearchItem[] = [];
-let nextCursor: string | undefined;
+let totalResults = 0;
+let totalPages = 0;
+let currentPage = requestedPage;
 let hasSearchError = false;
 
 if (query) {
   let ftsResults: SearchResult[] = [];
+  let searchCursor: string | undefined;
 
   try {
-    const response = await search(query, {
-      collections: ["products"],
-      status: "published",
-      limit: SEARCH_LIMIT,
-      cursor,
-    });
+    for (let batch = 0; batch < MAX_BATCHES; batch += 1) {
+      const response = await search(query, {
+        collections: ["products"],
+        status: "published",
+        limit: SEARCH_BATCH_SIZE,
+        cursor: searchCursor,
+      });
 
-    ftsResults = response.items;
-    nextCursor = response.nextCursor;
+      ftsResults.push(...response.items);
+      searchCursor = response.nextCursor;
+
+      if (!searchCursor) break;
+    }
   } catch (error) {
     console.error("Không thể tìm kiếm sản phẩm bằng chỉ mục EmDash:", error);
   }
 
   if (ftsResults.length > 0) {
+    totalResults = ftsResults.length;
+    totalPages = Math.ceil(totalResults / PAGE_SIZE);
+    currentPage = Math.min(requestedPage, totalPages);
+
+    const pageResults = ftsResults.slice(
+      (currentPage - 1) * PAGE_SIZE,
+      currentPage * PAGE_SIZE,
+    );
+
     const detailResults = await Promise.all(
-      ftsResults.map(async (result) => {
-        if (!result.slug) {
-          return {
-            entry: null,
-            result,
-            cacheHint: null,
-            error: undefined,
-          };
-        }
+      pageResults.map(async (result) => {
+        if (!result.slug) return null;
 
         const detail = await getEmDashEntry<"products", Product>(
           "products",
           result.slug,
         );
 
-        return { ...detail, result };
+        Astro.cache.set(detail.cacheHint);
+
+        if (detail.error) {
+          console.error("Không thể tải chi tiết sản phẩm tìm kiếm:", detail.error);
+        }
+
+        return detail.entry;
       }),
     );
 
-    for (const detail of detailResults) {
-      if (detail.cacheHint) Astro.cache.set(detail.cacheHint);
+    products = detailResults
+      .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+      .map(toSearchItem);
+  } else {
+    // Bảo đảm tìm kiếm vẫn hoạt động nếu collection cũ chưa bật chỉ mục FTS.
+    const allProducts: ProductEntry[] = [];
+    let collectionCursor: string | undefined;
 
-      if (detail.error) {
-        console.error("Không thể tải chi tiết sản phẩm tìm kiếm:", detail.error);
+    for (let batch = 0; batch < MAX_BATCHES; batch += 1) {
+      const result = await getEmDashCollection<"products", Product>(
+        "products",
+        {
+          status: "published",
+          orderBy: { published_at: "desc" },
+          limit: COLLECTION_BATCH_SIZE,
+          cursor: collectionCursor,
+        },
+      );
+
+      Astro.cache.set(result.cacheHint);
+
+      if (result.error) {
+        hasSearchError = true;
+        console.error("Không thể tải sản phẩm để tìm kiếm:", result.error);
+        break;
       }
 
-      if (detail.entry) {
-        products.push(toSearchItem(detail.entry, detail.result));
-      }
+      allProducts.push(...result.entries);
+      collectionCursor = result.nextCursor;
+
+      if (!collectionCursor) break;
     }
-  }
 
-  // Dữ liệu cũ có thể chưa được bật chỉ mục FTS trong trang quản trị.
-  // Khi đó vẫn bảo đảm tìm kiếm hoạt động bằng cách lọc danh sách sản phẩm.
-  if (products.length === 0 && !cursor) {
-    const fallback = await getEmDashCollection<"products", Product>(
-      "products",
-      {
-        status: "published",
-        orderBy: { published_at: "desc" },
-        limit: FALLBACK_LIMIT,
-      },
-    );
-
-    Astro.cache.set(fallback.cacheHint);
-
-    if (fallback.error) {
-      hasSearchError = true;
-      console.error("Không thể tải sản phẩm để tìm kiếm:", fallback.error);
-    } else {
+    if (!hasSearchError) {
       const normalizedQuery = normalizeSearchText(query);
+      const queryTerms = normalizedQuery.split(" ").filter(Boolean);
 
-      products = fallback.entries
-        .filter((entry) => {
-          const searchableText = [
-            entry.data.title,
-            entry.data.origin,
-            entry.data.availability,
-            ...(entry.data.sizes ?? []),
-            portableTextToPlainText(entry.data.description),
-          ]
-            .filter(Boolean)
-            .join(" ");
+      const matchingProducts = allProducts
+        .map((entry) => ({
+          entry,
+          score: getProductMatchScore(entry, normalizedQuery, queryTerms),
+        }))
+        .filter(
+          (
+            match,
+          ): match is {
+            entry: ProductEntry;
+            score: number;
+          } => match.score !== null,
+        )
+        .sort(
+          (a, b) =>
+            a.score - b.score ||
+            a.entry.data.title.localeCompare(b.entry.data.title, "vi"),
+        );
 
-          return normalizeSearchText(searchableText).includes(normalizedQuery);
-        })
-        .slice(0, SEARCH_LIMIT)
-        .map((entry) => toSearchItem(entry));
+      totalResults = matchingProducts.length;
+      totalPages = Math.ceil(totalResults / PAGE_SIZE);
+      currentPage = totalPages > 0 ? Math.min(requestedPage, totalPages) : 1;
+      products = matchingProducts
+        .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+        .map(({ entry }) => toSearchItem(entry));
     }
   }
 }
 
-const nextPageUrl = nextCursor
-  ? `/search?${new URLSearchParams({ q: query, cursor: nextCursor })}`
-  : undefined;
+const createPageUrl = (page: number) => {
+  const params = new URLSearchParams({ q: query });
+
+  if (page > 1) params.set("page", String(page));
+
+  return `/search?${params}`;
+};
+
+const previousPageUrl = currentPage > 1 ? createPageUrl(currentPage - 1) : null;
+const nextPageUrl =
+  currentPage < totalPages ? createPageUrl(currentPage + 1) : null;
 ---
 
 <Base
   title={query ? `Tìm kiếm: ${query}` : "Tìm kiếm sản phẩm"}
-  description="Tìm kiếm sản phẩm và giải pháp đóng gói công nghiệp"
+  description="Kết quả tìm kiếm sản phẩm và giải pháp đóng gói công nghiệp"
 >
   <section class="product-search-page" aria-labelledby="product-search-title">
     <header class="product-search-page__header">
-      <p class="product-search-page__eyebrow">Danh mục sản phẩm</p>
-      <h1 id="product-search-title">Tìm kiếm sản phẩm</h1>
-      <p>
-        Nhập tên, xuất xứ, tình trạng hoặc kích thước sản phẩm bạn đang cần.
+      <p class="product-search-page__eyebrow">
+        {query ? "Kết quả tìm kiếm" : "Danh mục sản phẩm"}
       </p>
+      <h1 id="product-search-title">
+        {query ? `Sản phẩm cho “${query}”` : "Tìm kiếm sản phẩm"}
+      </h1>
+      {
+        query && !hasSearchError && (
+          <p aria-live="polite">
+            Tìm thấy <strong>{totalResults}</strong> sản phẩm phù hợp
+            {totalPages > 1 && ` · Trang ${currentPage}/${totalPages}`}
+          </p>
+        )
+      }
     </header>
-
-    <form method="get" action="/search" role="search" class="product-search-form">
-      <label for="search-page-input" class="visually-hidden">
-        Từ khóa tìm kiếm sản phẩm
-      </label>
-      <div class="product-search-form__field">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="7"></circle>
-          <path d="m20 20-3.5-3.5"></path>
-        </svg>
-        <input
-          id="search-page-input"
-          type="search"
-          name="q"
-          value={query}
-          placeholder="Ví dụ: băng dính, màng PE, hạt nhựa..."
-          maxlength="120"
-          autocomplete="off"
-          autofocus
-        />
-      </div>
-      <button type="submit">Tìm kiếm</button>
-    </form>
 
     {
       !query ? (
@@ -232,7 +270,7 @@ const nextPageUrl = nextCursor
             <path d="m20 20-3.5-3.5"></path>
           </svg>
           <h2>Bạn đang tìm sản phẩm nào?</h2>
-          <p>Nhập từ khóa vào ô phía trên để bắt đầu tìm kiếm.</p>
+          <p>Nhập từ khóa vào ô tìm kiếm trên thanh đầu trang.</p>
           <a href="/products">Xem tất cả sản phẩm</a>
         </div>
       ) : hasSearchError ? (
@@ -244,80 +282,55 @@ const nextPageUrl = nextCursor
         <div class="product-search-state" aria-live="polite">
           <h2>Không tìm thấy sản phẩm phù hợp</h2>
           <p>
-            Không có kết quả cho “<strong>{query}</strong>”. Hãy thử từ khóa ngắn hơn
-            hoặc tên nhóm sản phẩm.
+            Không có kết quả cho “<strong>{query}</strong>”. Hãy thử một từ khóa
+            khác trong ô tìm kiếm phía trên.
           </p>
           <a href="/products">Xem tất cả sản phẩm</a>
         </div>
       ) : (
         <div class="product-search-results">
-          <div class="product-search-results__summary" aria-live="polite">
-            <p>
-              Hiển thị <strong>{products.length}</strong> sản phẩm phù hợp với “<strong
-                >{query}</strong
-              >”
-            </p>
-            <a href="/products">Xem tất cả sản phẩm</a>
-          </div>
-
           <ol class="product-search-grid">
             {products.map((product) => (
               <li>
-                <article class="product-search-card">
-                  <a
-                    href={`/products/${product.slug}`}
-                    class="product-search-card__image"
-                    aria-label={`Xem chi tiết ${product.title}`}
-                  >
-                    {product.featuredImage ? (
-                      <Image image={product.featuredImage} />
-                    ) : (
-                      <span>Chưa có hình ảnh</span>
-                    )}
-                  </a>
-
-                  <div class="product-search-card__content">
-                    <h2>
-                      <a href={`/products/${product.slug}`}>{product.title}</a>
-                    </h2>
-
-                    {(product.origin || product.availability) && (
-                      <div class="product-search-card__meta">
-                        {product.origin && <span>Xuất xứ: {product.origin}</span>}
-                        {product.availability && (
-                          <span class="product-search-card__status">
-                            {product.availability}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {product.snippetHtml && (
-                      <p
-                        class="product-search-card__description"
-                        set:html={product.snippetHtml}
-                      />
-                    )}
-                    {!product.snippetHtml && product.snippetText && (
-                      <p class="product-search-card__description">
-                        {product.snippetText}
-                      </p>
-                    )}
-
-                    <a href={`/products/${product.slug}`} class="product-search-card__link">
-                      Xem chi tiết
-                      <span aria-hidden="true">→</span>
-                    </a>
-                  </div>
-                </article>
+                <ProductCard
+                  title={product.title}
+                  href={`/products/${product.slug}`}
+                  featuredImage={product.featuredImage}
+                />
               </li>
             ))}
           </ol>
 
-          {nextPageUrl && (
-            <div class="product-search-results__more">
-              <a href={nextPageUrl}>Xem thêm kết quả</a>
-            </div>
+          {totalPages > 1 && (
+            <nav class="product-search-pagination" aria-label="Phân trang kết quả tìm kiếm">
+              {previousPageUrl ? (
+                <a href={previousPageUrl} rel="prev">
+                  <span aria-hidden="true">←</span>
+                  Trang trước
+                </a>
+              ) : (
+                <span class="product-search-pagination__disabled" aria-disabled="true">
+                  <span aria-hidden="true">←</span>
+                  Trang trước
+                </span>
+              )}
+
+              <span class="product-search-pagination__current">
+                Trang {currentPage} / {totalPages}
+              </span>
+
+              {nextPageUrl ? (
+                <a href={nextPageUrl} rel="next">
+                  Trang sau
+                  <span aria-hidden="true">→</span>
+                </a>
+              ) : (
+                <span class="product-search-pagination__disabled" aria-disabled="true">
+                  Trang sau
+                  <span aria-hidden="true">→</span>
+                </span>
+              )}
+            </nav>
           )}
         </div>
       )
@@ -334,8 +347,9 @@ const nextPageUrl = nextCursor
   }
 
   .product-search-page__header {
-    max-width: 720px;
+    padding-bottom: 20px;
     margin-bottom: 28px;
+    border-bottom: 1px solid var(--color-border-subtle);
   }
 
   .product-search-page__eyebrow {
@@ -350,83 +364,12 @@ const nextPageUrl = nextCursor
   .product-search-page__header h1 {
     margin: 0 0 10px;
     color: var(--navy);
-    font-size: clamp(32px, 5vw, 46px);
-    line-height: 1.15;
+    font-size: clamp(30px, 5vw, 42px);
+    line-height: 1.2;
   }
 
   .product-search-page__header > p:last-child {
     color: var(--color-text-secondary);
-  }
-
-  .product-search-form {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 12px;
-    padding: 14px;
-    margin-bottom: 34px;
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    background: var(--color-bg-subtle);
-  }
-
-  .product-search-form__field {
-    min-width: 0;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 16px;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    color: var(--color-muted);
-    background: #fff;
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
-  }
-
-  .product-search-form__field:focus-within {
-    border-color: var(--color-brand);
-    box-shadow: 0 0 0 3px var(--color-brand-ring);
-  }
-
-  .product-search-form__field svg {
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
-  }
-
-  .product-search-form input {
-    width: 100%;
-    min-width: 0;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    outline: 0;
-    color: var(--color-text);
-    background: transparent;
-    font-size: 16px;
-  }
-
-  .product-search-form button {
-    min-width: 126px;
-    min-height: 52px;
-    padding: 0 24px;
-    border: 0;
-    border-radius: 8px;
-    color: #fff;
-    background: var(--color-brand);
-    font-weight: 700;
-    transition:
-      background 0.2s ease,
-      transform 0.2s ease;
-  }
-
-  .product-search-form button:hover,
-  .product-search-form button:focus-visible {
-    outline: 0;
-    background: var(--color-brand-hover);
-    transform: translateY(-1px);
   }
 
   .product-search-state {
@@ -474,26 +417,9 @@ const nextPageUrl = nextCursor
     border-style: solid;
   }
 
-  .product-search-results__summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding-bottom: 18px;
-    margin-bottom: 24px;
-    border-bottom: 1px solid var(--color-border-subtle);
-    color: var(--color-text-secondary);
-  }
-
-  .product-search-results__summary a {
-    flex: 0 0 auto;
-    color: var(--color-brand);
-    font-weight: 700;
-  }
-
   .product-search-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 292px));
     gap: 24px;
     padding: 0;
     margin: 0;
@@ -504,171 +430,94 @@ const nextPageUrl = nextCursor
     min-width: 0;
   }
 
-  .product-search-card {
-    height: 100%;
-    display: flex;
-    overflow: hidden;
-    flex-direction: column;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 8px 24px rgb(15 23 42 / 6%);
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      transform 0.2s ease;
-  }
-
-  .product-search-card:hover {
-    border-color: #83bce3;
-    box-shadow: 0 14px 30px rgb(15 23 42 / 12%);
-    transform: translateY(-4px);
-  }
-
-  .product-search-card__image {
-    height: 230px;
-    display: flex;
+  .product-search-pagination {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 18px;
     align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    border-bottom: 1px solid var(--color-border-subtle);
-    color: var(--color-muted);
-    background: #f6f8fb;
+    padding-top: 28px;
+    margin-top: 36px;
+    border-top: 1px solid var(--color-border-subtle);
   }
 
-  .product-search-card__image :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-
-  .product-search-card:hover .product-search-card__image :global(img) {
-    transform: scale(1.035);
-  }
-
-  .product-search-card__content {
-    display: flex;
-    padding: 20px;
-    flex: 1;
-    flex-direction: column;
-  }
-
-  .product-search-card h2 {
-    margin: 0;
-    color: var(--color-brand);
-    font-size: 19px;
-    line-height: 1.4;
-  }
-
-  .product-search-card h2 a:hover {
-    color: var(--color-brand-hover);
-  }
-
-  .product-search-card__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    margin-top: 12px;
-    color: var(--color-muted);
-    font-size: 13px;
-  }
-
-  .product-search-card__status {
-    padding: 2px 8px;
-    border-radius: 999px;
-    color: var(--navy);
-    background: var(--color-bg-subtle);
-    font-weight: 600;
-  }
-
-  .product-search-card__description {
-    display: -webkit-box;
-    margin-top: 14px;
-    overflow: hidden;
-    color: var(--color-text-secondary);
-    font-size: 14px;
-    line-height: 1.6;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-  }
-
-  .product-search-card__description :global(mark) {
-    padding: 0 0.12em;
-    border-radius: 2px;
-    color: inherit;
-    background: var(--color-brand-ring);
-  }
-
-  .product-search-card__link {
+  .product-search-pagination a,
+  .product-search-pagination__disabled {
+    width: fit-content;
+    min-height: 42px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-top: auto;
-    padding-top: 18px;
+    padding: 8px 15px;
+    border: 1px solid var(--color-brand);
+    border-radius: 6px;
     color: var(--color-brand);
     font-size: 14px;
     font-weight: 700;
   }
 
-  .product-search-card__link:hover {
-    color: var(--color-brand-hover);
+  .product-search-pagination a:last-child,
+  .product-search-pagination__disabled:last-child {
+    justify-self: end;
   }
 
-  .product-search-results__more {
-    margin-top: 34px;
-    text-align: center;
-  }
-
-  .product-search-results__more a {
-    display: inline-flex;
-    min-height: 46px;
-    padding: 10px 22px;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--color-brand);
-    border-radius: 6px;
-    color: var(--color-brand);
-    font-weight: 700;
-  }
-
-  .product-search-results__more a:hover {
+  .product-search-pagination a:hover,
+  .product-search-pagination a:focus-visible {
+    outline: 0;
     color: #fff;
     background: var(--color-brand);
   }
 
-  @media (max-width: 900px) {
+  .product-search-pagination__disabled {
+    border-color: var(--color-border);
+    color: var(--color-muted);
+    opacity: 0.55;
+  }
+
+  .product-search-pagination__current {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  @media (max-width: 1050px) {
     .product-search-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 292px));
     }
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 780px) {
+    .product-search-grid {
+      grid-template-columns: repeat(2, minmax(0, 292px));
+    }
+  }
+
+  @media (max-width: 560px) {
     .product-search-page {
       width: min(100% - 24px, 1200px);
       padding: 32px 0 52px;
     }
 
-    .product-search-form {
-      grid-template-columns: 1fr;
-      padding: 10px;
-    }
-
-    .product-search-form button {
-      width: 100%;
-    }
-
-    .product-search-results__summary {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
     .product-search-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 292px);
+      justify-content: center;
     }
 
-    .product-search-card__image {
-      height: 220px;
+    .product-search-pagination {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .product-search-pagination__current {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+
+    .product-search-pagination a,
+    .product-search-pagination__disabled {
+      width: 100%;
+      justify-content: center;
+      padding-inline: 10px;
     }
   }
 </style>
