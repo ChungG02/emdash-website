@@ -1,19 +1,13 @@
 ---
 export const prerender = false;
 
-import {
-  getEmDashCollection,
-  getEmDashEntry,
-  search,
-  type SearchResult,
-} from "emdash";
+import { getEmDashCollection } from "emdash";
 import type { Product } from "../../.emdash/types";
 
 import Base from "../layouts/Base.astro";
 import ProductCard from "../modules/products/components/ProductCard.astro";
 
 const PAGE_SIZE = 12;
-const SEARCH_BATCH_SIZE = 100;
 const COLLECTION_BATCH_SIZE = 100;
 const MAX_BATCHES = 100;
 
@@ -47,47 +41,17 @@ const normalizeSearchText = (value: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-const portableTextToPlainText = (value: unknown): string => {
-  if (typeof value === "string") return value;
-
-  if (Array.isArray(value)) {
-    return value.map(portableTextToPlainText).filter(Boolean).join(" ");
-  }
-
-  if (!value || typeof value !== "object") return "";
-
-  const block = value as { text?: unknown; children?: unknown };
-
-  if (typeof block.text === "string") return block.text;
-  if (block.children) return portableTextToPlainText(block.children);
-
-  return "";
-};
-
 const getProductMatchScore = (
   entry: ProductEntry,
   normalizedQuery: string,
   queryTerms: string[],
 ) => {
   const normalizedTitle = normalizeSearchText(entry.data.title);
-  const normalizedContent = normalizeSearchText(
-    [
-      entry.data.title,
-      entry.data.origin,
-      entry.data.availability,
-      ...(entry.data.sizes ?? []),
-      portableTextToPlainText(entry.data.description),
-    ]
-      .filter(Boolean)
-      .join(" "),
-  );
 
   if (normalizedTitle === normalizedQuery) return 0;
   if (normalizedTitle.startsWith(normalizedQuery)) return 1;
   if (normalizedTitle.includes(normalizedQuery)) return 2;
   if (queryTerms.every((term) => normalizedTitle.includes(term))) return 3;
-  if (normalizedContent.includes(normalizedQuery)) return 4;
-  if (queryTerms.every((term) => normalizedContent.includes(term))) return 5;
 
   return null;
 };
@@ -105,119 +69,60 @@ let currentPage = requestedPage;
 let hasSearchError = false;
 
 if (query) {
-  let ftsResults: SearchResult[] = [];
-  let searchCursor: string | undefined;
+  const allProducts: ProductEntry[] = [];
+  let collectionCursor: string | undefined;
 
-  try {
-    for (let batch = 0; batch < MAX_BATCHES; batch += 1) {
-      const response = await search(query, {
-        collections: ["products"],
-        status: "published",
-        limit: SEARCH_BATCH_SIZE,
-        cursor: searchCursor,
-      });
+  for (let batch = 0; batch < MAX_BATCHES; batch += 1) {
+    const result = await getEmDashCollection<"products", Product>("products", {
+      status: "published",
+      orderBy: { published_at: "desc" },
+      limit: COLLECTION_BATCH_SIZE,
+      cursor: collectionCursor,
+    });
 
-      ftsResults.push(...response.items);
-      searchCursor = response.nextCursor;
+    Astro.cache.set(result.cacheHint);
 
-      if (!searchCursor) break;
+    if (result.error) {
+      hasSearchError = true;
+      console.error("Không thể tải sản phẩm để tìm kiếm:", result.error);
+      break;
     }
-  } catch (error) {
-    console.error("Không thể tìm kiếm sản phẩm bằng chỉ mục EmDash:", error);
+
+    allProducts.push(...result.entries);
+    collectionCursor = result.nextCursor;
+
+    if (!collectionCursor) break;
   }
 
-  if (ftsResults.length > 0) {
-    totalResults = ftsResults.length;
-    totalPages = Math.ceil(totalResults / PAGE_SIZE);
-    currentPage = Math.min(requestedPage, totalPages);
+  if (!hasSearchError) {
+    const normalizedQuery = normalizeSearchText(query);
+    const queryTerms = normalizedQuery.split(" ").filter(Boolean);
 
-    const pageResults = ftsResults.slice(
-      (currentPage - 1) * PAGE_SIZE,
-      currentPage * PAGE_SIZE,
-    );
-
-    const detailResults = await Promise.all(
-      pageResults.map(async (result) => {
-        if (!result.slug) return null;
-
-        const detail = await getEmDashEntry<"products", Product>(
-          "products",
-          result.slug,
-        );
-
-        Astro.cache.set(detail.cacheHint);
-
-        if (detail.error) {
-          console.error("Không thể tải chi tiết sản phẩm tìm kiếm:", detail.error);
-        }
-
-        return detail.entry;
-      }),
-    );
-
-    products = detailResults
-      .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
-      .map(toSearchItem);
-  } else {
-    // Bảo đảm tìm kiếm vẫn hoạt động nếu collection cũ chưa bật chỉ mục FTS.
-    const allProducts: ProductEntry[] = [];
-    let collectionCursor: string | undefined;
-
-    for (let batch = 0; batch < MAX_BATCHES; batch += 1) {
-      const result = await getEmDashCollection<"products", Product>(
-        "products",
-        {
-          status: "published",
-          orderBy: { published_at: "desc" },
-          limit: COLLECTION_BATCH_SIZE,
-          cursor: collectionCursor,
-        },
+    const matchingProducts = allProducts
+      .map((entry) => ({
+        entry,
+        score: getProductMatchScore(entry, normalizedQuery, queryTerms),
+      }))
+      .filter(
+        (
+          match,
+        ): match is {
+          entry: ProductEntry;
+          score: number;
+        } => match.score !== null,
+      )
+      .sort(
+        (a, b) =>
+          a.score - b.score ||
+          a.entry.data.title.localeCompare(b.entry.data.title, "vi"),
       );
 
-      Astro.cache.set(result.cacheHint);
-
-      if (result.error) {
-        hasSearchError = true;
-        console.error("Không thể tải sản phẩm để tìm kiếm:", result.error);
-        break;
-      }
-
-      allProducts.push(...result.entries);
-      collectionCursor = result.nextCursor;
-
-      if (!collectionCursor) break;
-    }
-
-    if (!hasSearchError) {
-      const normalizedQuery = normalizeSearchText(query);
-      const queryTerms = normalizedQuery.split(" ").filter(Boolean);
-
-      const matchingProducts = allProducts
-        .map((entry) => ({
-          entry,
-          score: getProductMatchScore(entry, normalizedQuery, queryTerms),
-        }))
-        .filter(
-          (
-            match,
-          ): match is {
-            entry: ProductEntry;
-            score: number;
-          } => match.score !== null,
-        )
-        .sort(
-          (a, b) =>
-            a.score - b.score ||
-            a.entry.data.title.localeCompare(b.entry.data.title, "vi"),
-        );
-
-      totalResults = matchingProducts.length;
-      totalPages = Math.ceil(totalResults / PAGE_SIZE);
-      currentPage = totalPages > 0 ? Math.min(requestedPage, totalPages) : 1;
-      products = matchingProducts
-        .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-        .map(({ entry }) => toSearchItem(entry));
-    }
+    totalResults = matchingProducts.length;
+    totalPages = Math.ceil(totalResults / PAGE_SIZE);
+    currentPage = totalPages > 0 ? Math.min(requestedPage, totalPages) : 1;
+    products = matchingProducts
+      .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+      .map(({ entry }) => toSearchItem(entry));
   }
 }
 
