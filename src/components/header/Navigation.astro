@@ -18,7 +18,15 @@ import { navigationItems } from "../../data/navigation";
 
         {
           navigationItems.map((item, index) => (
-            <li class:list={["nav-item", item.children && "has-dropdown"]}>
+            <li
+              class:list={[
+                "nav-item",
+                item.children && "has-dropdown",
+                item.children &&
+                  item.children.length > 10 &&
+                  "has-mega-dropdown",
+              ]}
+            >
               <a
                 href={item.href}
                 class="nav-link"

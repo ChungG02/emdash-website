@@ -19,7 +19,7 @@ export interface ProductSectionData {
 const screenshot = (url: string) =>
   `https://image.thum.io/get/width/650/crop/650/noanimate/${url}`;
 
-export const productSections: ProductSectionData[] = [
+const productSectionData: ProductSectionData[] = [
   {
     id: "bang-dinh",
     title: "BĂNG DÍNH",
@@ -187,37 +187,39 @@ export const productSections: ProductSectionData[] = [
     ],
   },
   {
-    id: "san-pham-khac",
-    title: "SẢN PHẨM KHÁC",
+    id: "day-dai-pet",
+    title: "DÂY ĐAI PET",
     products: [
       {
-        name: "Dây Đai PP - PET",
+        name: "Dây Đai PET",
         image: "/images/products/day-dai-pp-pet.png",
-        alt: "Dây đai PP và PET",
+        alt: "Dây đai PET",
         fallbackImage: "/images/banners/banner2.png",
         objectPosition: "62% center",
-      },
-      {
-        name: "Túi PE, HDPE, PP, LDPE",
-        image: "/images/products/tuipe-hdpe-pp-ldpe.png",
-        alt: "Túi nhựa PE HDPE PP và LDPE",
-        fallbackImage: "/images/banners/banner2.png",
-        objectPosition: "40% center",
-      },
-      {
-        name: "Thùng Carton",
-        image: "/images/banners/banner2.png",
-        alt: "Thùng carton đóng gói",
-        fallbackImage: "/images/banners/banner2.png",
-        objectPosition: "88% center",
-      },
-      {
-        name: "Ống Giấy - Ống Lõi",
-        image: "/images/products/bang-keo-vai-nhieu-mau.jpg",
-        alt: "Ống giấy và ống lõi",
-        fallbackImage: "/images/banners/banner1.png",
-        objectPosition: "46% center",
       },
     ],
   },
 ];
+
+const productSectionOrder = [
+  "hat-nhua-nguyen-sinh",
+  "mang-pe",
+  "day-dai-pet",
+  "bang-dinh",
+  "thanh-nep-goc",
+] as const;
+
+export const productSections: ProductSectionData[] = productSectionOrder.map(
+  (id, index) => {
+    const section = productSectionData.find((item) => item.id === id);
+
+    if (!section) {
+      throw new Error(`Không tìm thấy nhóm sản phẩm: ${id}`);
+    }
+
+    return {
+      ...section,
+      alternate: index % 2 === 1,
+    };
+  },
+);
