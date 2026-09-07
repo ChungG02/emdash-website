@@ -15,8 +15,6 @@ import CatalogueBanner from "../components/home/CatalogueBanner.astro";
 import NewsSection from "../components/home/NewsSection.astro";
 import ContactSection from "../components/home/ContactSection.astro";
 
-import { newsItems } from "../data/news";
-
 import type { ProductSectionData } from "../modules/types/product.type";
 
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
@@ -37,9 +35,6 @@ const [productResult, postResult, settings] = await Promise.all([
     orderBy: {
       published_at: "desc",
     },
-    where: {
-      category: "tin-tuc",
-    },
     limit: 3,
   }),
 
@@ -48,10 +43,8 @@ const [productResult, postResult, settings] = await Promise.all([
 
 console.log("[Homepage] Số sản phẩm:", productResult.entries.length);
 
-if (Astro.cache?.enabled) {
-  Astro.cache.set(productResult.cacheHint);
-  Astro.cache.set(postResult.cacheHint);
-}
+Astro.cache.set(productResult.cacheHint);
+Astro.cache.set(postResult.cacheHint);
 
 if (productResult.error) {
   console.error("Không thể tải sản phẩm từ EmDash:", productResult.error);
@@ -107,29 +100,18 @@ const displaySections = Array.from(sectionsBySlug.values()).map(
   }),
 );
 
-const cmsNews = postResult.entries.map((post, index) => {
-  const fallback = newsItems[index % newsItems.length];
-
-  return {
-    title: post.data.title,
-
-    description: post.data.excerpt ?? fallback.description,
-
-    image: post.data.featured_image ?? fallback.image,
-
-    fallbackImage: fallback.fallbackImage,
-
-    alt: post.data.featured_image?.alt ?? post.data.title,
-
-    href: `/posts/${post.id}`,
-
-    date: post.data.publishedAt?.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }),
-  };
-});
+const cmsNews = postResult.entries.map((post) => ({
+  title: post.data.title,
+  description: post.data.excerpt,
+  image: post.data.featured_image,
+  alt: post.data.featured_image?.alt ?? post.data.title,
+  href: `/posts/${post.id}`,
+  date: post.data.publishedAt?.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }),
+}));
 
 const { siteTitle, siteTagline } = resolveBlogSiteIdentity(settings);
 ---
@@ -153,7 +135,7 @@ const { siteTitle, siteTagline } = resolveBlogSiteIdentity(settings);
 
   <CatalogueBanner />
 
-  <NewsSection items={cmsNews.length > 0 ? cmsNews : newsItems} />
+  <NewsSection items={cmsNews} />
 
   <ContactSection />
 </Base>
