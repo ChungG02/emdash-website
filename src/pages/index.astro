@@ -38,7 +38,6 @@ const [productResult, postResult, settings] = await Promise.all([
   getSiteSettings(),
 ]);
 
-console.log("[Homepage] Số sản phẩm:", productResult.entries.length);
 
 Astro.cache.set(productResult.cacheHint);
 Astro.cache.set(postResult.cacheHint);
