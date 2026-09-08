@@ -5,6 +5,8 @@ export const siteConfig = {
 
   phone: "096 519 08 88",
   phoneHref: "0965190888",
+  secondaryPhone: "097 7818 818",
+  secondaryPhoneHref: "0977818818",
   email: "info@thaisonplastic.com",
   businessRegistrationNumber: "0111184458 do Sở Kế hoạch & Đầu Tư TP Hà Nội cấp lần đầu ngày 19/08/2025",
   address: "Đường Đồng Vàng - Xã Tây Phương - TP Hà Nội",
