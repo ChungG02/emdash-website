@@ -10,9 +10,7 @@ interface Props {
 
 const { section } = Astro.props;
 
-const isCarousel =
-  section.id === "bang-dinh" &&
-  section.products.length > 4;
+const isCarousel = section.products.length > 4;
 ---
 
 <section
