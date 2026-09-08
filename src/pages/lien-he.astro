@@ -1,14 +1,14 @@
 ---
 import ContactInformation from "../components/about/ContactInformation.astro";
 import Container from "../components/common/Container.astro";
-import PageHeading from "../components/common/PageHeading.astro";
-import LocationCard from "../components/contact/LocationCard.astro";
+// import PageHeading from "../components/common/PageHeading.astro";
+// import LocationCard from "../components/contact/LocationCard.astro";
 import MapSection from "../components/contact/MapSection.astro";
 import SocialChannels from "../components/contact/SocialChannels.astro";
 import BaseLayout from "../layouts/Base.astro";
 
 import {
-  companyLocations,
+  // companyLocations,
   contactSummary,
   mapLocations,
   socialMedia,
@@ -33,7 +33,7 @@ import {
         <ContactInformation items={contactSummary} title="Thông tin công ty" />
       </div>
 
-      <section class="mt-12" aria-labelledby="company-locations-title">
+      <!-- <section class="mt-12" aria-labelledby="company-locations-title"> -->
         <!-- <h2
           id="company-locations-title"
           class="mb-6 text-2xl font-bold text-slate-800"
@@ -41,18 +41,18 @@ import {
           Văn phòng và nhà máy
         </h2> -->
 
-        <div class="grid gap-x-12 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
+        <!-- <div class="grid gap-x-12 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
           {
             companyLocations.map((location) => (
               <LocationCard location={location} />
             ))
           }
         </div>
-      </section>
+      </section> -->
 
       <div class="mt-12 grid items-start gap-10 lg:grid-cols-2">
-        <SocialChannels facebookPageUrl={socialMedia.facebookPageUrl} />
         <MapSection locations={mapLocations} />
+        <SocialChannels facebookPageUrl={socialMedia.facebookPageUrl} />
       </div>
     </div>
   </Container>
