@@ -1,9 +1,12 @@
 ---
 import Container from "../common/Container.astro";
-import { isNavigationItemActive, navigationItems } from "../../data/navigation";
+import { getNavigationItems, isNavigationItemActive } from "../../data/navigation";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
 
 const currentPath = Astro.url.pathname;
+const t = useTranslations(getUiLocale(Astro.cookies));
+const navigationItems = getNavigationItems(t);
 
 const isActive = (href: string) => isNavigationItemActive(currentPath, href);
 ---
@@ -26,7 +29,7 @@ const isActive = (href: string) => isNavigationItemActive(currentPath, href);
         <path d="M4 18h16"></path>
       </svg>
 
-      Danh mục
+      {t("nav.menu")}
     </span>
 
     <svg
@@ -56,7 +59,7 @@ const isActive = (href: string) => isNavigationItemActive(currentPath, href);
               currentPath === "/" && "text-[#1477b9]",
             ]}
           >
-            Trang chủ
+            {t("common.home")}
           </a>
         </li>
 
@@ -94,7 +97,7 @@ const isActive = (href: string) => isNavigationItemActive(currentPath, href);
                         href={item.href}
                         class="block px-4 py-2.5 text-sm font-semibold text-[#1477b9]"
                       >
-                        Xem tất cả {item.label}
+                        {t("common.viewAllNamed", { name: item.label })}
                       </a>
                     </li>
 
@@ -135,7 +138,7 @@ const isActive = (href: string) => isNavigationItemActive(currentPath, href);
       <div
         class="mt-4 flex items-center justify-between border-t border-slate-200 pt-4"
       >
-        <span class="text-sm font-semibold text-slate-600">Ngôn ngữ</span>
+        <span class="text-sm font-semibold text-slate-600">{t("nav.language")}</span>
         <LanguageSwitcher />
       </div>
     </Container>

@@ -1,12 +1,15 @@
 ---
 import Base from "../layouts/Base.astro";
+import { getUiLocale, useTranslations } from "../i18n/ui";
+
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
-<Base title="Page not found">
+<Base title={t("notFound.title")}>
 	<div class="not-found">
 		<h1>404</h1>
-		<p>The page you're looking for doesn't exist.</p>
-		<a href="/">Go back home</a>
+		<p>{t("notFound.description")}</p>
+		<a href="/">{t("notFound.backHome")}</a>
 	</div>
 </Base>
 

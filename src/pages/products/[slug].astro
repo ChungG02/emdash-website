@@ -5,6 +5,9 @@ import ProductGallery from "../../modules/products/components/ProductGallery.ast
 import Base from "../../layouts/Base.astro";
 import ProductDescription from "../../modules/products/components/ProductDescription.astro";
 import ProductSpecifications from "../../modules/products/components/ProductSpecifications.astro";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
+
+const t = useTranslations(getUiLocale(Astro.cookies));
 
 const slug = decodeSlug(Astro.params.slug); // Astro lấy slug trên URL
 
@@ -37,10 +40,10 @@ if (Astro.cache?.enabled) {
 
 <Base
   title={product.data.title}
-  description={`Thông tin sản phẩm ${product.data.title}`}
+  description={t("products.metaDescription", { title: product.data.title })}
 >
   <main class="product-detail">
-    <a href="/" class="back-link"> ← Quay lại danh sách sản phẩm </a>
+    <a href="/" class="back-link">← {t("products.back")}</a>
 
     <section class="product-detail__main">
       <ProductGallery
@@ -50,7 +53,7 @@ if (Astro.cache?.enabled) {
       />
 
       <div class="product-detail__information">
-        <p class="product-detail__label">Sản phẩm</p>
+        <p class="product-detail__label">{t("products.product")}</p>
 
         <h1 class="product-detail__title">
           {product.data.title}

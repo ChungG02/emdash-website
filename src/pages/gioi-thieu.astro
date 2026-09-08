@@ -3,7 +3,6 @@ import CompanyOverview from "../components/about/CompanyOverview.astro";
 import Container from "../components/common/Container.astro";
 import PageHeading from "../components/common/PageHeading.astro";
 import BaseLayout from "../layouts/Base.astro";
-import ContactInformation from "../components/about/ContactInformation.astro";
 
 import { companyProfile } from "../data/companyProfile";
 ---
@@ -22,8 +21,8 @@ import { companyProfile } from "../data/companyProfile";
 
       <div class="mt-10">
         <h2
-          class="mb-7 text-2xl font-bold uppercase text-[#1477b9]
-                 sm:text-3xl"
+          class="mb-7 text-xl font-bold uppercase text-[#1477b9]
+                 sm:text-2xl"
         >
           {companyProfile.name}
         </h2>
@@ -42,10 +41,74 @@ import { companyProfile } from "../data/companyProfile";
           Về chúng tôi
         </h2>
 
-        <div class="space-y-5 text-base leading-7 text-slate-700">
+        <div class="space-y-10 text-base leading-7 text-slate-700">
           {
-            companyProfile.introduction.map((paragraph) => (
-              <p>{paragraph}</p>
+            companyProfile.introduction.map((section) => (
+              <section aria-labelledby={section.title ? section.id : undefined}>
+                {section.title && (
+                  <h3
+                    id={section.id}
+                    class:list={[
+                      "text-lg font-bold text-[#1477b9] sm:text-xl",
+                      section.details ? "mb-6" : "mb-4",
+                    ]}
+                  >
+                    {section.title}
+                  </h3>
+                )}
+
+                {section.details && (
+                  <dl class="mb-5 space-y-3 border-l-4 border-[#1477b9] bg-slate-50 px-5 py-4">
+                    {section.details.map((item) => (
+                      <div class="grid gap-1 sm:grid-cols-[170px_minmax(0,1fr)] sm:gap-5">
+                        <dt class="font-semibold text-slate-900">{item.label}:</dt>
+                        <dd
+                          class:list={[
+                            "m-0",
+                            { "font-bold text-slate-900": item.emphasizeValue },
+                          ]}
+                        >
+                          {item.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+
+                {section.highlight && (
+                  <p class="mb-4 font-bold text-slate-900">{section.highlight}</p>
+                )}
+
+                {section.paragraphs?.map((paragraph) => (
+                  <p class="mt-4 first:mt-0">
+                    {typeof paragraph === "string" ? (
+                      paragraph
+                    ) : (
+                      <>
+                        {paragraph.before}
+                        <strong class="font-bold text-slate-900">
+                          {paragraph.emphasis}
+                        </strong>
+                        {paragraph.after}
+                      </>
+                    )}
+                  </p>
+                ))}
+
+                {section.bullets && (
+                  <ul class="mt-4 space-y-2.5">
+                    {section.bullets.map((item) => (
+                      <li class="flex gap-3">
+                        <span
+                          class="mt-[0.65rem] size-1.5 shrink-0 rounded-full bg-[#1477b9]"
+                          aria-hidden="true"
+                        />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
             ))
           }
         </div>
@@ -126,9 +189,6 @@ import { companyProfile } from "../data/companyProfile";
         </ul>
       </section>
 
-      <div class="mt-10">
-  <ContactInformation items={companyProfile.contact} />
-</div>
     </article>
   </Container>
 </BaseLayout>

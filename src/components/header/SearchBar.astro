@@ -1,4 +1,6 @@
 ---
+import { getUiLocale, useTranslations } from "../../i18n/ui";
+
 interface Props {
   id?: string;
   formId?: string;
@@ -13,9 +15,12 @@ const {
   formId = "site-search-form",
   action = "/search",
   inputName = "q",
-  placeholder = "Tìm kiếm sản phẩm...",
+  placeholder,
   value,
 } = Astro.props;
+
+const t = useTranslations(getUiLocale(Astro.cookies));
+const resolvedPlaceholder = placeholder ?? t("search.placeholder");
 
 const isSearchPage = Astro.url.pathname.replace(/\/+$/, "") === "/search";
 const currentValue = (
@@ -33,19 +38,19 @@ const currentValue = (
   class="search-box w-full"
   data-site-search
 >
-  <label for={id} class="visually-hidden"> Tìm kiếm sản phẩm </label>
+  <label for={id} class="visually-hidden">{t("search.label")}</label>
 
   <input
     id={id}
     type="search"
     name={inputName}
     value={currentValue}
-    placeholder={placeholder}
+    placeholder={resolvedPlaceholder}
     maxlength="120"
     autocomplete="off"
   />
 
-  <button type="submit" aria-label="Tìm kiếm">
+  <button type="submit" aria-label={t("search.submit")}>
     <svg
       viewBox="0 0 24 24"
       fill="none"

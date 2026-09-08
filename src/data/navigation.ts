@@ -1,79 +1,99 @@
+import type { UiMessageKey } from "../i18n/ui";
+
 export interface NavigationItem {
   label: string;
   href: string;
   children?: NavigationItem[];
 }
 
-export const navigationItems: NavigationItem[] = [
+interface NavigationDefinition {
+  labelKey: UiMessageKey;
+  href: string;
+  children?: NavigationDefinition[];
+}
+
+type Translate = (key: UiMessageKey) => string;
+
+const navigationDefinitions: NavigationDefinition[] = [
   {
-    label: "Hạt nhựa nguyên sinh",
+    labelKey: "nav.virginResin",
     href: "/#hat-nhua-nguyen-sinh",
     children: [
-      { label: "Hạt nhựa PE", href: "/#hat-nhua-nguyen-sinh" },
-      { label: "Hạt nhựa PP", href: "/#hat-nhua-nguyen-sinh" },
-      { label: "Hạt nhựa PVC", href: "/#hat-nhua-nguyen-sinh" },
-      { label: "Hạt nhựa PET", href: "/#hat-nhua-nguyen-sinh" },
+      { labelKey: "nav.peResin", href: "/#hat-nhua-nguyen-sinh" },
+      { labelKey: "nav.ppResin", href: "/#hat-nhua-nguyen-sinh" },
+      { labelKey: "nav.pvcResin", href: "/#hat-nhua-nguyen-sinh" },
+      { labelKey: "nav.petResin", href: "/#hat-nhua-nguyen-sinh" },
     ],
   },
   {
-    label: "Màng quấn PE",
+    labelKey: "nav.peFilm",
     href: "/#mang-pe",
     children: [
-      { label: "Màng PE quấn tay", href: "/#mang-pe" },
-      { label: "Màng PE quấn máy", href: "/#mang-pe" },
-      { label: "Màng PE quấn gạch", href: "/#mang-pe" },
-      { label: "Màng bọc PE trong suốt", href: "/#mang-pe" },
-      { label: "Màng bọc PE màu", href: "/#mang-pe" },
-      { label: "Sản xuất theo yêu cầu", href: "/#mang-pe" },
+      { labelKey: "nav.handWrapFilm", href: "/#mang-pe" },
+      { labelKey: "nav.machineWrapFilm", href: "/#mang-pe" },
+      { labelKey: "nav.brickWrapFilm", href: "/#mang-pe" },
+      { labelKey: "nav.clearPeFilm", href: "/#mang-pe" },
+      { labelKey: "nav.coloredPeFilm", href: "/#mang-pe" },
+      { labelKey: "nav.customProduction", href: "/#mang-pe" },
     ],
   },
   {
-    label: "Dây đai PET",
+    labelKey: "nav.petStrap",
     href: "/#day-dai-pet",
     children: [
-      { label: "Dây đai nguyên sinh", href: "/#day-dai-pet" },
-      { label: "Dây đai PET", href: "/#day-dai-pet" },
-      { label: "Dây đai nhựa PP", href: "/#day-dai-pet" },
+      { labelKey: "nav.virginStrap", href: "/#day-dai-pet" },
+      { labelKey: "nav.petStrap", href: "/#day-dai-pet" },
+      { labelKey: "nav.ppStrap", href: "/#day-dai-pet" },
     ],
   },
   {
-    label: "Băng dính",
+    labelKey: "nav.adhesiveTape",
     href: "/#bang-dinh",
     children: [
-      { label: "Băng dính trong", href: "/#bang-dinh" },
-      { label: "Băng dính dàn thùng carton", href: "/#bang-dinh" },
-      { label: "Băng dính cách điện", href: "/#bang-dinh" },
-      { label: "Băng dính vải", href: "/#bang-dinh" },
-      { label: "Băng dính giấy", href: "/#bang-dinh" },
-      { label: "Băng keo 2 mặt", href: "/#bang-dinh" },
-      { label: "Băng dính bằng bạc", href: "/#bang-dinh" },
-      { label: "Băng dính y tế", href: "/#bang-dinh" },
-      { label: "Băng dính sợi thuỷ tinh", href: "/#bang-dinh" },
+      { labelKey: "nav.clearTape", href: "/#bang-dinh" },
+      { labelKey: "nav.cartonTape", href: "/#bang-dinh" },
+      { labelKey: "nav.electricalTape", href: "/#bang-dinh" },
+      { labelKey: "nav.clothTape", href: "/#bang-dinh" },
+      { labelKey: "nav.paperTape", href: "/#bang-dinh" },
+      { labelKey: "nav.doubleSidedTape", href: "/#bang-dinh" },
+      { labelKey: "nav.foilTape", href: "/#bang-dinh" },
+      { labelKey: "nav.medicalTape", href: "/#bang-dinh" },
+      { labelKey: "nav.fiberglassTape", href: "/#bang-dinh" },
     ],
   },
   {
-    label: "Sản phẩm khác",
+    labelKey: "nav.otherProducts",
     href: "/#san-pham-khac",
     children: [
-      { label: "Thanh nẹp", href: "/#thanh-nep" },
-      { label: "Cuộn xốp nổ", href: "/#cuon-xop-no" },
+      { labelKey: "nav.edgeProtector", href: "/#thanh-nep" },
+      { labelKey: "nav.bubbleWrap", href: "/#cuon-xop-no" },
       // { label: "Thanh nẹp đóng pallet", href: "/#thanh-nep-goc" },
       // { label: "Nẹp góc công nghiệp", href: "/#thanh-nep-goc" },
     ],
   },
   { 
-    label: "Tin tức", 
+    labelKey: "nav.news",
     href: "/#tin-tuc",
     children: [
-      { label: "Giới thiệu về chúng tôi", href: "/gioi-thieu" },
-      { label: "Tin xuất khẩu", href: "/posts/tin-xuat-khau" },
-      { label: "Thông tin sản xuất", href: "/posts/thong-tin-san-xuat" },
-      { label: "Tuyển dụng", href: "/posts/tuyen-dung" },
+      { labelKey: "nav.aboutUs", href: "/gioi-thieu" },
+      { labelKey: "nav.exportNews", href: "/posts/tin-xuat-khau" },
+      { labelKey: "nav.productionInfo", href: "/posts/thong-tin-san-xuat" },
+      { labelKey: "nav.recruitment", href: "/posts/tuyen-dung" },
     ],
   },
   // { label: "Sản phẩm khác", href: "#catalogue" },
-  { label: "Liên hệ", href: "/lien-he" },
+  { labelKey: "nav.contact", href: "/lien-he" },
 ];
+
+export const getNavigationItems = (translate: Translate): NavigationItem[] =>
+  navigationDefinitions.map((item) => ({
+    label: translate(item.labelKey),
+    href: item.href,
+    children: item.children?.map((child) => ({
+      label: translate(child.labelKey),
+      href: child.href,
+    })),
+  }));
 
 export const isNavigationItemActive = (
   currentPath: string,

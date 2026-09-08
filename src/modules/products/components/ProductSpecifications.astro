@@ -1,5 +1,6 @@
 ---
 import { contactInfo } from "../../../data/contact";
+import { getUiLocale, useTranslations } from "../../../i18n/ui";
 
 interface Props {
   origin?: string;
@@ -8,13 +9,14 @@ interface Props {
 }
 
 const { origin, availability, sizes = [] } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
 <div class="product-specifications">
   {
     origin && (
       <p class="product-specifications__row">
-        <strong>Xuất xứ:</strong>
+        <strong>{t("products.origin")}:</strong>
         <span>{origin}</span>
       </p>
     )
@@ -23,7 +25,7 @@ const { origin, availability, sizes = [] } = Astro.props;
   {
     availability && (
       <p class="product-specifications__row">
-        <strong>Tình trạng:</strong>
+        <strong>{t("products.availability")}:</strong>
         <span class="product-specifications__availability">{availability}</span>
       </p>
     )
@@ -61,7 +63,7 @@ const { origin, availability, sizes = [] } = Astro.props;
     </span> -->
 
   <span class="product-hotline__content">
-    <span class="product-hotline__label"> Báo Giá Liên Hệ </span>
+    <span class="product-hotline__label">{t("products.contactForPrice")}</span>
     <strong class="product-hotline__number">
       {contactInfo.hotline.display}
     </strong>
@@ -72,7 +74,7 @@ const { origin, availability, sizes = [] } = Astro.props;
   {
     sizes.length > 0 && (
       <div class="product-specifications__sizes">
-        <p class="product-specifications__sizes-title">Kích thước</p>
+        <p class="product-specifications__sizes-title">{t("products.sizes")}</p>
 
         <div class="product-specifications__size-list">
           {sizes.map((size) => (

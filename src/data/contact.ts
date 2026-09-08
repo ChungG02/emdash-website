@@ -2,6 +2,11 @@ export interface ContactInformationItem {
   label: string;
   value: string;
   href?: string;
+  additionalLinks?: {
+    value: string;
+    href: string;
+  }[];
+  noWrap?: boolean;
 }
 
 export interface CompanyLocation {
@@ -41,6 +46,10 @@ export const contactSummary: ContactInformationItem[] = [
       "CÔNG TY TNHH SẢN XUẤT THƯƠNG MẠI VÀ XUẤT NHẬP KHẨU THÁI SƠN",
   },
   {
+    label: "Trụ sở chính",
+    value: "Thôn Vĩnh Lộc 2, xã Tây Phương, TP Hà Nội, Việt Nam",
+  },
+  {
     label: "Số đăng ký kinh doanh",
     value:
       "0111184458 – Sở Kế hoạch & Đầu Tư TP Hà Nội cấp lần đầu ngày 19/08/2025",
@@ -53,6 +62,13 @@ export const contactSummary: ContactInformationItem[] = [
     label: "Hotline",
     value: "0965 190 888",
     href: "tel:0965190888",
+    additionalLinks: [
+      {
+        value: "097 7818 818",
+        href: "tel:0977818818",
+      },
+    ],
+    noWrap: true,
   },
   {
     label: "Email",

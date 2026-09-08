@@ -1,24 +1,24 @@
 ---
 import Container from "../common/Container.astro";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
+
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
 <section class="catalogue-banner" id="catalogue">
   <Container class="catalogue-inner">
     <div>
-      <h2>Catalogue sản phẩm Thái Sơn Plastic</h2>
-      <p>
-        Nhận catalogue tổng hợp để tham khảo nhanh các nhóm vật tư và giải pháp
-        đóng gói dành cho doanh nghiệp.
-      </p>
+      <h2>{t("catalogue.title")}</h2>
+      <p>{t("catalogue.description")}</p>
     </div>
 
     <a
       href="/downloads/ho-so-nang-luc-cong-ty-nhua-thai-son.docx"
       class="product-action catalogue-action"
       download="ho-so-nang-luc-cong-ty-nhua-thai-son.docx"
-      aria-label="Tải catalogue sản phẩm Thái Sơn Plastic"
+      aria-label={t("catalogue.downloadLabel")}
     >
-      Nhận catalogue
+      {t("catalogue.download")}
     </a>
   </Container>
 </section>
