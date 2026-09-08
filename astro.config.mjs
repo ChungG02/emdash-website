@@ -27,7 +27,7 @@ export default defineConfig({
         cloudflareEmail({
           binding: "EMAIL",
           from: {
-            email: "website@thaisonplastic.com",
+            email: "website@chungdev.website",
             name: "Thai Son Plastic Website",
           },
           replyTo: "info@thaisonplastic.com",

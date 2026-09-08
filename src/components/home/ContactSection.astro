@@ -15,7 +15,29 @@ import { siteConfig } from "../../data/site";
       </p>
     </div>
 
-    <form class="contact-form" data-contact-form novalidate>
+    <form
+      class="contact-form"
+      method="POST"
+      action="/_emdash/api/plugins/emdash-forms/submit"
+      data-contact-form
+      novalidate
+    >
+      <input type="hidden" name="formId" value="contact-form" />
+
+      <div
+        aria-hidden="true"
+        style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;"
+      >
+        <label for="contact-website">Website</label>
+        <input
+          id="contact-website"
+          name="_hp"
+          type="text"
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </div>
+
       <div class="form-grid">
         <div class="field">
           <label class="visually-hidden" for="contact-name">Họ và tên</label>
@@ -102,15 +124,41 @@ import { siteConfig } from "../../data/site";
         <button class="submit-button" type="submit">Gửi yêu cầu</button>
       </div>
 
-      <p class="form-demo-note">
-        Form đang ở chế độ giao diện demo, chưa kết nối email hoặc cơ sở dữ
-        liệu.
-      </p>
+      <p
+        class="form-demo-note"
+        data-contact-form-status
+        role="status"
+        aria-live="polite"
+      ></p>
     </form>
   </Container>
 </section>
 
 <script>
+  interface SubmitResult {
+    success?: boolean;
+    message?: string;
+    redirect?: string;
+    errors?: Array<{ field?: string; message?: string }>;
+  }
+
+  const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value);
+
+  const parseSubmitResult = (body: unknown): SubmitResult => {
+    if (!isRecord(body)) return {};
+    return isRecord(body.data)
+      ? (body.data as SubmitResult)
+      : (body as SubmitResult);
+  };
+
+  const getResponseError = (body: unknown): string | undefined => {
+    if (!isRecord(body) || !isRecord(body.error)) return undefined;
+    return typeof body.error.message === "string"
+      ? body.error.message
+      : undefined;
+  };
+
   const notify = (message: string) => {
     document.dispatchEvent(
       new CustomEvent("site:toast", { detail: { message } }),
@@ -123,9 +171,20 @@ import { siteConfig } from "../../data/site";
 
     const phone = form.querySelector<HTMLInputElement>("[name='phone']");
     const message = form.querySelector<HTMLTextAreaElement>("[name='message']");
+    const submitButton = form.querySelector<HTMLButtonElement>(
+      "button[type='submit']",
+    );
+    const status = form.querySelector<HTMLElement>(
+      "[data-contact-form-status]",
+    );
 
-    form.addEventListener("submit", (event) => {
+    const setStatus = (text: string) => {
+      if (status) status.textContent = text;
+    };
+
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      setStatus("");
 
       if (!form.reportValidity()) {
         notify("Vui lòng nhập đầy đủ thông tin bắt buộc.");
@@ -139,10 +198,85 @@ import { siteConfig } from "../../data/site";
         return;
       }
 
-      notify(
-        "Thông tin đã được kiểm tra. Vui lòng gọi hotline để được hỗ trợ ngay; form demo chưa gửi dữ liệu.",
-      );
-      form.reset();
+      const originalButtonLabel =
+        submitButton?.textContent ?? "Gửi yêu cầu";
+
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Đang gửi...";
+      }
+      form.setAttribute("aria-busy", "true");
+      setStatus("Đang gửi thông tin...");
+
+      try {
+        const formData = new FormData(form);
+        const formId = String(formData.get("formId") ?? "contact-form");
+        const data: Record<string, unknown> = {};
+
+        for (const [key, value] of formData) {
+          if (key === "formId" || typeof value !== "string") continue;
+
+          const existing = data[key];
+          if (existing === undefined) {
+            data[key] = value;
+          } else if (Array.isArray(existing)) {
+            existing.push(value);
+          } else {
+            data[key] = [existing, value];
+          }
+        }
+
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ formId, data }),
+        });
+
+        const responseBody: unknown = await response.json().catch(() => null);
+        const result = parseSubmitResult(responseBody);
+
+        if (!response.ok || result.success !== true) {
+          const errorMessage =
+            result.errors?.find((error) => error.message)?.message ??
+            result.message ??
+            getResponseError(responseBody) ??
+            "Không thể gửi thông tin. Vui lòng thử lại.";
+
+          setStatus(errorMessage);
+          notify(errorMessage);
+          return;
+        }
+
+        const successMessage =
+          result.message ??
+          "Thông tin đã được gửi thành công. Chúng tôi sẽ sớm liên hệ lại.";
+
+        setStatus(successMessage);
+        notify(successMessage);
+        form.reset();
+
+        if (result.redirect) {
+          const redirectUrl = new URL(result.redirect, window.location.href);
+          if (["http:", "https:"].includes(redirectUrl.protocol)) {
+            window.location.assign(redirectUrl.href);
+          }
+        }
+      } catch (error) {
+        console.error("[contact-form] Submission failed", error);
+        const errorMessage =
+          "Không thể kết nối máy chủ. Vui lòng thử lại sau.";
+        setStatus(errorMessage);
+        notify(errorMessage);
+      } finally {
+        form.removeAttribute("aria-busy");
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = originalButtonLabel;
+        }
+      }
     });
 
     document

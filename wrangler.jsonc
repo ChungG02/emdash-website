@@ -32,7 +32,7 @@
     {
       "name": "EMAIL",
       "destination_address": "info@thaisonplastic.com",
-      "allowed_sender_addresses": ["website@thaisonplastic.com"],
+      "allowed_sender_addresses": ["website@chungdev.website"],
       "remote": true
     }
   ],

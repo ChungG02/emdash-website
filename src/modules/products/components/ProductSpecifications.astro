@@ -1,6 +1,4 @@
 ---
-import { contactInfo } from "../../../data/contact";
-
 interface Props {
   origin?: string;
   availability?: string;
@@ -29,21 +27,6 @@ const { origin, availability, sizes = [] } = Astro.props;
     )
   }
 
-  <span class="product-hotline__content">
-    <a
-      href="#lien-he"
-      class="product-hotline__label"
-      aria-label="Cuộn đến biểu mẫu đăng ký thông tin liên hệ"
-    >
-      Báo Giá Liên Hệ
-    </a>
-    <strong class="product-hotline__number">
-      {contactInfo.hotline.display}
-    </strong>
-    <strong class="product-hotline__number"> 097 781 88 18 </strong>
-  </span>
-  <!-- </a> -->
-
   {
     sizes.length > 0 && (
       <div class="product-specifications__sizes">
@@ -57,6 +40,16 @@ const { origin, availability, sizes = [] } = Astro.props;
       </div>
     )
   }
+
+  <div class="product-specifications__quote">
+    <a
+      href="#lien-he"
+      class="product-specifications__quote-button"
+      aria-label="Cuộn đến biểu mẫu đăng ký thông tin liên hệ"
+    >
+      Báo giá liên hệ
+    </a>
+  </div>
 </div>
 
 <style>
@@ -113,81 +106,33 @@ const { origin, availability, sizes = [] } = Astro.props;
     font-weight: 600;
   }
 
-  .product-hotline {
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-    margin: 6px 0 28px;
-    color: inherit;
-    text-decoration: none;
+  .product-specifications__quote {
+    margin-top: 24px;
   }
 
-  .product-hotline__icon {
-    display: flex;
-    width: 52px;
-    height: 52px;
-    flex-shrink: 0;
+  .product-specifications__quote-button {
+    display: inline-flex;
+    min-height: 48px;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    background: #eff8ff;
-    color: #1477b9;
+    padding: 12px 24px;
+    border-radius: 6px;
+    background: #1477b9;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-decoration: none;
     transition:
       background-color 0.2s ease,
       transform 0.2s ease;
   }
 
-  .product-hotline__icon svg {
-    width: 25px;
-    height: 25px;
-  }
-
-  .product-hotline__content {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .product-hotline__label {
-    width: fit-content;
-    color: #6b7280;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.2;
-    text-decoration: underline;
-    text-decoration-color: transparent;
-    text-underline-offset: 3px;
-    transition:
-      color 0.2s ease,
-      text-decoration-color 0.2s ease;
-  }
-
-  .product-hotline__label:hover,
-  .product-hotline__label:focus-visible {
-    outline: 0;
-    color: #1477b9;
-    text-decoration-color: currentColor;
-  }
-
-  .product-hotline__number {
-    color: #10466e;
-    font-size: 24px;
-    font-weight: 800;
-    line-height: 1.3;
-    letter-spacing: 0.5px;
-  }
-
-  .product-hotline:hover .product-hotline__icon {
-    background: #dbeeff;
-    transform: scale(1.05);
-  }
-
-  .product-hotline:hover .product-hotline__number {
-    color: #1477b9;
-  }
-
-  @media (max-width: 600px) {
-    .product-hotline__number {
-      font-size: 21px;
-    }
+  .product-specifications__quote-button:hover,
+  .product-specifications__quote-button:focus-visible {
+    outline: 3px solid rgba(20, 119, 185, 0.25);
+    outline-offset: 3px;
+    background: #10466e;
+    transform: translateY(-1px);
   }
 </style>
