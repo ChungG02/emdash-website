@@ -5,6 +5,7 @@ interface Props {
   action?: string;
   inputName?: string;
   placeholder?: string;
+  value?: string;
 }
 
 const {
@@ -13,7 +14,15 @@ const {
   action = "/search",
   inputName = "q",
   placeholder = "Tìm kiếm sản phẩm...",
+  value,
 } = Astro.props;
+
+const isSearchPage = Astro.url.pathname.replace(/\/+$/, "") === "/search";
+const currentValue = (
+  value ??
+  (isSearchPage ? Astro.url.searchParams.get(inputName) : "") ??
+  ""
+).slice(0, 120);
 ---
 
 <form
@@ -26,7 +35,15 @@ const {
 >
   <label for={id} class="visually-hidden"> Tìm kiếm sản phẩm </label>
 
-  <input id={id} type="search" name={inputName} placeholder={placeholder} />
+  <input
+    id={id}
+    type="search"
+    name={inputName}
+    value={currentValue}
+    placeholder={placeholder}
+    maxlength="120"
+    autocomplete="off"
+  />
 
   <button type="submit" aria-label="Tìm kiếm">
     <svg

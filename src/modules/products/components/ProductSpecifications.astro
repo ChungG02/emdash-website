@@ -29,12 +29,12 @@ const { origin, availability, sizes = [] } = Astro.props;
     )
   }
 
-  <a
+  <!-- <a
     href={contactInfo.hotline.href}
     class="product-hotline"
     aria-label={`Gọi ${contactInfo.hotline.label} ${contactInfo.hotline.display}`}
-  >
-    <span class="product-hotline__icon" aria-hidden="true">
+  > -->
+  <!-- <span class="product-hotline__icon" aria-hidden="true">
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -58,18 +58,16 @@ const { origin, availability, sizes = [] } = Astro.props;
 				A2 2 0 0 1 22 16.92z"
         ></path>
       </svg>
-    </span>
+    </span> -->
 
-    <span class="product-hotline__content">
-      <span class="product-hotline__label">
-        {contactInfo.hotline.label}
-      </span>
-
-      <strong class="product-hotline__number">
-        {contactInfo.hotline.display}
-      </strong>
-    </span>
-  </a>
+  <span class="product-hotline__content">
+    <span class="product-hotline__label"> Báo Giá Liên Hệ </span>
+    <strong class="product-hotline__number">
+      {contactInfo.hotline.display}
+    </strong>
+    <strong class="product-hotline__number"> 097 781 88 18 </strong>
+  </span>
+  <!-- </a> -->
 
   {
     sizes.length > 0 && (
