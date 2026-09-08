@@ -1,39 +1,37 @@
 ---
 import FlagIcon from "./FlagIcon.astro";
 import { languages } from "../../data/languages";
+import {
+  getUiLocale,
+  UI_LOCALE_COOKIE,
+  useTranslations,
+} from "../../i18n/ui";
 
-const currentPath = Astro.url.pathname;
-
-const isCurrentLanguage = (code: "vi" | "en" | "zh") => {
-  if (code === "vi") {
-    return !currentPath.startsWith("/en") && !currentPath.startsWith("/zh");
-  }
-
-  return currentPath.startsWith(`/${code}`);
-};
-
-const currentLang = languages.find((lang) => isCurrentLanguage(lang.code)) || languages[0];
-const otherLangs = languages.filter((lang) => !isCurrentLanguage(lang.code));
+const locale = getUiLocale(Astro.cookies);
+const t = useTranslations(locale);
+const currentLang = languages.find((language) => language.code === locale) ?? languages[0];
+const otherLangs = languages.filter((language) => language.code !== locale);
 ---
 
 <!-- Mobile version: Row of flags -->
 <div
   class="flex items-center gap-2 min-[821px]:hidden"
   role="navigation"
-  aria-label="Chọn ngôn ngữ"
+  aria-label={t("language.select")}
 >
   {
     languages.map((language) => {
-      const isCurrent = isCurrentLanguage(language.code);
+      const isCurrent = language.code === locale;
 
       return (
-        <a
-          href={language.href}
+        <button
+          type="button"
+          data-ui-locale={language.code}
           lang={language.code}
-          hreflang={language.code}
           title={language.label}
-          aria-label={`Chuyển sang ${language.label}`}
+          aria-label={t("language.switchTo", { language: language.label })}
           aria-current={isCurrent ? "page" : undefined}
+          disabled={isCurrent}
           class:list={[
             "block overflow-hidden rounded-sm border border-slate-200 shadow-sm",
             "transition duration-150 hover:-translate-y-0.5 hover:shadow-md",
@@ -42,7 +40,7 @@ const otherLangs = languages.filter((lang) => !isCurrentLanguage(lang.code));
           ]}
         >
           <FlagIcon code={language.code} />
-        </a>
+        </button>
       );
     })
   }
@@ -52,7 +50,7 @@ const otherLangs = languages.filter((lang) => !isCurrentLanguage(lang.code));
 <div
   class="relative group hidden min-[821px]:block"
   role="navigation"
-  aria-label="Chọn ngôn ngữ"
+  aria-label={t("language.select")}
 >
   <button
     type="button"
@@ -73,21 +71,36 @@ const otherLangs = languages.filter((lang) => !isCurrentLanguage(lang.code));
     <div class="w-max bg-white rounded-md shadow-lg border border-slate-200 py-2 flex flex-col">
       {
         otherLangs.map((language) => (
-          <a
-            href={language.href}
+          <button
+            type="button"
+            data-ui-locale={language.code}
             lang={language.code}
-            hreflang={language.code}
             title={language.label}
-            aria-label={`Chuyển sang ${language.label}`}
+            aria-label={t("language.switchTo", { language: language.label })}
             class="flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors"
           >
             <div class="block overflow-hidden rounded-sm border border-slate-200 shadow-sm">
               <FlagIcon code={language.code} />
             </div>
             <span class="text-sm font-medium uppercase text-slate-700">{language.code}</span>
-          </a>
+          </button>
         ))
       }
     </div>
   </div>
 </div>
+
+<script is:inline define:vars={{ cookieName: UI_LOCALE_COOKIE }}>
+  document.querySelectorAll("[data-ui-locale]").forEach((button) => {
+    if (!(button instanceof HTMLButtonElement) || button.dataset.bound === "true") return;
+
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      const locale = button.dataset.uiLocale;
+      if (!locale) return;
+
+      document.cookie = `${cookieName}=${encodeURIComponent(locale)}; Path=/; Max-Age=31536000; SameSite=Lax`;
+      window.location.reload();
+    });
+  });
+</script>

@@ -7,6 +7,7 @@ import Footer from "../components/footer/Footer.astro";
 import FloatingContact from "../components/footer/FloatingContact.astro";
 import { siteConfig } from "../data/site";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import { getUiLocale, useTranslations } from "../i18n/ui";
 import "../styles/theme.css";
 
 interface Props {
@@ -59,10 +60,16 @@ const pageCtx = createPublicPageContext({
 
 const logoSrc = siteLogo?.url ?? "/images/logo.png";
 const favicon = settings?.favicon?.url ?? "/favicon.svg";
+const uiLocale = getUiLocale(Astro.cookies);
+const t = useTranslations(uiLocale);
+
+if (uiLocale !== "vi" && Astro.cache.enabled) {
+	Astro.cache.set(false);
+}
 ---
 
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-ui-locale={uiLocale}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -73,7 +80,7 @@ const favicon = settings?.favicon?.url ?? "/favicon.svg";
 	</head>
 	<body>
 		<EmDashBodyStart page={pageCtx} />
-		<a class="skip-link" href="#main-content">Bỏ qua đến nội dung</a>
+		<a class="skip-link" href="#main-content">{t("layout.skipToContent")}</a>
 		<Header
 			logoSrc={logoSrc}
 			companyName={siteTitle}

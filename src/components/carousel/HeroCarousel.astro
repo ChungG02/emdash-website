@@ -1,8 +1,7 @@
 ---
 import CarouselSlide from "./CarouselSlide.astro";
-import Container from "../common/Container.astro";
 import { heroSlides, type HeroSlide } from "../../data/heroSlides";
-import { siteConfig } from "../../data/site";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
 
 interface Props {
   id?: string;
@@ -15,9 +14,10 @@ const {
   slides = heroSlides,
   autoplayMs = 5000,
 } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
-<section class="hero" id="home" aria-label="Giới thiệu Thái Sơn Plastic">
+<section class="hero" id="home" aria-label={t("carousel.introduction")}>
   <h1 class="visually-hidden">
     Thái Sơn Plastic - Nhà máy sản xuất màng PE và giải pháp đóng gói công
     nghiệp
@@ -30,7 +30,7 @@ const {
         class="hero-carousel"
         data-carousel
         data-autoplay={autoplayMs}
-        aria-label="Banner nổi bật"
+        aria-label={t("carousel.featured")}
         aria-roledescription="carousel"
       >
         <div class="hero-stage">
@@ -45,7 +45,7 @@ const {
               type="button"
               class="carousel-control carousel-control-prev"
               data-carousel-prev
-              aria-label="Hiển thị slide trước"
+              aria-label={t("carousel.previous")}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -61,7 +61,7 @@ const {
               type="button"
               class="carousel-control carousel-control-next"
               data-carousel-next
-              aria-label="Hiển thị slide tiếp theo"
+              aria-label={t("carousel.next")}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -73,13 +73,13 @@ const {
               </svg>
             </button>
 
-            <div class="carousel-dots" aria-label="Chọn slide">
+            <div class="carousel-dots" aria-label={t("carousel.select")}>
               {slides.map((_, index) => (
                 <button
                   type="button"
                   class:list={["carousel-dot", index === 0 && "is-active"]}
                   data-carousel-dot={index}
-                  aria-label={`Hiển thị slide ${index + 1}`}
+                  aria-label={t("carousel.show", { index: index + 1 })}
                   aria-current={index === 0 ? "true" : undefined}
                 />
               ))}

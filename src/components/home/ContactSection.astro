@@ -1,13 +1,16 @@
 ---
 import Container from "../common/Container.astro";
 import { siteConfig } from "../../data/site";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
+
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
 <section class="contact-section" id="lien-he">
   <Container>
     <div class="contact-heading">
       <span>{siteConfig.name}</span>
-      <h2>Đăng ký thông tin liên hệ</h2>
+      <h2>{t("contact.title")}</h2>
       <p>
         Hotline <a href={"tel:" + siteConfig.phoneHref}>{siteConfig.phone}</a>
         <b aria-hidden="true"> · </b>
@@ -17,6 +20,7 @@ import { siteConfig } from "../../data/site";
 
     <form
       class="contact-form"
+<<<<<<< HEAD
       method="POST"
       action="/_emdash/api/plugins/emdash-forms/submit"
       data-contact-form
@@ -38,22 +42,31 @@ import { siteConfig } from "../../data/site";
         />
       </div>
 
+=======
+      data-contact-form
+      data-required-error={t("contact.requiredError")}
+      data-phone-error={t("contact.phoneError")}
+      data-demo-success={t("contact.demoSuccess")}
+      data-product-request-template={t("contact.productRequest")}
+      novalidate
+    >
+>>>>>>> origin/update-ui-contact-page
       <div class="form-grid">
         <div class="field">
-          <label class="visually-hidden" for="contact-name">Họ và tên</label>
+          <label class="visually-hidden" for="contact-name">{t("contact.name")}</label>
           <input
             id="contact-name"
             name="name"
             type="text"
             autocomplete="name"
-            placeholder="Họ và tên *"
+            placeholder={`${t("contact.name")} *`}
             required
           />
         </div>
 
         <div class="field">
           <label class="visually-hidden" for="contact-phone"
-            >Số điện thoại</label
+            >{t("contact.phone")}</label
           >
           <input
             id="contact-phone"
@@ -61,7 +74,7 @@ import { siteConfig } from "../../data/site";
             type="tel"
             autocomplete="tel"
             inputmode="tel"
-            placeholder="Số điện thoại *"
+            placeholder={`${t("contact.phone")} *`}
             required
           />
         </div>
@@ -78,37 +91,37 @@ import { siteConfig } from "../../data/site";
           />
         </div>
         <div class="field field-full">
-          <label class="visually-hidden" for="contact-company">Tên công ty</label>
+          <label class="visually-hidden" for="contact-company">{t("contact.company")}</label>
           <input
             id="contact-company"
             name="company"
             type="text"
             autocomplete="company"
-            placeholder="Tên công ty *"
+            placeholder={`${t("contact.company")} *`}
             required
           />
         </div>
 
         <div class="field field-full">
-          <label class="visually-hidden" for="contact-address">Địa chỉ</label>
+          <label class="visually-hidden" for="contact-address">{t("contact.address")}</label>
           <input
             id="contact-address"
             name="address"
             type="text"
             autocomplete="address"
-            placeholder="Địa chỉ *"
+            placeholder={`${t("contact.address")} *`}
             required
           />
         </div>
 
         <div class="field field-full">
           <label class="visually-hidden" for="contact-message"
-            >Nội dung cần tư vấn</label
+            >{t("contact.message")}</label
           >
           <textarea
             id="contact-message"
             name="message"
-            placeholder="Nội dung / sản phẩm cần tư vấn *"
+            placeholder={t("contact.messagePlaceholder")}
             required></textarea>
         </div>
       </div>
@@ -116,20 +129,26 @@ import { siteConfig } from "../../data/site";
       <label class="consent">
         <input type="checkbox" name="consent" required />
         <span>
-          Tôi đồng ý cung cấp thông tin để Thái Sơn Plastic liên hệ tư vấn.
+          {t("contact.consent")}
         </span>
       </label>
 
       <div class="submit-wrap">
-        <button class="submit-button" type="submit">Gửi yêu cầu</button>
+        <button class="submit-button" type="submit">{t("contact.submit")}</button>
       </div>
 
+<<<<<<< HEAD
       <p
         class="form-demo-note"
         data-contact-form-status
         role="status"
         aria-live="polite"
       ></p>
+=======
+      <p class="form-demo-note">
+        {t("contact.demoNote")}
+      </p>
+>>>>>>> origin/update-ui-contact-page
     </form>
   </Container>
 </section>
@@ -187,17 +206,18 @@ import { siteConfig } from "../../data/site";
       setStatus("");
 
       if (!form.reportValidity()) {
-        notify("Vui lòng nhập đầy đủ thông tin bắt buộc.");
+        notify(form.dataset.requiredError ?? "");
         return;
       }
 
       const phonePattern = /^[0-9+\s().-]{8,20}$/;
       if (!phonePattern.test(phone?.value.trim() ?? "")) {
-        notify("Vui lòng kiểm tra lại số điện thoại.");
+        notify(form.dataset.phoneError ?? "");
         phone?.focus();
         return;
       }
 
+<<<<<<< HEAD
       const originalButtonLabel =
         submitButton?.textContent ?? "Gửi yêu cầu";
 
@@ -277,6 +297,10 @@ import { siteConfig } from "../../data/site";
           submitButton.textContent = originalButtonLabel;
         }
       }
+=======
+      notify(form.dataset.demoSuccess ?? "");
+      form.reset();
+>>>>>>> origin/update-ui-contact-page
     });
 
     document
@@ -285,8 +309,8 @@ import { siteConfig } from "../../data/site";
         link.addEventListener("click", () => {
           const productName = link.dataset.productRequest;
           if (message && productName) {
-            message.value =
-              "Tôi cần tư vấn và báo giá sản phẩm: " + productName + ".";
+            message.value = (form.dataset.productRequestTemplate ?? "{name}")
+              .replace("{name}", productName);
           }
         });
       });

@@ -1,4 +1,7 @@
 ---
+import { contactInfo } from "../../../data/contact";
+import { getUiLocale, useTranslations } from "../../../i18n/ui";
+
 interface Props {
   origin?: string;
   availability?: string;
@@ -6,13 +9,14 @@ interface Props {
 }
 
 const { origin, availability, sizes = [] } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
 <div class="product-specifications">
   {
     origin && (
       <p class="product-specifications__row">
-        <strong>Xuất xứ:</strong>
+        <strong>{t("products.origin")}:</strong>
         <span>{origin}</span>
       </p>
     )
@@ -21,16 +25,56 @@ const { origin, availability, sizes = [] } = Astro.props;
   {
     availability && (
       <p class="product-specifications__row">
-        <strong>Tình trạng:</strong>
+        <strong>{t("products.availability")}:</strong>
         <span class="product-specifications__availability">{availability}</span>
       </p>
     )
   }
 
+  <!-- <a
+    href={contactInfo.hotline.href}
+    class="product-hotline"
+    aria-label={`Gọi ${contactInfo.hotline.label} ${contactInfo.hotline.display}`}
+  > -->
+  <!-- <span class="product-hotline__icon" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M22 16.92v3a2 2 0 0 1-2.18 2
+				19.79 19.79 0 0 1-8.63-3.07
+				19.5 19.5 0 0 1-6-6
+				19.79 19.79 0 0 1-3.07-8.67
+				A2 2 0 0 1 4.11 2h3
+				a2 2 0 0 1 2 1.72
+				12.84 12.84 0 0 0 .7 2.81
+				2 2 0 0 1-.45 2.11L8.09 9.91
+				a16 16 0 0 0 6 6l1.27-1.27
+				a2 2 0 0 1 2.11-.45
+				12.84 12.84 0 0 0 2.81.7
+				A2 2 0 0 1 22 16.92z"
+        ></path>
+      </svg>
+    </span> -->
+
+  <span class="product-hotline__content">
+    <span class="product-hotline__label">{t("products.contactForPrice")}</span>
+    <strong class="product-hotline__number">
+      {contactInfo.hotline.display}
+    </strong>
+    <strong class="product-hotline__number"> 097 781 88 18 </strong>
+  </span>
+  <!-- </a> -->
+
   {
     sizes.length > 0 && (
       <div class="product-specifications__sizes">
-        <p class="product-specifications__sizes-title">Kích thước</p>
+        <p class="product-specifications__sizes-title">{t("products.sizes")}</p>
 
         <div class="product-specifications__size-list">
           {sizes.map((size) => (

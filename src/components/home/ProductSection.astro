@@ -3,12 +3,14 @@ import Container from "../common/Container.astro";
 import SectionHeading from "./SectionHeading.astro";
 import ProductCard from "./ProductCard.astro";
 import type { ProductSectionData } from "../../modules/types/product.type";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
 
 interface Props {
   section: ProductSectionData;
 }
 
 const { section } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
 
 const isCarousel = section.products.length > 4;
 ---
@@ -29,7 +31,7 @@ const isCarousel = section.products.length > 4;
     {
       section.products.length === 0 ? (
         <p class="product-section__empty">
-          Chưa có sản phẩm trong danh mục này.
+          {t("products.emptyCategory")}
         </p>
       ) : isCarousel ? (
         <div class="product-carousel" data-product-carousel>
@@ -37,7 +39,7 @@ const isCarousel = section.products.length > 4;
             class="product-carousel__viewport"
             data-product-carousel-viewport
             tabindex="0"
-            aria-label={`Danh sách ${section.title}`}
+            aria-label={t("products.listLabel", { name: section.title })}
           >
             <div class="product-grid product-carousel__track">
               {section.products.map((product) => (
@@ -50,7 +52,7 @@ const isCarousel = section.products.length > 4;
             type="button"
             class="product-carousel__next"
             data-product-carousel-next
-            aria-label="Xem các sản phẩm tiếp theo"
+            aria-label={t("products.next")}
           >
             <svg
               viewBox="0 0 24 24"

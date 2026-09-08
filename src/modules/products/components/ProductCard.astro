@@ -1,6 +1,7 @@
 ---
 import type { MediaValue } from "emdash";
 import { Image } from "emdash/ui";
+import { getUiLocale, useTranslations } from "../../../i18n/ui";
 
 interface Props {
   title: string;
@@ -9,16 +10,17 @@ interface Props {
 }
 
 const { title, href, featuredImage } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
 <article class="product-card">
-  <a href={href} class="product-card__image-link" aria-label={`Xem ${title}`}>
+  <a href={href} class="product-card__image-link" aria-label={t("common.view", { name: title })}>
     <div class="product-card__image">
       {
         featuredImage ? (
           <Image image={featuredImage} />
         ) : (
-          <div class="product-card__placeholder">Chưa có hình ảnh</div>
+          <div class="product-card__placeholder">{t("common.noImage")}</div>
         )
       }
     </div>
@@ -29,7 +31,7 @@ const { title, href, featuredImage } = Astro.props;
       <a href={href}>{title}</a>
     </h3>
 
-    <a href={href} class="product-card__button"> Xem chi tiết </a>
+    <a href={href} class="product-card__button">{t("common.viewDetails")}</a>
   </div>
 </article>
 

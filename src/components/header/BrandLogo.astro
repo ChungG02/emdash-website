@@ -1,4 +1,6 @@
 ---
+import { getUiLocale, useTranslations } from "../../i18n/ui";
+
 interface Props {
   href?: string;
   logoSrc?: string;
@@ -16,9 +18,10 @@ const {
 } = Astro.props;
 
 const logoAlt = alt ?? `Logo ${companyName}`;
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
-<a href={href} class="brand" aria-label={`Về trang chủ ${companyName}`}>
+<a href={href} class="brand" aria-label={t("brand.home", { company: companyName })}>
   <img
     src={logoSrc}
     alt={logoAlt}

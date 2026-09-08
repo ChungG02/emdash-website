@@ -6,6 +6,9 @@ import type { Product } from "../../.emdash/types";
 
 import Base from "../layouts/Base.astro";
 import ProductCard from "../modules/products/components/ProductCard.astro";
+import { getUiLocale, useTranslations } from "../i18n/ui";
+
+const t = useTranslations(getUiLocale(Astro.cookies));
 
 const PAGE_SIZE = 12;
 const COLLECTION_BATCH_SIZE = 100;
@@ -140,22 +143,22 @@ const nextPageUrl =
 ---
 
 <Base
-  title={query ? `Tìm kiếm: ${query}` : "Tìm kiếm sản phẩm"}
-  description="Kết quả tìm kiếm sản phẩm và giải pháp đóng gói công nghiệp"
+  title={query ? t("search.pageTitle", { query }) : t("search.productSearch")}
+  description={t("search.metaDescription")}
 >
   <section class="product-search-page" aria-labelledby="product-search-title">
     <header class="product-search-page__header">
       <p class="product-search-page__eyebrow">
-        {query ? "Kết quả tìm kiếm" : "Danh mục sản phẩm"}
+        {query ? t("search.results") : t("search.catalogue")}
       </p>
       <h1 id="product-search-title">
-        {query ? `Sản phẩm cho “${query}”` : "Tìm kiếm sản phẩm"}
+        {query ? t("search.productsFor", { query }) : t("search.productSearch")}
       </h1>
       {
         query && !hasSearchError && (
           <p aria-live="polite">
-            Tìm thấy <strong>{totalResults}</strong> sản phẩm phù hợp
-            {totalPages > 1 && ` · Trang ${currentPage}/${totalPages}`}
+            {t("search.found", { count: totalResults })}
+            {totalPages > 1 && ` · ${t("search.pageCount", { current: currentPage, total: totalPages })}`}
           </p>
         )
       }
@@ -174,23 +177,20 @@ const nextPageUrl =
             <circle cx="11" cy="11" r="7"></circle>
             <path d="m20 20-3.5-3.5"></path>
           </svg>
-          <h2>Bạn đang tìm sản phẩm nào?</h2>
-          <p>Nhập từ khóa vào ô tìm kiếm trên thanh đầu trang.</p>
-          <a href="/products">Xem tất cả sản phẩm</a>
+          <h2>{t("search.promptTitle")}</h2>
+          <p>{t("search.promptDescription")}</p>
+          <a href="/products">{t("search.viewAllProducts")}</a>
         </div>
       ) : hasSearchError ? (
         <div class="product-search-state product-search-state--error" role="alert">
-          <h2>Chưa thể thực hiện tìm kiếm</h2>
-          <p>Vui lòng thử lại sau ít phút hoặc liên hệ với chúng tôi để được hỗ trợ.</p>
+          <h2>{t("search.errorTitle")}</h2>
+          <p>{t("search.errorDescription")}</p>
         </div>
       ) : products.length === 0 ? (
         <div class="product-search-state" aria-live="polite">
-          <h2>Không tìm thấy sản phẩm phù hợp</h2>
-          <p>
-            Không có kết quả cho “<strong>{query}</strong>”. Hãy thử một từ khóa
-            khác trong ô tìm kiếm phía trên.
-          </p>
-          <a href="/products">Xem tất cả sản phẩm</a>
+          <h2>{t("search.emptyTitle")}</h2>
+          <p>{t("search.emptyDescription", { query })}</p>
+          <a href="/products">{t("search.viewAllProducts")}</a>
         </div>
       ) : (
         <div class="product-search-results">
@@ -207,31 +207,31 @@ const nextPageUrl =
           </ol>
 
           {totalPages > 1 && (
-            <nav class="product-search-pagination" aria-label="Phân trang kết quả tìm kiếm">
+            <nav class="product-search-pagination" aria-label={t("search.pagination")}>
               {previousPageUrl ? (
                 <a href={previousPageUrl} rel="prev">
                   <span aria-hidden="true">←</span>
-                  Trang trước
+                  {t("search.previous")}
                 </a>
               ) : (
                 <span class="product-search-pagination__disabled" aria-disabled="true">
                   <span aria-hidden="true">←</span>
-                  Trang trước
+                  {t("search.previous")}
                 </span>
               )}
 
               <span class="product-search-pagination__current">
-                Trang {currentPage} / {totalPages}
+                {t("search.pageCount", { current: currentPage, total: totalPages })}
               </span>
 
               {nextPageUrl ? (
                 <a href={nextPageUrl} rel="next">
-                  Trang sau
+                  {t("search.next")}
                   <span aria-hidden="true">→</span>
                 </a>
               ) : (
                 <span class="product-search-pagination__disabled" aria-disabled="true">
-                  Trang sau
+                  {t("search.next")}
                   <span aria-hidden="true">→</span>
                 </span>
               )}
