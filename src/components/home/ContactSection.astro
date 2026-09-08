@@ -20,7 +20,6 @@ const t = useTranslations(getUiLocale(Astro.cookies));
 
     <form
       class="contact-form"
-<<<<<<< HEAD
       method="POST"
       action="/_emdash/api/plugins/emdash-forms/submit"
       data-contact-form
@@ -42,15 +41,6 @@ const t = useTranslations(getUiLocale(Astro.cookies));
         />
       </div>
 
-=======
-      data-contact-form
-      data-required-error={t("contact.requiredError")}
-      data-phone-error={t("contact.phoneError")}
-      data-demo-success={t("contact.demoSuccess")}
-      data-product-request-template={t("contact.productRequest")}
-      novalidate
-    >
->>>>>>> origin/update-ui-contact-page
       <div class="form-grid">
         <div class="field">
           <label class="visually-hidden" for="contact-name">{t("contact.name")}</label>
@@ -137,18 +127,12 @@ const t = useTranslations(getUiLocale(Astro.cookies));
         <button class="submit-button" type="submit">{t("contact.submit")}</button>
       </div>
 
-<<<<<<< HEAD
       <p
         class="form-demo-note"
         data-contact-form-status
         role="status"
         aria-live="polite"
       ></p>
-=======
-      <p class="form-demo-note">
-        {t("contact.demoNote")}
-      </p>
->>>>>>> origin/update-ui-contact-page
     </form>
   </Container>
 </section>
@@ -217,7 +201,6 @@ const t = useTranslations(getUiLocale(Astro.cookies));
         return;
       }
 
-<<<<<<< HEAD
       const originalButtonLabel =
         submitButton?.textContent ?? "Gửi yêu cầu";
 
@@ -297,10 +280,6 @@ const t = useTranslations(getUiLocale(Astro.cookies));
           submitButton.textContent = originalButtonLabel;
         }
       }
-=======
-      notify(form.dataset.demoSuccess ?? "");
-      form.reset();
->>>>>>> origin/update-ui-contact-page
     });
 
     document
