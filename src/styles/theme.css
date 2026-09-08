@@ -450,7 +450,8 @@ button {
 
 .hero-stage {
   position: relative;
-  height: clamp(260px, 31.5vw, 610px);
+  height: clamp(320px, 34vw, 660px);
+  overflow: hidden;
 }
 
 .carousel-slide {
@@ -473,8 +474,12 @@ button {
   display: block;
 }
 
+.carousel-slide a {
+  overflow: hidden;
+}
+
 .carousel-slide img {
-  object-fit: cover;
+  object-fit: fill;
   object-position: center;
   user-select: none;
 }
@@ -1536,8 +1541,8 @@ button {
   }
 
   .hero-stage {
-    height: 42vw;
-    min-height: 260px;
+    height: 45vw;
+    min-height: 320px;
   }
 
   .carousel-control {
@@ -1613,8 +1618,13 @@ button {
   }
 
   .hero-stage {
-    height: 220px;
-    min-height: 220px;
+    aspect-ratio: 647 / 270;
+    height: auto;
+    min-height: 0;
+  }
+
+  .carousel-slide img {
+    object-fit: contain;
   }
 
   .carousel-control {
