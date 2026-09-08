@@ -52,9 +52,13 @@ const quickLinks = [
                     stroke-linejoin="round"></path>
                 </svg>
               </span>
-              <span>
+              <span class="ts-footer__hotlines">
                 <strong>Hotline:</strong>{" "}
                 <a href={`tel:${siteConfig.phoneHref}`}>{siteConfig.phone}</a>
+                <span aria-hidden="true">/</span>
+                <a href={`tel:${siteConfig.secondaryPhoneHref}`}>
+                  {siteConfig.secondaryPhone}
+                </a>
               </span>
             </li>
 
@@ -292,6 +296,13 @@ const quickLinks = [
     color: #fff;
   }
 
+  .ts-footer__hotlines {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    white-space: nowrap;
+  }
+
   .ts-footer__contact-icon {
     width: 2rem;
     height: 2rem;
@@ -418,6 +429,10 @@ const quickLinks = [
 
     .ts-footer__contact-list li:last-child {
       grid-column: auto;
+    }
+
+    .ts-footer__hotlines {
+      font-size: clamp(0.8rem, 3.7vw, 0.925rem);
     }
 
     .ts-footer__title {

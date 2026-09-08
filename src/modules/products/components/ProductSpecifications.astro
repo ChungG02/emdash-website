@@ -1,5 +1,5 @@
 ---
-import { contactInfo } from "../../../data/contact";
+// import { contactInfo } from "../../../data/contact";
 import { getUiLocale, useTranslations } from "../../../i18n/ui";
 
 interface Props {
@@ -62,13 +62,13 @@ const t = useTranslations(getUiLocale(Astro.cookies));
       </svg>
     </span> -->
 
-  <span class="product-hotline__content">
+  <!-- <span class="product-hotline__content">
     <span class="product-hotline__label">{t("products.contactForPrice")}</span>
     <strong class="product-hotline__number">
       {contactInfo.hotline.display}
     </strong>
     <strong class="product-hotline__number"> 097 781 88 18 </strong>
-  </span>
+  </span> -->
   <!-- </a> -->
 
   {
@@ -91,7 +91,7 @@ const t = useTranslations(getUiLocale(Astro.cookies));
       class="product-specifications__quote-button"
       aria-label="Cuộn đến biểu mẫu đăng ký thông tin liên hệ"
     >
-      Báo giá liên hệ
+      Nhận báo giá
     </a>
   </div>
 </div>

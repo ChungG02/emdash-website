@@ -79,17 +79,17 @@ export const companyProfile: CompanyProfile = {
     {
       id: "thong-tin-doanh-nghiep",
       title: "Thông tin doanh nghiệp",
-      details: [
-        {
-          label: "Tên doanh nghiệp",
-          value: "Công ty TNHH SXTM và XNK Thái Sơn",
-          emphasizeValue: true,
-        },
-        {
-          label: "Trụ sở chính",
-          value: "Thôn Vĩnh Lộc 2, xã Tây Phương, TP. Hà Nội, Việt Nam",
-        },
-      ],
+      // details: [
+      //   {
+      //     label: "Tên doanh nghiệp",
+      //     value: "Công ty TNHH SXTM và XNK Thái Sơn",
+      //     emphasizeValue: true,
+      //   },
+      //   {
+      //     label: "Trụ sở chính",
+      //     value: "Thôn Vĩnh Lộc 2, xã Tây Phương, TP. Hà Nội, Việt Nam",
+      //   },
+      // ],
       paragraphs: [
         "Ngay từ những năm đầu hoạt động, Thái Sơn đã chú trọng đầu tư mở rộng nhà xưởng, đổi mới máy móc và ứng dụng công nghệ vào sản xuất. Việc tập trung hoạt động sản xuất tại khu vực Hòa Lạc giúp công ty từng bước nâng cao năng lực đáp ứng, chủ động tiến độ và phục vụ tốt hơn nhu cầu ngày càng đa dạng của khách hàng.",
         "Các sản phẩm bao bì do Thái Sơn cung cấp hiện được sử dụng tại nhiều doanh nghiệp trên toàn quốc, đồng hành cùng khách hàng trong hoạt động sản xuất, đóng gói và xuất khẩu hàng hóa.",
