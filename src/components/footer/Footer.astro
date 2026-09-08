@@ -1,5 +1,6 @@
 ---
 import Container from "../common/Container.astro";
+import ContactSection from "../home/ContactSection.astro";
 import { siteConfig } from "../../data/site";
 
 const currentYear = new Date().getFullYear();
@@ -22,6 +23,8 @@ const quickLinks = [
 ---
 
 <footer class="ts-footer">
+  <ContactSection />
+
   <div class="ts-footer__decoration" aria-hidden="true"></div>
 
   <Container>

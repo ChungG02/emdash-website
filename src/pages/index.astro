@@ -13,7 +13,6 @@ import ProductSection from "../components/home/ProductSection.astro";
 import TrustStrip from "../components/home/TrustStrip.astro";
 import CatalogueBanner from "../components/home/CatalogueBanner.astro";
 import NewsSection from "../components/home/NewsSection.astro";
-import ContactSection from "../components/home/ContactSection.astro";
 
 import type { ProductSectionData } from "../modules/types/product.type";
 
@@ -136,6 +135,4 @@ const { siteTitle, siteTagline } = resolveBlogSiteIdentity(settings);
   <CatalogueBanner />
 
   <NewsSection items={cmsNews} />
-
-  <ContactSection />
 </Base>
