@@ -65,3 +65,71 @@ const currentValue = (
     </svg>
   </button>
 </form>
+
+<script>
+  const initializeSearchScrollGuards = () => {
+    document
+      .querySelectorAll<HTMLInputElement>(
+        "[data-site-search] input[type='search']",
+      )
+      .forEach((input) => {
+        if (input.dataset.scrollGuardInitialized === "true") return;
+        input.dataset.scrollGuardInitialized = "true";
+
+        let scrollPosition = window.scrollY;
+        let lastKeydownAt = 0;
+        let restoreFrame = 0;
+
+        const rememberKeyboardScrollPosition = () => {
+          lastKeydownAt = performance.now();
+          scrollPosition = window.scrollY;
+        };
+
+        const rememberNonKeyboardScrollPosition = () => {
+          // On Chrome, beforeinput may fire after the browser has already moved
+          // the sticky input. Do not let it overwrite the keydown position.
+          if (performance.now() - lastKeydownAt > 250) {
+            scrollPosition = window.scrollY;
+          }
+        };
+
+        const restoreUnexpectedUpwardScroll = () => {
+          window.cancelAnimationFrame(restoreFrame);
+          let remainingFrames = 6;
+
+          const restore = () => {
+            if (document.activeElement !== input) return;
+
+            const upwardShift = scrollPosition - window.scrollY;
+            const headerHeight =
+              input.closest<HTMLElement>(".site-header")?.offsetHeight ?? 0;
+
+            // Chrome can nudge a focused control inside a sticky element upward
+            // during caret updates. Only undo a small upward shift caused by input;
+            // normal page scrolling and larger navigations remain untouched.
+            if (upwardShift > 0 && upwardShift <= headerHeight + 32) {
+              const root = document.documentElement;
+              const previousScrollBehavior = root.style.scrollBehavior;
+              root.style.scrollBehavior = "auto";
+              window.scrollTo(window.scrollX, scrollPosition);
+              root.style.scrollBehavior = previousScrollBehavior;
+            }
+
+            remainingFrames -= 1;
+            if (remainingFrames > 0) {
+              restoreFrame = window.requestAnimationFrame(restore);
+            }
+          };
+
+          restoreFrame = window.requestAnimationFrame(restore);
+        };
+
+        input.addEventListener("keydown", rememberKeyboardScrollPosition);
+        input.addEventListener("beforeinput", rememberNonKeyboardScrollPosition);
+        input.addEventListener("input", restoreUnexpectedUpwardScroll);
+      });
+  };
+
+  initializeSearchScrollGuards();
+  document.addEventListener("astro:page-load", initializeSearchScrollGuards);
+</script>
