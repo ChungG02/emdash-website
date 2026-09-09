@@ -62,6 +62,9 @@ const currentValue = (
 </form>
 
 <script>
+  const SEARCH_SCROLL_LOCK_MS = 500;
+  const SEARCH_SCROLL_RESTORE_DELAYS = [50, 150, 350];
+
   const initializeSearchScrollGuard = (form: HTMLFormElement) => {
     if (form.dataset.scrollGuardInitialized === "true") return;
 
@@ -70,59 +73,128 @@ const currentValue = (
 
     form.dataset.scrollGuardInitialized = "true";
 
-    let scrollX = 0;
-    let scrollY = 0;
-    let shouldPreserveScroll = false;
+    let preservedScrollPosition: { x: number; y: number } | null = null;
+    let scrollLockExpiresAt = 0;
     let restoreFrame: number | undefined;
+    let restoreTimeouts: number[] = [];
 
-    const rememberScrollPosition = () => {
+    const isInputVisible = () => {
       const rect = input.getBoundingClientRect();
       const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
 
-      // Only suppress focus scrolling when the sticky search input is already
-      // visible. Keyboard navigation to an off-screen input should still work.
-      shouldPreserveScroll = rect.top >= 0 && rect.bottom <= viewportHeight;
+      return rect.top >= 0 && rect.bottom <= viewportHeight;
+    };
 
-      if (shouldPreserveScroll) {
-        scrollX = window.scrollX;
-        scrollY = window.scrollY;
+    const rememberScrollPosition = (force = false) => {
+      if (!isInputVisible()) return;
+
+      const now = window.performance.now();
+
+      // Keep the position captured before focus instead of replacing it with
+      // a position produced by a delayed browser focus scroll.
+      if (
+        force ||
+        preservedScrollPosition === null ||
+        now > scrollLockExpiresAt
+      ) {
+        preservedScrollPosition = {
+          x: window.scrollX,
+          y: window.scrollY,
+        };
       }
+
+      scrollLockExpiresAt = now + SEARCH_SCROLL_LOCK_MS;
+    };
+
+    const clearScheduledRestores = () => {
+      if (restoreFrame !== undefined) {
+        window.cancelAnimationFrame(restoreFrame);
+        restoreFrame = undefined;
+      }
+
+      restoreTimeouts.forEach((timeout) => window.clearTimeout(timeout));
+      restoreTimeouts = [];
     };
 
     const restoreScrollPosition = () => {
-      if (!shouldPreserveScroll) return;
-
-      if (restoreFrame !== undefined) {
-        window.cancelAnimationFrame(restoreFrame);
+      if (
+        preservedScrollPosition === null ||
+        document.activeElement !== input ||
+        window.performance.now() > scrollLockExpiresAt
+      ) {
+        return;
       }
 
-      restoreFrame = window.requestAnimationFrame(() => {
-        restoreFrame = undefined;
+      const { x, y } = preservedScrollPosition;
 
-        if (document.activeElement !== input) return;
-        if (
-          Math.abs(window.scrollX - scrollX) < 1 &&
-          Math.abs(window.scrollY - scrollY) < 1
-        ) {
-          return;
-        }
+      if (
+        Math.abs(window.scrollX - x) < 1 &&
+        Math.abs(window.scrollY - y) < 1
+      ) {
+        return;
+      }
 
-        const scrollBehavior = document.documentElement.style.scrollBehavior;
-        document.documentElement.style.scrollBehavior = "auto";
-        window.scrollTo(scrollX, scrollY);
-        document.documentElement.style.scrollBehavior = scrollBehavior;
-      });
+      const scrollBehavior = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = "auto";
+      window.scrollTo(x, y);
+      document.documentElement.style.scrollBehavior = scrollBehavior;
     };
 
-    input.addEventListener("pointerdown", rememberScrollPosition, {
-      capture: true,
+    const scheduleScrollRestore = () => {
+      clearScheduledRestores();
+      restoreScrollPosition();
+      window.queueMicrotask(restoreScrollPosition);
+
+      restoreFrame = window.requestAnimationFrame(() => {
+        restoreScrollPosition();
+
+        restoreFrame = window.requestAnimationFrame(() => {
+          restoreFrame = undefined;
+          restoreScrollPosition();
+        });
+      });
+
+      restoreTimeouts = SEARCH_SCROLL_RESTORE_DELAYS.map((delay) =>
+        window.setTimeout(restoreScrollPosition, delay),
+      );
+    };
+
+    const startScrollLock = (force = false) => {
+      rememberScrollPosition(force);
+      scheduleScrollRestore();
+    };
+
+    const releaseScrollLock = () => {
+      clearScheduledRestores();
+      preservedScrollPosition = null;
+      scrollLockExpiresAt = 0;
+    };
+
+    input.addEventListener("pointerdown", () => {
+      startScrollLock(true);
+
+      // Focus at the current viewport position before the browser performs
+      // its default focus action for the sticky header input.
+      input.focus({ preventScroll: true });
+      scheduleScrollRestore();
     });
-    input.addEventListener("keydown", rememberScrollPosition, {
+    input.addEventListener("keydown", () => startScrollLock());
+    input.addEventListener("beforeinput", () => startScrollLock());
+    input.addEventListener("compositionstart", () => startScrollLock());
+    input.addEventListener("compositionupdate", () => startScrollLock());
+    input.addEventListener("focus", scheduleScrollRestore);
+    input.addEventListener("input", scheduleScrollRestore);
+    input.addEventListener("blur", releaseScrollLock);
+
+    window.addEventListener("scroll", restoreScrollPosition, {
       capture: true,
+      passive: true,
     });
-    input.addEventListener("beforeinput", rememberScrollPosition);
-    input.addEventListener("focus", restoreScrollPosition);
-    input.addEventListener("input", restoreScrollPosition);
+
+    // Deliberate wheel/touch scrolling should remain available while the
+    // input is focused; only browser-driven movement during typing is locked.
+    window.addEventListener("wheel", releaseScrollLock, { passive: true });
+    window.addEventListener("touchmove", releaseScrollLock, { passive: true });
   };
 
   const initializeAllSearchScrollGuards = () => {
