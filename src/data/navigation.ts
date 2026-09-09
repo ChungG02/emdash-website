@@ -27,8 +27,8 @@ export const navigationItems: NavigationItem[] = [
     productCategorySlug: "bang-dinh",
   },
   {
-    label: "Thanh nẹp",
-    href: "/#thanh-nep-goc",
+    label: "Sản phẩm khác",
+    href: "/products",
     children: [
       { label: "Thanh nẹp góc chữ V", href: "/#thanh-nep-goc" },
       { label: "Nẹp giấy bảo vệ góc", href: "/#thanh-nep-goc" },

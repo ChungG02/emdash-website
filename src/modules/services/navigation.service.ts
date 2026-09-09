@@ -8,15 +8,25 @@ import {
 
 const HEADER_PRODUCT_LIMIT = 100;
 
+const getHeaderProducts = () =>
+  getEmDashCollection<"products", Product>("products", {
+    status: "published",
+    orderBy: { published_at: "desc" },
+    limit: HEADER_PRODUCT_LIMIT,
+  });
+
 export async function getHeaderNavigationItems() {
-  const productResult = await getEmDashCollection<"products", Product>(
-    "products",
-    {
-      status: "published",
-      orderBy: { published_at: "desc" },
-      limit: HEADER_PRODUCT_LIMIT,
-    },
-  );
+  let productResult: Awaited<ReturnType<typeof getHeaderProducts>>;
+
+  try {
+    productResult = await getHeaderProducts();
+  } catch (error) {
+    return {
+      items: navigationItems,
+      cacheHint: null,
+      error,
+    };
+  }
 
   if (productResult.error || productResult.entries.length === 0) {
     return {
