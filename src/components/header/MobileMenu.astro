@@ -103,17 +103,26 @@ const isActive = (href: string) => isNavigationItemActive(currentPath, href);
 
                     {item.children.map((child) => (
                       <li>
-                        <a
-                          href={child.href}
-                          class:list={[
-                            "block px-4 py-2.5 text-sm text-slate-600 transition",
-                            "hover:bg-slate-100 hover:text-[#1477b9]",
-                            isActive(child.href) &&
-                              "bg-slate-100 font-semibold text-[#1477b9]",
-                          ]}
-                        >
-                          {child.label}
-                        </a>
+                        {child.disabled ? (
+                          <span
+                            class="block cursor-not-allowed px-4 py-2.5 text-sm text-slate-400"
+                            aria-disabled="true"
+                          >
+                            {child.label}
+                          </span>
+                        ) : (
+                          <a
+                            href={child.href}
+                            class:list={[
+                              "block px-4 py-2.5 text-sm text-slate-600 transition",
+                              "hover:bg-slate-100 hover:text-[#1477b9]",
+                              isActive(child.href) &&
+                                "bg-slate-100 font-semibold text-[#1477b9]",
+                            ]}
+                          >
+                            {child.label}
+                          </a>
+                        )}
                       </li>
                     ))}
                   </ul>
