@@ -65,8 +65,14 @@ const navigationDefinitions: NavigationDefinition[] = [
     labelKey: "nav.otherProducts",
     href: "/#san-pham-khac",
     children: [
-      { labelKey: "nav.edgeProtector", href: "/#thanh-nep" },
-      { labelKey: "nav.bubbleWrap", href: "/#cuon-xop-no" },
+      {
+        labelKey: "nav.edgeProtector",
+        href: "/product-category/thanh-nep",
+      },
+      {
+        labelKey: "nav.bubbleWrap",
+        href: "/product-category/cuon-xop-no",
+      },
       // { label: "Thanh nẹp đóng pallet", href: "/#thanh-nep-goc" },
       // { label: "Nẹp góc công nghiệp", href: "/#thanh-nep-goc" },
     ],
