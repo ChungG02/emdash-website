@@ -3,12 +3,14 @@ import type { UiMessageKey } from "../i18n/ui";
 export interface NavigationItem {
   label: string;
   href: string;
+  disabled?: boolean;
   children?: NavigationItem[];
 }
 
 interface NavigationDefinition {
   labelKey: UiMessageKey;
   href: string;
+  disabled?: boolean;
   children?: NavigationDefinition[];
 }
 
@@ -17,48 +19,60 @@ type Translate = (key: UiMessageKey) => string;
 const navigationDefinitions: NavigationDefinition[] = [
   {
     labelKey: "nav.virginResin",
-    href: "/#hat-nhua-nguyen-sinh",
+    href: "/product-category/hat-nhua-nguyen-sinh",
     children: [
-      { labelKey: "nav.peResin", href: "/#hat-nhua-nguyen-sinh" },
-      { labelKey: "nav.ppResin", href: "/#hat-nhua-nguyen-sinh" },
-      { labelKey: "nav.pvcResin", href: "/#hat-nhua-nguyen-sinh" },
-      { labelKey: "nav.petResin", href: "/#hat-nhua-nguyen-sinh" },
+      { labelKey: "nav.peResin", href: "/products/hat-nhua-pe" },
+      { labelKey: "nav.ppResin", href: "/products/hat-nhua-pp" },
+      { labelKey: "nav.petResin", href: "/products/hat-nhua-pet" },
+      { labelKey: "nav.pvcResin", href: "/products/hat-nhua-pvc" },
     ],
   },
   {
     labelKey: "nav.peFilm",
-    href: "/#mang-pe",
+    href: "/product-category/mang-quan-pe",
     children: [
-      { labelKey: "nav.handWrapFilm", href: "/#mang-pe" },
-      { labelKey: "nav.machineWrapFilm", href: "/#mang-pe" },
-      { labelKey: "nav.brickWrapFilm", href: "/#mang-pe" },
-      { labelKey: "nav.clearPeFilm", href: "/#mang-pe" },
-      { labelKey: "nav.coloredPeFilm", href: "/#mang-pe" },
-      { labelKey: "nav.customProduction", href: "/#mang-pe" },
+      { labelKey: "nav.handWrapFilm", href: "/products/mang-pe-quan-tay" },
+      { labelKey: "nav.machineWrapFilm", href: "/products/mang-pe-quan-may" },
+      { labelKey: "nav.brickWrapFilm", href: "/products/mang-pe-quan-gach" },
+      {
+        labelKey: "nav.clearPeFilm",
+        href: "/products/mang-boc-pe-trong-suot",
+      },
+      { labelKey: "nav.coloredPeFilm", href: "/products/mang-boc-pe-mau" },
+      { labelKey: "nav.customProduction", href: "#", disabled: true },
     ],
   },
   {
     labelKey: "nav.petStrap",
-    href: "/#day-dai-pet",
+    href: "/product-category/day-pet",
     children: [
-      { labelKey: "nav.virginStrap", href: "/#day-dai-pet" },
-      { labelKey: "nav.petStrap", href: "/#day-dai-pet" },
-      { labelKey: "nav.ppStrap", href: "/#day-dai-pet" },
+      { labelKey: "nav.virginStrap", href: "/products/day-dai-nguyen-sinh" },
+      { labelKey: "nav.ppStrap", href: "/products/day-dai-nhua-pp" },
+      { labelKey: "nav.petStrap", href: "/products/day-dai-pet" },
     ],
   },
   {
     labelKey: "nav.adhesiveTape",
-    href: "/#bang-dinh",
+    href: "/product-category/bang-dinh",
     children: [
-      { labelKey: "nav.clearTape", href: "/#bang-dinh" },
-      { labelKey: "nav.cartonTape", href: "/#bang-dinh" },
-      { labelKey: "nav.electricalTape", href: "/#bang-dinh" },
-      { labelKey: "nav.clothTape", href: "/#bang-dinh" },
-      { labelKey: "nav.paperTape", href: "/#bang-dinh" },
-      { labelKey: "nav.doubleSidedTape", href: "/#bang-dinh" },
-      { labelKey: "nav.foilTape", href: "/#bang-dinh" },
-      { labelKey: "nav.medicalTape", href: "/#bang-dinh" },
-      { labelKey: "nav.fiberglassTape", href: "/#bang-dinh" },
+      { labelKey: "nav.clearTape", href: "/products/bang-dinh-trong" },
+      {
+        labelKey: "nav.cartonTape",
+        href: "/products/bang-dinh-dan-thung-carton",
+      },
+      {
+        labelKey: "nav.electricalTape",
+        href: "/products/bang-dinh-cach-dien",
+      },
+      { labelKey: "nav.clothTape", href: "/products/bang-dinh-vai" },
+      { labelKey: "nav.paperTape", href: "/products/bang-dinh-giay" },
+      { labelKey: "nav.doubleSidedTape", href: "/products/bang-keo-2-mat" },
+      { labelKey: "nav.foilTape", href: "/products/bang-dinh-bac" },
+      { labelKey: "nav.medicalTape", href: "/products/bang-dinh-y-te" },
+      {
+        labelKey: "nav.fiberglassTape",
+        href: "/products/bang-dinh-soi-thuy-tinh",
+      },
     ],
   },
   {
@@ -98,6 +112,7 @@ export const getNavigationItems = (translate: Translate): NavigationItem[] =>
     children: item.children?.map((child) => ({
       label: translate(child.labelKey),
       href: child.href,
+      disabled: child.disabled,
     })),
   }));
 

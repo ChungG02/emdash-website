@@ -68,9 +68,18 @@ const navigationItems = getNavigationItems(t);
                     item.children.length > 10 && "nav-dropdown-mega",
                   ]}
                 >
-                  {item.children.map((child) => (
-                    <a href={child.href}>{child.label}</a>
-                  ))}
+                  {item.children.map((child) =>
+                    child.disabled ? (
+                      <span
+                        class="flex cursor-not-allowed items-center rounded-md px-2.5 py-[9px] text-[13px] text-slate-400"
+                        aria-disabled="true"
+                      >
+                        {child.label}
+                      </span>
+                    ) : (
+                      <a href={child.href}>{child.label}</a>
+                    )
+                  )}
                 </div>
               )}
             </li>
