@@ -1,6 +1,15 @@
 ---
 import Container from "../common/Container.astro";
-import { navigationItems } from "../../data/navigation";
+import {
+  navigationItems,
+  type NavigationItem,
+} from "../../data/navigation";
+
+interface Props {
+  items?: NavigationItem[];
+}
+
+const { items = navigationItems } = Astro.props;
 ---
 
 <div class="nav-shell" id="main-navigation">
@@ -17,7 +26,7 @@ import { navigationItems } from "../../data/navigation";
         </li>
 
         {
-          navigationItems.map((item, index) => (
+          items.map((item, index) => (
             <li
               class:list={[
                 "nav-item",

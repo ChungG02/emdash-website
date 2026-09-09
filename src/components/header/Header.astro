@@ -8,6 +8,9 @@ import SearchBar from "./SearchBar.astro";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
 import MobileMenu from "./MobileMenu.astro";
 import { siteConfig } from "../../data/site";
+import {
+  getHeaderNavigationItems,
+} from "../../modules/services/navigation.service";
 
 interface Props {
   logoSrc?: string;
@@ -22,6 +25,19 @@ const {
   phone = siteConfig.phone,
   phoneHref = siteConfig.phoneHref,
 } = Astro.props;
+
+const navigationResult = await getHeaderNavigationItems();
+
+if (navigationResult.cacheHint) {
+  Astro.cache.set(navigationResult.cacheHint);
+}
+
+if (navigationResult.error) {
+  console.error(
+    "Không thể tải sản phẩm cho thanh điều hướng:",
+    navigationResult.error,
+  );
+}
 ---
 
 <!-- ---
@@ -261,12 +277,12 @@ const {
   </div>
 
   <div class="hidden min-[821px]:block">
-    <Navigation />
+    <Navigation items={navigationResult.items} />
   </div>
 
   <div class="nav-shell relative min-[821px]:hidden">
     <Container>
-      <MobileMenu />
+      <MobileMenu items={navigationResult.items} />
     </Container>
   </div>
 </header>
