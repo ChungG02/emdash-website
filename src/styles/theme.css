@@ -36,7 +36,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth; */
   scroll-padding-top: 150px;
 }
 
@@ -127,6 +127,8 @@ button {
   position: sticky;
   top: 0;
   z-index: 1000;
+  /* Keep Chrome's scroll anchoring from using the sticky header while typing. */
+  overflow-anchor: none;
   background: #fff;
   box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
 }
