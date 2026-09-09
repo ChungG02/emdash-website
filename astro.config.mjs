@@ -10,6 +10,7 @@ import { cloudflareEmail } from "@emdash-cms/cloudflare/plugins";
 import { thaiSonEmailTemplate } from "./src/plugins/thai-son-email-template.ts";
 
 export default defineConfig({
+  site: "https://my-emdash-site.chungg02.workers.dev",
   output: "server",
   adapter: cloudflare(),
   image: {
