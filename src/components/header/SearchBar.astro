@@ -60,3 +60,80 @@ const currentValue = (
     </svg>
   </button>
 </form>
+
+<script>
+  const initializeSearchScrollGuard = (form: HTMLFormElement) => {
+    if (form.dataset.scrollGuardInitialized === "true") return;
+
+    const input = form.querySelector<HTMLInputElement>("input[type='search']");
+    if (!input) return;
+
+    form.dataset.scrollGuardInitialized = "true";
+
+    let scrollX = 0;
+    let scrollY = 0;
+    let shouldPreserveScroll = false;
+    let restoreFrame: number | undefined;
+
+    const rememberScrollPosition = () => {
+      const rect = input.getBoundingClientRect();
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+
+      // Only suppress focus scrolling when the sticky search input is already
+      // visible. Keyboard navigation to an off-screen input should still work.
+      shouldPreserveScroll = rect.top >= 0 && rect.bottom <= viewportHeight;
+
+      if (shouldPreserveScroll) {
+        scrollX = window.scrollX;
+        scrollY = window.scrollY;
+      }
+    };
+
+    const restoreScrollPosition = () => {
+      if (!shouldPreserveScroll) return;
+
+      if (restoreFrame !== undefined) {
+        window.cancelAnimationFrame(restoreFrame);
+      }
+
+      restoreFrame = window.requestAnimationFrame(() => {
+        restoreFrame = undefined;
+
+        if (document.activeElement !== input) return;
+        if (
+          Math.abs(window.scrollX - scrollX) < 1 &&
+          Math.abs(window.scrollY - scrollY) < 1
+        ) {
+          return;
+        }
+
+        const scrollBehavior = document.documentElement.style.scrollBehavior;
+        document.documentElement.style.scrollBehavior = "auto";
+        window.scrollTo(scrollX, scrollY);
+        document.documentElement.style.scrollBehavior = scrollBehavior;
+      });
+    };
+
+    input.addEventListener("pointerdown", rememberScrollPosition, {
+      capture: true,
+    });
+    input.addEventListener("keydown", rememberScrollPosition, {
+      capture: true,
+    });
+    input.addEventListener("beforeinput", rememberScrollPosition);
+    input.addEventListener("focus", restoreScrollPosition);
+    input.addEventListener("input", restoreScrollPosition);
+  };
+
+  const initializeAllSearchScrollGuards = () => {
+    document
+      .querySelectorAll<HTMLFormElement>("[data-site-search]")
+      .forEach(initializeSearchScrollGuard);
+  };
+
+  initializeAllSearchScrollGuards();
+  document.addEventListener(
+    "astro:page-load",
+    initializeAllSearchScrollGuards,
+  );
+</script>
