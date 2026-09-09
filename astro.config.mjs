@@ -7,6 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, fontProviders } from "astro/config";
 import emdash from "emdash/astro";
 import { cloudflareEmail } from "@emdash-cms/cloudflare/plugins";
+import { thaiSonEmailTemplate } from "./src/plugins/thai-son-email-template.ts";
 
 export default defineConfig({
   output: "server",
@@ -24,11 +25,12 @@ export default defineConfig({
         formsPlugin({
           defaultSpamProtection: "honeypot",
         }),
+        thaiSonEmailTemplate(),
         cloudflareEmail({
           binding: "EMAIL",
           from: {
             email: "website@chungdev.website",
-            name: "Thai Son Plastic Website",
+            name: "Thái Sơn Plastic",
           },
           replyTo: "info@thaisonplastic.com",
         }),
