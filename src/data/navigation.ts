@@ -52,27 +52,12 @@ const navigationDefinitions: NavigationDefinition[] = [
     ],
   },
   {
-    labelKey: "nav.adhesiveTape",
-    href: "/product-category/bang-dinh",
+    labelKey: "nav.bubbleWrap",
+    href: "/product-category/cuon-xop-no",
     children: [
-      { labelKey: "nav.clearTape", href: "/products/bang-dinh-trong" },
-      {
-        labelKey: "nav.cartonTape",
-        href: "/products/bang-dinh-dan-thung-carton",
-      },
-      {
-        labelKey: "nav.electricalTape",
-        href: "/products/bang-dinh-cach-dien",
-      },
-      { labelKey: "nav.clothTape", href: "/products/bang-dinh-vai" },
-      { labelKey: "nav.paperTape", href: "/products/bang-dinh-giay" },
-      { labelKey: "nav.doubleSidedTape", href: "/products/bang-keo-2-mat" },
-      { labelKey: "nav.foilTape", href: "/products/bang-dinh-bac" },
-      { labelKey: "nav.medicalTape", href: "/products/bang-dinh-y-te" },
-      {
-        labelKey: "nav.fiberglassTape",
-        href: "/products/bang-dinh-soi-thuy-tinh",
-      },
+      { labelKey: "nav.airBubbleFilm", href: "/products/mang-xop-hoi" },
+      { labelKey: "nav.peFoamRoll", href: "/products/cuon-xop-foam-pe" },
+      { labelKey: "nav.foilFoam", href: "/products/xop-trang-bac" },
     ],
   },
   {
@@ -84,8 +69,8 @@ const navigationDefinitions: NavigationDefinition[] = [
         href: "/product-category/thanh-nep",
       },
       {
-        labelKey: "nav.bubbleWrap",
-        href: "/product-category/cuon-xop-no",
+        labelKey: "nav.adhesiveTape",
+        href: "/product-category/bang-dinh",
       },
       // { label: "Thanh nẹp đóng pallet", href: "/#thanh-nep-goc" },
       // { label: "Nẹp góc công nghiệp", href: "/#thanh-nep-goc" },
