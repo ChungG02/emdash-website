@@ -20,6 +20,8 @@ interface Props {
 
 const { items } = Astro.props;
 const t = useTranslations(getUiLocale(Astro.cookies));
+const featuredItem = items[0];
+const secondaryItems = items.slice(1);
 ---
 
 <section class="news-section" id="tin-tuc">
@@ -27,23 +29,79 @@ const t = useTranslations(getUiLocale(Astro.cookies));
     <SectionHeading title={t("news.title")} linkHref="/posts" />
 
     {
-      items.length > 0 ? (
-        <div class="news-grid">
-          {items.map((item) => (
-            <article class="news-card">
-              {item.image && (
-                <a href={item.href} class="news-image" aria-label={t("news.read", { title: item.title })}>
-                  <Image image={item.image} alt={item.alt} width={850} height={500} />
-                </a>
-              )}
+      featuredItem ? (
+        <div
+          class:list={[
+            "news-layout",
+            { "news-layout--single": secondaryItems.length === 0 },
+          ]}
+        >
+          <article
+            class:list={[
+              "news-card news-card--featured",
+              { "news-card--text-only": !featuredItem.image },
+            ]}
+          >
+            {featuredItem.image && (
+              <a
+                href={featuredItem.href}
+                class="news-image"
+                aria-label={t("news.read", { title: featuredItem.title })}
+              >
+                <Image
+                  image={featuredItem.image}
+                  alt={featuredItem.alt}
+                  width={1000}
+                  height={650}
+                />
+              </a>
+            )}
 
-              <div class="news-body">
-                {item.date && <small>{item.date}</small>}
-                <h3><a href={item.href}>{item.title}</a></h3>
-                {item.description && <p>{item.description}</p>}
-              </div>
-            </article>
-          ))}
+            <div class="news-body">
+              {featuredItem.date && <small>{featuredItem.date}</small>}
+              <h3><a href={featuredItem.href}>{featuredItem.title}</a></h3>
+              {featuredItem.description && <p>{featuredItem.description}</p>}
+            </div>
+          </article>
+
+          {secondaryItems.length > 0 && (
+            <div
+              class="news-list"
+              role="region"
+              aria-label={t("news.title")}
+              tabindex="0"
+            >
+              {secondaryItems.map((item) => (
+                <article
+                  class:list={[
+                    "news-card news-card--compact",
+                    { "news-card--text-only": !item.image },
+                  ]}
+                >
+                  {item.image && (
+                    <a
+                      href={item.href}
+                      class="news-image"
+                      aria-label={t("news.read", { title: item.title })}
+                    >
+                      <Image
+                        image={item.image}
+                        alt={item.alt}
+                        width={420}
+                        height={280}
+                      />
+                    </a>
+                  )}
+
+                  <div class="news-body">
+                    {item.date && <small>{item.date}</small>}
+                    <h3><a href={item.href}>{item.title}</a></h3>
+                    {item.description && <p>{item.description}</p>}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <p class="news-empty">{t("news.empty")}</p>
