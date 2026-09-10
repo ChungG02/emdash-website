@@ -18,8 +18,6 @@ import type { ProductSectionData } from "../modules/types/product.type";
 
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 
-const HOME_PRODUCTS_PER_CATEGORY = 4;
-
 const [productResult, postResult, settings] = await Promise.all([
   getEmDashCollection<"products", EmDashProduct>("products", {
     status: "published",
@@ -52,12 +50,6 @@ if (postResult.error) {
   console.error("Không thể tải tin tức từ EmDash:", postResult.error);
 }
 
-/*
- * Nhóm các sản phẩm theo taxonomy product_category.
- *
- * Không sử dụng dữ liệu cố định trong
- * src/data/products.ts.
- */
 const categoryTermsByProduct = await getTermsForEntries(
   "products",
   productResult.entries.map((product) => product.data.id),
@@ -78,14 +70,12 @@ for (const entry of productResult.entries) {
       products: [],
     };
 
-    if (section.products.length < HOME_PRODUCTS_PER_CATEGORY) {
-      section.products.push({
-        name: entry.data.title,
-        image: entry.data.featured_image,
-        alt: entry.data.featured_image?.alt ?? entry.data.title,
-        href: `/products/${entry.id}`,
-      });
-    }
+    section.products.push({
+      name: entry.data.title,
+      image: entry.data.featured_image,
+      alt: entry.data.featured_image?.alt ?? entry.data.title,
+      href: `/products/${entry.id}`,
+    });
 
     sectionsBySlug.set(category.slug, section);
   }

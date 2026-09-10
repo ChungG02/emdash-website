@@ -36,7 +36,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth; */
   scroll-padding-top: 150px;
 }
 
@@ -127,10 +127,10 @@ button {
   position: sticky;
   top: 0;
   z-index: 1000;
+  /* Keep Chrome's scroll anchoring from using the sticky header while typing. */
   overflow-anchor: none;
   background: #fff;
   box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
-  transform: translateZ(0);
 }
 
 .header-top {
@@ -188,7 +188,6 @@ button {
   height: 46px;
   display: flex;
   overflow: hidden;
-  overflow-anchor: none;
   border: 1px solid #d8e0e6;
   border-radius: 24px;
   background: #fff;
@@ -211,7 +210,7 @@ button {
   outline: 0;
   color: var(--text);
   background: transparent;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .search-box button {
@@ -303,7 +302,7 @@ button {
   min-height: 52px;
   display: flex;
   align-items: stretch;
-  justify-content: space-between;
+  justify-content: space-around;
   list-style: none;
 }
 
@@ -453,7 +452,8 @@ button {
 
 .hero-stage {
   position: relative;
-  height: clamp(260px, 31.5vw, 610px);
+  height: clamp(320px, 34vw, 660px);
+  overflow: hidden;
 }
 
 .carousel-slide {
@@ -476,8 +476,12 @@ button {
   display: block;
 }
 
+.carousel-slide a {
+  overflow: hidden;
+}
+
 .carousel-slide img {
-  object-fit: cover;
+  object-fit: fill;
   object-position: center;
   user-select: none;
 }
@@ -733,24 +737,22 @@ button {
   top: 50%;
   right: -22px;
   z-index: 5;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
   padding: 0;
-  border: 3px solid #fff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 50%;
   color: #fff;
-  background: linear-gradient(145deg, #1591da, var(--blue-dark));
-  box-shadow:
-    0 8px 22px rgba(7, 53, 99, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  opacity: 0.55;
+  background: rgba(3, 22, 43, 0.42);
+  box-shadow: 0 4px 14px rgba(3, 22, 43, 0.16);
+  backdrop-filter: blur(4px);
   transform: translateY(-50%);
   transition:
+    opacity 0.2s,
     background 0.2s,
-    border-color 0.2s,
-    color 0.2s,
-    transform 0.2s,
     box-shadow 0.2s;
 }
 
@@ -762,18 +764,15 @@ button {
 
 .product-carousel__next:hover,
 .product-carousel__next:focus-visible {
-  outline: 0;
-  border-color: var(--blue);
-  color: var(--blue);
-  background: #fff;
-  box-shadow:
-    0 10px 26px rgba(7, 53, 99, 0.34),
-    0 0 0 4px rgba(8, 115, 197, 0.14);
-  transform: translateY(-50%) scale(1.08);
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  opacity: 1;
+  background: rgba(3, 22, 43, 0.72);
+  box-shadow: 0 7px 18px rgba(3, 22, 43, 0.28);
 }
 
 .product-carousel__next:active {
-  transform: translateY(-50%) scale(0.96);
+  background: rgba(3, 22, 43, 0.84);
 }
 
 @media (max-width: 1300px) {
@@ -1404,14 +1403,6 @@ button {
   transform: none;
 }
 
-@media (min-width: 821px) and (max-width: 1280px) {
-  .nav-link {
-    gap: clamp(3px, 0.45vw, 6px);
-    padding-inline: clamp(4px, 0.7vw, 10px);
-    font-size: clamp(12px, 1.25vw, 16px);
-  }
-}
-
 @media (max-width: 1080px) {
   .header-top-inner {
     grid-template-columns: 168px 1fr 215px;
@@ -1547,8 +1538,8 @@ button {
   }
 
   .hero-stage {
-    height: 42vw;
-    min-height: 260px;
+    height: 45vw;
+    min-height: 320px;
   }
 
   .carousel-control {
@@ -1624,8 +1615,13 @@ button {
   }
 
   .hero-stage {
-    height: 220px;
-    min-height: 220px;
+    aspect-ratio: 647 / 270;
+    height: auto;
+    min-height: 0;
+  }
+
+  .carousel-slide img {
+    object-fit: contain;
   }
 
   .carousel-control {

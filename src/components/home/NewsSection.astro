@@ -3,6 +3,7 @@ import type { MediaValue } from "emdash";
 import { Image } from "emdash/ui";
 import Container from "../common/Container.astro";
 import SectionHeading from "./SectionHeading.astro";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
 
 interface NewsCardData {
   title: string;
@@ -18,11 +19,12 @@ interface Props {
 }
 
 const { items } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
 <section class="news-section" id="tin-tuc">
   <Container>
-    <SectionHeading title="TIN TỨC" linkHref="/posts" />
+    <SectionHeading title={t("news.title")} linkHref="/posts" />
 
     {
       items.length > 0 ? (
@@ -30,7 +32,7 @@ const { items } = Astro.props;
           {items.map((item) => (
             <article class="news-card">
               {item.image && (
-                <a href={item.href} class="news-image" aria-label={`Đọc ${item.title}`}>
+                <a href={item.href} class="news-image" aria-label={t("news.read", { title: item.title })}>
                   <Image image={item.image} alt={item.alt} width={850} height={500} />
                 </a>
               )}
@@ -44,7 +46,7 @@ const { items } = Astro.props;
           ))}
         </div>
       ) : (
-        <p class="news-empty">Chưa có bài viết nào được xuất bản.</p>
+        <p class="news-empty">{t("news.empty")}</p>
       )
     }
   </Container>

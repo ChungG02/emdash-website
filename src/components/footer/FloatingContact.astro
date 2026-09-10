@@ -1,13 +1,16 @@
 ---
 import { siteConfig } from "../../data/site";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
+
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
 <div class="floating-contact" data-floating-contact>
   <a
     href={"tel:" + siteConfig.phoneHref}
     class="floating-button phone-button"
-    title="Gọi hotline"
-    aria-label={"Gọi hotline " + siteConfig.phone}
+    title={t("floating.callHotline")}
+    aria-label={t("floating.callHotlineNumber", { phone: siteConfig.phone })}
   >
     <span class="floating-button__ring" aria-hidden="true"></span>
     <span class="floating-button__pulse" aria-hidden="true"></span>
@@ -29,8 +32,8 @@ import { siteConfig } from "../../data/site";
     target="_blank"
     rel="noopener noreferrer"
     class="floating-button whatsapp-button"
-    title="Liên hệ WhatsApp"
-    aria-label="Liên hệ qua WhatsApp"
+    title={t("floating.contactWhatsApp")}
+    aria-label={t("floating.contactViaWhatsApp")}
   >
     <span class="floating-button__ring" aria-hidden="true"></span>
     <span class="floating-button__pulse" aria-hidden="true"></span>
@@ -57,8 +60,8 @@ import { siteConfig } from "../../data/site";
     target="_blank"
     rel="noopener noreferrer"
     class="floating-button zalo-button"
-    title="Liên hệ Zalo"
-    aria-label="Liên hệ qua Zalo"
+    title={t("floating.contactZalo")}
+    aria-label={t("floating.contactViaZalo")}
   >
     <span class="floating-button__ring" aria-hidden="true"></span>
     <span class="floating-button__pulse" aria-hidden="true"></span>

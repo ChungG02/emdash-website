@@ -1,19 +1,21 @@
 ---
 import type { PortableTextBlock } from "emdash";
 import { PortableText } from "emdash/ui";
+import { getUiLocale, useTranslations } from "../../../i18n/ui";
 
 interface Props {
 	description?: PortableTextBlock[];
 }
 
 const { description = [] } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
 {
 	description.length > 0 && (
 		<section
 			class="product-description"
-			aria-label="Mô tả sản phẩm"
+			aria-label={t("products.description")}
 		>
 			<PortableText value={description} />
 		</section>

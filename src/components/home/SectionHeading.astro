@@ -1,11 +1,14 @@
 ---
+import { getUiLocale, useTranslations } from "../../i18n/ui";
+
 interface Props {
   title: string;
   linkHref?: string;
   linkLabel?: string;
 }
 
-const { title, linkHref = "#lien-he", linkLabel = "Xem thêm" } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
+const { title, linkHref = "#lien-he", linkLabel = t("common.viewMore") } = Astro.props;
 ---
 
 <div class="section-title-row" style="margin-top: -10px; margin-bottom: 20px;">

@@ -1,4 +1,6 @@
 ---
+import { getUiLocale, useTranslations } from "../../i18n/ui";
+
 interface Props {
   id?: string;
   formId?: string;
@@ -13,9 +15,12 @@ const {
   formId = "site-search-form",
   action = "/search",
   inputName = "q",
-  placeholder = "Tìm kiếm sản phẩm...",
+  placeholder,
   value,
 } = Astro.props;
+
+const t = useTranslations(getUiLocale(Astro.cookies));
+const resolvedPlaceholder = placeholder ?? t("search.placeholder");
 
 const isSearchPage = Astro.url.pathname.replace(/\/+$/, "") === "/search";
 const currentValue = (
@@ -33,19 +38,19 @@ const currentValue = (
   class="search-box w-full"
   data-site-search
 >
-  <label for={id} class="visually-hidden"> Tìm kiếm sản phẩm </label>
+  <label for={id} class="visually-hidden">{t("search.label")}</label>
 
   <input
     id={id}
     type="search"
     name={inputName}
     value={currentValue}
-    placeholder={placeholder}
+    placeholder={resolvedPlaceholder}
     maxlength="120"
     autocomplete="off"
   />
 
-  <button type="submit" aria-label="Tìm kiếm">
+  <button type="submit" aria-label={t("search.submit")}>
     <svg
       viewBox="0 0 24 24"
       fill="none"
@@ -62,150 +67,69 @@ const currentValue = (
 </form>
 
 <script>
-  const SEARCH_SCROLL_LOCK_MS = 500;
-  const SEARCH_SCROLL_RESTORE_DELAYS = [50, 150, 350];
-
-  const initializeSearchScrollGuard = (form: HTMLFormElement) => {
-    if (form.dataset.scrollGuardInitialized === "true") return;
-
-    const input = form.querySelector<HTMLInputElement>("input[type='search']");
-    if (!input) return;
-
-    form.dataset.scrollGuardInitialized = "true";
-
-    let preservedScrollPosition: { x: number; y: number } | null = null;
-    let scrollLockExpiresAt = 0;
-    let restoreFrame: number | undefined;
-    let restoreTimeouts: number[] = [];
-
-    const isInputVisible = () => {
-      const rect = input.getBoundingClientRect();
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-
-      return rect.top >= 0 && rect.bottom <= viewportHeight;
-    };
-
-    const rememberScrollPosition = (force = false) => {
-      if (!isInputVisible()) return;
-
-      const now = window.performance.now();
-
-      // Keep the position captured before focus instead of replacing it with
-      // a position produced by a delayed browser focus scroll.
-      if (
-        force ||
-        preservedScrollPosition === null ||
-        now > scrollLockExpiresAt
-      ) {
-        preservedScrollPosition = {
-          x: window.scrollX,
-          y: window.scrollY,
-        };
-      }
-
-      scrollLockExpiresAt = now + SEARCH_SCROLL_LOCK_MS;
-    };
-
-    const clearScheduledRestores = () => {
-      if (restoreFrame !== undefined) {
-        window.cancelAnimationFrame(restoreFrame);
-        restoreFrame = undefined;
-      }
-
-      restoreTimeouts.forEach((timeout) => window.clearTimeout(timeout));
-      restoreTimeouts = [];
-    };
-
-    const restoreScrollPosition = () => {
-      if (
-        preservedScrollPosition === null ||
-        document.activeElement !== input ||
-        window.performance.now() > scrollLockExpiresAt
-      ) {
-        return;
-      }
-
-      const { x, y } = preservedScrollPosition;
-
-      if (
-        Math.abs(window.scrollX - x) < 1 &&
-        Math.abs(window.scrollY - y) < 1
-      ) {
-        return;
-      }
-
-      const scrollBehavior = document.documentElement.style.scrollBehavior;
-      document.documentElement.style.scrollBehavior = "auto";
-      window.scrollTo(x, y);
-      document.documentElement.style.scrollBehavior = scrollBehavior;
-    };
-
-    const scheduleScrollRestore = () => {
-      clearScheduledRestores();
-      restoreScrollPosition();
-      window.queueMicrotask(restoreScrollPosition);
-
-      restoreFrame = window.requestAnimationFrame(() => {
-        restoreScrollPosition();
-
-        restoreFrame = window.requestAnimationFrame(() => {
-          restoreFrame = undefined;
-          restoreScrollPosition();
-        });
-      });
-
-      restoreTimeouts = SEARCH_SCROLL_RESTORE_DELAYS.map((delay) =>
-        window.setTimeout(restoreScrollPosition, delay),
-      );
-    };
-
-    const startScrollLock = (force = false) => {
-      rememberScrollPosition(force);
-      scheduleScrollRestore();
-    };
-
-    const releaseScrollLock = () => {
-      clearScheduledRestores();
-      preservedScrollPosition = null;
-      scrollLockExpiresAt = 0;
-    };
-
-    input.addEventListener("pointerdown", () => {
-      startScrollLock(true);
-
-      // Focus at the current viewport position before the browser performs
-      // its default focus action for the sticky header input.
-      input.focus({ preventScroll: true });
-      scheduleScrollRestore();
-    });
-    input.addEventListener("keydown", () => startScrollLock());
-    input.addEventListener("beforeinput", () => startScrollLock());
-    input.addEventListener("compositionstart", () => startScrollLock());
-    input.addEventListener("compositionupdate", () => startScrollLock());
-    input.addEventListener("focus", scheduleScrollRestore);
-    input.addEventListener("input", scheduleScrollRestore);
-    input.addEventListener("blur", releaseScrollLock);
-
-    window.addEventListener("scroll", restoreScrollPosition, {
-      capture: true,
-      passive: true,
-    });
-
-    // Deliberate wheel/touch scrolling should remain available while the
-    // input is focused; only browser-driven movement during typing is locked.
-    window.addEventListener("wheel", releaseScrollLock, { passive: true });
-    window.addEventListener("touchmove", releaseScrollLock, { passive: true });
-  };
-
-  const initializeAllSearchScrollGuards = () => {
+  const initializeSearchScrollGuards = () => {
     document
-      .querySelectorAll<HTMLFormElement>("[data-site-search]")
-      .forEach(initializeSearchScrollGuard);
+      .querySelectorAll<HTMLInputElement>(
+        "[data-site-search] input[type='search']",
+      )
+      .forEach((input) => {
+        if (input.dataset.scrollGuardInitialized === "true") return;
+        input.dataset.scrollGuardInitialized = "true";
+
+        let scrollPosition = window.scrollY;
+        let lastKeydownAt = 0;
+        let restoreFrame = 0;
+
+        const rememberKeyboardScrollPosition = () => {
+          lastKeydownAt = performance.now();
+          scrollPosition = window.scrollY;
+        };
+
+        const rememberNonKeyboardScrollPosition = () => {
+          // On Chrome, beforeinput may fire after the browser has already moved
+          // the sticky input. Do not let it overwrite the keydown position.
+          if (performance.now() - lastKeydownAt > 250) {
+            scrollPosition = window.scrollY;
+          }
+        };
+
+        const restoreUnexpectedUpwardScroll = () => {
+          window.cancelAnimationFrame(restoreFrame);
+          let remainingFrames = 6;
+
+          const restore = () => {
+            if (document.activeElement !== input) return;
+
+            const upwardShift = scrollPosition - window.scrollY;
+            const headerHeight =
+              input.closest<HTMLElement>(".site-header")?.offsetHeight ?? 0;
+
+            // Chrome can nudge a focused control inside a sticky element upward
+            // during caret updates. Only undo a small upward shift caused by input;
+            // normal page scrolling and larger navigations remain untouched.
+            if (upwardShift > 0 && upwardShift <= headerHeight + 32) {
+              const root = document.documentElement;
+              const previousScrollBehavior = root.style.scrollBehavior;
+              root.style.scrollBehavior = "auto";
+              window.scrollTo(window.scrollX, scrollPosition);
+              root.style.scrollBehavior = previousScrollBehavior;
+            }
+
+            remainingFrames -= 1;
+            if (remainingFrames > 0) {
+              restoreFrame = window.requestAnimationFrame(restore);
+            }
+          };
+
+          restoreFrame = window.requestAnimationFrame(restore);
+        };
+
+        input.addEventListener("keydown", rememberKeyboardScrollPosition);
+        input.addEventListener("beforeinput", rememberNonKeyboardScrollPosition);
+        input.addEventListener("input", restoreUnexpectedUpwardScroll);
+      });
   };
 
-  initializeAllSearchScrollGuards();
-  document.addEventListener(
-    "astro:page-load",
-    initializeAllSearchScrollGuards,
-  );
+  initializeSearchScrollGuards();
+  document.addEventListener("astro:page-load", initializeSearchScrollGuards);
 </script>

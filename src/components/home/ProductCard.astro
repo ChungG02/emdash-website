@@ -1,26 +1,28 @@
 ---
 import { Image } from "emdash/ui";
 import type { ProductCardItem } from "../../modules/types/product.type";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
 
 interface Props {
   product: ProductCardItem;
 }
 
 const { product } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
 ---
 
 <article class="product-card" data-product-card>
   <a
     href={product.href}
     class="product-image"
-    aria-label={`Xem ${product.name}`}
+    aria-label={t("common.view", { name: product.name })}
   >
     {
       product.image ? (
         <Image image={product.image} />
       ) : (
         <div class="product-image__placeholder">
-          Chưa có hình ảnh
+          {t("common.noImage")}
         </div>
       )
     }
@@ -36,7 +38,7 @@ const { product } = Astro.props;
       class="product-action"
       data-product-request={product.name}
     >
-      Xem chi tiết
+      {t("common.viewDetails")}
     </a>
   </div>
 </article>

@@ -2,23 +2,25 @@
 import Container from "../common/Container.astro";
 import ContactSection from "../home/ContactSection.astro";
 import { siteConfig } from "../../data/site";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
 
 const currentYear = new Date().getFullYear();
+const t = useTranslations(getUiLocale(Astro.cookies));
 
 const productLinks = [
-  { label: "Hạt nhựa nguyên sinh", href: "/#hat-nhua-nguyen-sinh" },
-  { label: "Màng quấn PE", href: "/#mang-pe" },
-  { label: "Dây đai PET", href: "/#day-dai-pet" },
-  { label: "Các loại băng dính", href: "/#bang-dinh" },
-  { label: "Thanh nẹp", href: "/#thanh-nep-goc" },
+  { label: t("nav.virginResin"), href: "/#hat-nhua-nguyen-sinh" },
+  { label: t("nav.peFilm"), href: "/#mang-pe" },
+  { label: t("nav.petStrap"), href: "/#day-dai-pet" },
+  { label: t("nav.adhesiveTape"), href: "/#bang-dinh" },
+  { label: t("nav.edgeProtector"), href: "/#thanh-nep-goc" },
 ];
 
 const quickLinks = [
-  { label: "Trang chủ", href: "/" },
-  { label: "Giới thiệu", href: "/gioi-thieu" },
-  { label: "Tin tức", href: "/#tin-tuc" },
-  { label: "Catalogue", href: "/#catalogue" },
-  { label: "Liên hệ", href: "/lien-he" },
+  { label: t("common.home"), href: "/" },
+  { label: t("footer.about"), href: "/gioi-thieu" },
+  { label: t("nav.news"), href: "/#tin-tuc" },
+  { label: t("footer.catalogue"), href: "/#catalogue" },
+  { label: t("nav.contact"), href: "/lien-he" },
 ];
 ---
 
@@ -50,9 +52,13 @@ const quickLinks = [
                     stroke-linejoin="round"></path>
                 </svg>
               </span>
-              <span>
+              <span class="ts-footer__hotlines">
                 <strong>Hotline:</strong>{" "}
                 <a href={`tel:${siteConfig.phoneHref}`}>{siteConfig.phone}</a>
+                <span aria-hidden="true">/</span>
+                <a href={`tel:${siteConfig.secondaryPhoneHref}`}>
+                  {siteConfig.secondaryPhone}
+                </a>
               </span>
             </li>
 
@@ -99,7 +105,7 @@ const quickLinks = [
                 </svg>
               </span>
               <span>
-                <strong>Địa chỉ ĐKKD:</strong>{" "}
+                <strong>{t("footer.registeredAddress")}:</strong>{" "}
                 {siteConfig.address}
               </span>
             </li>
@@ -120,7 +126,7 @@ const quickLinks = [
               </span>
 
               <span>
-                <strong>Mã số doanh nghiệp:</strong>{" "}
+                <strong>{t("footer.businessId")}:</strong>{" "}
                 {siteConfig.businessRegistrationNumber}
               </span>
             </li>
@@ -129,7 +135,7 @@ const quickLinks = [
       </section>
 
       <nav class="ts-footer__column" aria-labelledby="footer-products-title">
-        <h2 id="footer-products-title" class="ts-footer__title">Sản phẩm</h2>
+        <h2 id="footer-products-title" class="ts-footer__title">{t("footer.products")}</h2>
         <ul class="ts-footer__links">
           {
             productLinks.map((item) => (
@@ -142,7 +148,7 @@ const quickLinks = [
       </nav>
 
       <nav class="ts-footer__column" aria-labelledby="footer-links-title">
-        <h2 id="footer-links-title" class="ts-footer__title">Liên kết nhanh</h2>
+        <h2 id="footer-links-title" class="ts-footer__title">{t("footer.quickLinks")}</h2>
         <ul class="ts-footer__links">
           {
             quickLinks.map((item) => (
@@ -290,6 +296,13 @@ const quickLinks = [
     color: #fff;
   }
 
+  .ts-footer__hotlines {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    white-space: nowrap;
+  }
+
   .ts-footer__contact-icon {
     width: 2rem;
     height: 2rem;
@@ -416,6 +429,10 @@ const quickLinks = [
 
     .ts-footer__contact-list li:last-child {
       grid-column: auto;
+    }
+
+    .ts-footer__hotlines {
+      font-size: clamp(0.8rem, 3.7vw, 0.925rem);
     }
 
     .ts-footer__title {

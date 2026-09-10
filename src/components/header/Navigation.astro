@@ -1,19 +1,14 @@
 ---
 import Container from "../common/Container.astro";
-import {
-  navigationItems,
-  type NavigationItem,
-} from "../../data/navigation";
+import { getNavigationItems } from "../../data/navigation";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
 
-interface Props {
-  items?: NavigationItem[];
-}
-
-const { items = navigationItems } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
+const navigationItems = getNavigationItems(t);
 ---
 
 <div class="nav-shell" id="main-navigation">
-  <nav aria-label="Điều hướng chính">
+  <nav aria-label={t("nav.primary")}>
     <Container>
       <ul class="nav-list">
         <li class="nav-item">
@@ -21,12 +16,12 @@ const { items = navigationItems } = Astro.props;
             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
             </svg>
-            Trang chủ
+            {t("common.home")}
           </a>
         </li>
 
         {
-          items.map((item, index) => (
+          navigationItems.map((item, index) => (
             <li
               class:list={[
                 "nav-item",
@@ -73,9 +68,18 @@ const { items = navigationItems } = Astro.props;
                     item.children.length > 10 && "nav-dropdown-mega",
                   ]}
                 >
-                  {item.children.map((child) => (
-                    <a href={child.href}>{child.label}</a>
-                  ))}
+                  {item.children.map((child) =>
+                    child.disabled ? (
+                      <span
+                        class="flex cursor-not-allowed items-center rounded-md px-2.5 py-[9px] text-[13px] text-slate-400"
+                        aria-disabled="true"
+                      >
+                        {child.label}
+                      </span>
+                    ) : (
+                      <a href={child.href}>{child.label}</a>
+                    )
+                  )}
                 </div>
               )}
             </li>

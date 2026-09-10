@@ -1,22 +1,14 @@
 ---
 import Container from "../common/Container.astro";
-import {
-  isNavigationItemActive,
-  navigationItems,
-  type NavigationItem,
-} from "../../data/navigation";
+import { getNavigationItems, isNavigationItemActive } from "../../data/navigation";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
 
-interface Props {
-  items?: NavigationItem[];
-}
-
-const { items = navigationItems } = Astro.props;
 const currentPath = Astro.url.pathname;
+const t = useTranslations(getUiLocale(Astro.cookies));
+const navigationItems = getNavigationItems(t);
 
 const isActive = (href: string) => isNavigationItemActive(currentPath, href);
-const isItemActive = (item: NavigationItem) =>
-  isActive(item.href) || item.children?.some((child) => isActive(child.href));
 ---
 
 <details class="group/mobile" id="mobile-menu-details">
@@ -37,7 +29,7 @@ const isItemActive = (item: NavigationItem) =>
         <path d="M4 18h16"></path>
       </svg>
 
-      Danh mục
+      {t("nav.menu")}
     </span>
 
     <svg
@@ -67,12 +59,12 @@ const isItemActive = (item: NavigationItem) =>
               currentPath === "/" && "text-[#1477b9]",
             ]}
           >
-            Trang chủ
+            {t("common.home")}
           </a>
         </li>
 
         {
-          items.map((item) => (
+          navigationItems.map((item) => (
             <li>
               {item.children ? (
                 <details class="group/item">
@@ -80,7 +72,7 @@ const isItemActive = (item: NavigationItem) =>
                     class:list={[
                       "flex cursor-pointer list-none items-center justify-between py-3 text-sm font-semibold uppercase",
                       "text-slate-700 [&::-webkit-details-marker]:hidden",
-                      isItemActive(item) && "text-[#1477b9]",
+                      isActive(item.href) && "text-[#1477b9]",
                     ]}
                   >
                     {item.label}
@@ -105,23 +97,32 @@ const isItemActive = (item: NavigationItem) =>
                         href={item.href}
                         class="block px-4 py-2.5 text-sm font-semibold text-[#1477b9]"
                       >
-                        Xem tất cả {item.label}
+                        {t("common.viewAllNamed", { name: item.label })}
                       </a>
                     </li>
 
                     {item.children.map((child) => (
                       <li>
-                        <a
-                          href={child.href}
-                          class:list={[
-                            "block px-4 py-2.5 text-sm text-slate-600 transition",
-                            "hover:bg-slate-100 hover:text-[#1477b9]",
-                            isActive(child.href) &&
-                              "bg-slate-100 font-semibold text-[#1477b9]",
-                          ]}
-                        >
-                          {child.label}
-                        </a>
+                        {child.disabled ? (
+                          <span
+                            class="block cursor-not-allowed px-4 py-2.5 text-sm text-slate-400"
+                            aria-disabled="true"
+                          >
+                            {child.label}
+                          </span>
+                        ) : (
+                          <a
+                            href={child.href}
+                            class:list={[
+                              "block px-4 py-2.5 text-sm text-slate-600 transition",
+                              "hover:bg-slate-100 hover:text-[#1477b9]",
+                              isActive(child.href) &&
+                                "bg-slate-100 font-semibold text-[#1477b9]",
+                            ]}
+                          >
+                            {child.label}
+                          </a>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -146,7 +147,7 @@ const isItemActive = (item: NavigationItem) =>
       <div
         class="mt-4 flex items-center justify-between border-t border-slate-200 pt-4"
       >
-        <span class="text-sm font-semibold text-slate-600">Ngôn ngữ</span>
+        <span class="text-sm font-semibold text-slate-600">{t("nav.language")}</span>
         <LanguageSwitcher />
       </div>
     </Container>
