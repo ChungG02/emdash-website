@@ -92,21 +92,37 @@ const navigationDefinitions: NavigationDefinition[] = [
 
 const productCategoryPathPrefix = "/product-category/";
 
-export const productCategoryNavigationOrder = navigationDefinitions
-  .flatMap((item) => [item, ...(item.children ?? [])])
+const flattenNavigationDefinitions = (
+  items: NavigationDefinition[],
+): NavigationDefinition[] =>
+  items.flatMap((item) => [
+    item,
+    ...flattenNavigationDefinitions(item.children ?? []),
+  ]);
+
+// Homepage uses this list, so changing category positions in the menu is enough
+// to change their section order there as well (including submenu categories).
+export const productCategoryNavigationOrder = flattenNavigationDefinitions(
+  navigationDefinitions,
+)
   .filter((item) => item.href.startsWith(productCategoryPathPrefix))
   .map((item) => item.href.slice(productCategoryPathPrefix.length));
 
-export const getNavigationItems = (translate: Translate): NavigationItem[] =>
-  navigationDefinitions.map((item) => ({
+const translateNavigationItems = (
+  items: NavigationDefinition[],
+  translate: Translate,
+): NavigationItem[] =>
+  items.map((item) => ({
     label: translate(item.labelKey),
     href: item.href,
-    children: item.children?.map((child) => ({
-      label: translate(child.labelKey),
-      href: child.href,
-      disabled: child.disabled,
-    })),
+    disabled: item.disabled,
+    children: item.children
+      ? translateNavigationItems(item.children, translate)
+      : undefined,
   }));
+
+export const getNavigationItems = (translate: Translate): NavigationItem[] =>
+  translateNavigationItems(navigationDefinitions, translate);
 
 export const isNavigationItemActive = (
   currentPath: string,
