@@ -1,49 +1,54 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "my-emdash-site",
-  "main": "./src/worker.ts",
-  "compatibility_date": "2026-02-24",
-  "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "my-emdash-site",
-      "database_id": "ff9c1aca-4c18-4341-bb4d-b6f4b624987a",
-      "migrations_dir": "../../../../migrations",
-      "remote": false
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "MEDIA",
-      "bucket_name": "my-emdash-media",
-      "remote": false
-    }
-  ],
-  "kv_namespaces": [
-    {
-      "binding": "SESSION",
-      "id": "677d3938683a4ceaad3d2b02d4363f1e",
-      "remote": false
-    }
-  ],
-
-  "send_email": [
-    {
-      "name": "EMAIL",
-      "destination_address": "info@thaisonplastic.com",
-      "allowed_sender_addresses": ["website@chungdev.website"],
-      "remote": true
-    }
-  ],
-  // Worker Loader for plugin sandboxing
-  "worker_loaders": [
-    {
-      "binding": "LOADER"
-    }
-  ],
-  // Drives scheduled publishing, plugin cron, and maintenance (see src/worker.ts)
-  "triggers": {
-    "crons": ["* * * * *"]
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "my-emdash-site",
+	"main": "./src/worker.ts",
+	"compatibility_date": "2026-02-24",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "my-emdash-site",
+			"database_id": "ff9c1aca-4c18-4341-bb4d-b6f4b624987a",
+			"migrations_dir": "../../../../../../migrations",
+			"remote": false
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA",
+			"bucket_name": "my-emdash-media",
+			"remote": false
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+			"id": "677d3938683a4ceaad3d2b02d4363f1e",
+			"remote": false
+		}
+	],
+	"send_email": [
+		{
+			"name": "EMAIL",
+			"destination_address": "info@thaisonplastic.com",
+			"allowed_sender_addresses": [
+				"website@chungdev.website"
+			],
+			"remote": true
+		}
+	],
+	// Worker Loader for plugin sandboxing
+	"worker_loaders": [
+		{
+			"binding": "LOADER"
+		}
+	],
+	// Drives scheduled publishing, plugin cron, and maintenance (see src/worker.ts)
+	"triggers": {
+		"crons": [
+			"* * * * *"
+		]
+	}
 }
