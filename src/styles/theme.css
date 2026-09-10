@@ -1963,13 +1963,13 @@ button {
   }
 
   .hero-stage {
-    aspect-ratio: 647 / 270;
+    aspect-ratio: 2048 / 682;
     height: auto;
     min-height: 0;
   }
 
   .carousel-slide img {
-    object-fit: contain;
+    object-fit: cover;
   }
 
   .carousel-control {
