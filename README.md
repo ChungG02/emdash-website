@@ -22,13 +22,6 @@
 | Static pages | `/pages/:slug` |
 | 404 | fallback |
 
-## Screenshots
-
-| | Desktop | Mobile |
-|---|---|---|
-| Light | ![homepage light desktop](https://raw.githubusercontent.com/emdash-cms/emdash/main/assets/templates/blog/latest/homepage-light-desktop.jpg) | ![homepage light mobile](https://raw.githubusercontent.com/emdash-cms/emdash/main/assets/templates/blog/latest/homepage-light-mobile.jpg) |
-| Dark | ![homepage dark desktop](https://raw.githubusercontent.com/emdash-cms/emdash/main/assets/templates/blog/latest/homepage-dark-desktop.jpg) | ![homepage dark mobile](https://raw.githubusercontent.com/emdash-cms/emdash/main/assets/templates/blog/latest/homepage-dark-mobile.jpg) |
-
 ## Infrastructure
 
 - **Runtime:** Cloudflare Workers
