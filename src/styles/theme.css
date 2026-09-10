@@ -448,11 +448,13 @@ button {
   position: relative;
   overflow: hidden;
   background: #dfe8ef;
+  container-type: inline-size;
 }
 
 .hero-stage {
   position: relative;
-  height: clamp(320px, 34vw, 660px);
+  aspect-ratio: 3 / 1;
+  height: auto;
   overflow: hidden;
 }
 
@@ -469,21 +471,410 @@ button {
   pointer-events: auto;
 }
 
-.carousel-slide a,
-.carousel-slide img {
+.carousel-slide .hero-background {
   width: 100%;
   height: 100%;
   display: block;
-}
-
-.carousel-slide a {
-  overflow: hidden;
-}
-
-.carousel-slide img {
   object-fit: fill;
   object-position: center;
   user-select: none;
+}
+
+.carousel-slide-link {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+
+.hero-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  color: #f7fbff;
+  font-family: var(--font-body), Arial, sans-serif;
+  text-shadow: 0 0.08em 0.12em rgba(0, 30, 61, 0.22);
+  pointer-events: none;
+}
+
+.hero-brand-copy,
+.hero-headline,
+.hero-headline-line,
+.hero-benefit {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-brand-copy {
+  position: absolute;
+  left: 10.2%;
+  top: 9.7%;
+  gap: 0.35cqw;
+  white-space: nowrap;
+}
+
+.hero-brand-copy strong {
+  font-size: 1.78cqw;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.hero-brand-copy span {
+  font-size: 0.92cqw;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.hero-headline {
+  position: absolute;
+  text-transform: uppercase;
+}
+
+.hero-headline-line {
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+.hero-subheading,
+.hero-footer-copy {
+  position: absolute;
+  margin: 0;
+}
+
+.hero-product-labels,
+.hero-benefits {
+  position: absolute;
+  display: grid;
+}
+
+.hero-product-labels span,
+.hero-benefit strong,
+.hero-benefit span {
+  display: block;
+}
+
+/* Banner 1: copy coordinates measured against banner1.1.png. */
+.carousel-slide[data-layout="factory"] .hero-brand-copy {
+  top: 7.1%;
+  left: 10.7%;
+  gap: 0.3cqw;
+}
+
+.carousel-slide[data-layout="factory"] .hero-brand-copy strong {
+  font-size: 1.62cqw;
+}
+
+.carousel-slide[data-layout="factory"] .hero-brand-copy span {
+  font-size: 0.84cqw;
+}
+
+.carousel-slide[data-layout="factory"] .hero-headline {
+  top: 23.3%;
+  left: 4.8%;
+  gap: 0.05cqw;
+}
+
+.carousel-slide[data-layout="factory"] .hero-headline .line-1 {
+  font-size: 3.02cqw;
+  line-height: 1.08;
+}
+
+.carousel-slide[data-layout="factory"] .hero-headline .line-2 {
+  padding-top: 0.18em;
+  margin-top: -0.18em;
+  color: #c9efff;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #ffffff 42%,
+    #eefaff 66%,
+    #c9efff 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.012em rgba(235, 248, 255, 0.72);
+  paint-order: stroke fill;
+  text-shadow: none;
+  filter: drop-shadow(0 0.055em 0.035em rgba(0, 38, 76, 0.2));
+  font-size: 5cqw;
+  line-height: 0.96;
+  letter-spacing: -0.055em;
+}
+
+.carousel-slide[data-layout="factory"] .hero-headline .line-3 {
+  margin-top: 0.32cqw;
+  font-size: 1.8cqw;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.carousel-slide[data-layout="factory"] .hero-product-labels {
+  top: 72.4%;
+  left: 0;
+  width: 100%;
+  display: block;
+  color: #f8fbff;
+  font-size: 0.78cqw;
+  line-height: 1.2;
+  font-weight: 600;
+  text-align: center;
+}
+
+.carousel-slide[data-layout="factory"] .hero-product-labels span {
+  position: absolute;
+  top: 0;
+  width: 7.2cqw;
+  padding-inline: 0.2cqw;
+  transform: translateX(-50%);
+  white-space: normal;
+  text-wrap: balance;
+}
+
+/* Keep every label centred on its icon instead of distributing the labels
+   into equal columns—the artwork's icon spacing is intentionally uneven. */
+.carousel-slide[data-layout="factory"] .hero-product-labels span:nth-child(1) {
+  left: 6.7%;
+}
+
+.carousel-slide[data-layout="factory"] .hero-product-labels span:nth-child(2) {
+  left: 13.2%;
+}
+
+.carousel-slide[data-layout="factory"] .hero-product-labels span:nth-child(3) {
+  left: 19.2%;
+}
+
+.carousel-slide[data-layout="factory"] .hero-product-labels span:nth-child(4) {
+  left: 25.4%;
+}
+
+.carousel-slide[data-layout="factory"] .hero-product-labels span:nth-child(5) {
+  left: 31.9%;
+}
+
+.carousel-slide[data-layout="factory"] .hero-product-labels span:nth-child(6) {
+  left: 38.4%;
+}
+
+.carousel-slide[data-layout="factory"] .hero-benefits {
+  top: 87.4%;
+  left: 0;
+  width: 100%;
+  display: block;
+  color: #f7fbff;
+  font-size: 0.77cqw;
+  line-height: 1.18;
+}
+
+.carousel-slide[data-layout="factory"] .hero-benefit {
+  position: absolute;
+  top: 0;
+  justify-content: center;
+  min-height: 2.3cqw;
+}
+
+/* The benefit icons in the artwork are intentionally spaced unevenly.
+   Position every label just after its icon so they keep the same visual gap. */
+.carousel-slide[data-layout="factory"] .hero-benefit:nth-child(1) {
+  left: 7.5%;
+}
+
+.carousel-slide[data-layout="factory"] .hero-benefit:nth-child(2) {
+  left: 21%;
+}
+
+.carousel-slide[data-layout="factory"] .hero-benefit:nth-child(3) {
+  left: 33%;
+}
+
+.carousel-slide[data-layout="factory"] .hero-benefit strong {
+  max-width: 7.5cqw;
+  font-weight: 600;
+}
+
+/* Banner 2: copy coordinates measured against banner2.2.png. */
+.carousel-slide[data-layout="catalogue"] .hero-headline {
+  top: 25.1%;
+  left: 4.3%;
+  gap: 0.48cqw;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-headline-line {
+  font-size: 3.32cqw;
+  line-height: 1.08;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-headline .line-2 {
+  padding-block: 0.18em 0.14em;
+  margin-block: -0.18em -0.14em;
+  color: #8edcff;
+  background: linear-gradient(
+    180deg,
+    #f8fdff 0%,
+    #e8f8ff 38%,
+    #bcecff 68%,
+    #78d2fa 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  filter: none;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-subheading {
+  top: 50.4%;
+  left: 4.35%;
+  font-size: 1.45cqw;
+  line-height: 1;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-product-labels {
+  inset: 0;
+  display: block;
+  font-size: 1.2cqw;
+  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 0.08em 0.1em rgba(0, 48, 95, 0.28);
+}
+
+/* The six blue captions are skewed artwork, so their visual centres do not
+   form an even grid. Anchor each label to the measured centre of its panel. */
+.carousel-slide[data-layout="catalogue"] .hero-product-labels span {
+  position: absolute;
+  top: 88.1%;
+  width: 15.3%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-product-labels span:nth-child(1) {
+  left: 8.91%;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-product-labels span:nth-child(2) {
+  left: 24.61%;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-product-labels span:nth-child(3) {
+  left: 40.42%;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-product-labels span:nth-child(4) {
+  left: 56.31%;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-product-labels span:nth-child(5) {
+  left: 72.35%;
+}
+
+.carousel-slide[data-layout="catalogue"] .hero-product-labels span:nth-child(6) {
+  left: 88.49%;
+}
+
+/* Banner 3: copy coordinates measured against banner3.3.png. */
+.carousel-slide[data-layout="logistics"] .hero-brand-copy {
+  top: 12.9%;
+  transform: translateY(-50%);
+}
+
+.carousel-slide[data-layout="logistics"] .hero-headline {
+  top: 24.2%;
+  left: 4.35%;
+  gap: 0.1cqw;
+}
+
+.carousel-slide[data-layout="logistics"] .hero-headline-line {
+  font-size: 3.08cqw;
+  line-height: 1.06;
+}
+
+.carousel-slide[data-layout="logistics"] .hero-headline .line-2 {
+  color: #a8e9ff;
+}
+
+.carousel-slide[data-layout="logistics"] .hero-benefits {
+  top: 47.8%;
+  left: 9.05%;
+  width: 29.3%;
+  height: 36.5%;
+  grid-template-columns: 1fr 1.12fr;
+  grid-template-rows: repeat(3, 1fr);
+  column-gap: 5.3cqw;
+}
+
+.carousel-slide[data-layout="logistics"] .hero-benefit {
+  align-self: center;
+  gap: 0.32cqw;
+}
+
+/* Give the three labels in the right column a little more breathing room
+   from the icons baked into the banner artwork. */
+.carousel-slide[data-layout="logistics"] .hero-benefit:nth-child(even) {
+  position: relative;
+  left: 0.55cqw;
+}
+
+/* The artwork's outer icon rows sit slightly farther from the middle row than
+   the equal CSS grid tracks. Keep the copy centred on the actual icon centres. */
+.carousel-slide[data-layout="logistics"] .hero-benefit:nth-child(-n + 2) {
+  transform: translateY(-0.56cqw);
+}
+
+.carousel-slide[data-layout="logistics"] .hero-benefit:nth-child(n + 5) {
+  transform: translateY(0.46cqw);
+}
+
+.carousel-slide[data-layout="logistics"] .hero-benefit strong {
+  font-size: 1cqw;
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.carousel-slide[data-layout="logistics"] .hero-benefit span {
+  font-size: 0.8cqw;
+  line-height: 1.05;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.carousel-slide[data-layout="logistics"] .hero-footer-copy {
+  top: 91.6%;
+  left: 4.4%;
+  font-size: 1.13cqw;
+  line-height: 1;
+  font-weight: 400;
+}
+
+html[data-ui-locale="en"] .carousel-slide[data-layout="factory"] .hero-headline .line-2 {
+  font-size: 4.75cqw;
+}
+
+html[data-ui-locale="en"] .carousel-slide[data-layout="factory"] .hero-headline .line-3 {
+  font-size: 1.42cqw;
+}
+
+html[data-ui-locale="en"] .carousel-slide[data-layout="catalogue"] .hero-headline-line {
+  font-size: 2.9cqw;
+}
+
+html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-headline-line {
+  font-size: 2.72cqw;
+}
+
+html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit strong {
+  font-size: 0.98cqw;
+}
+
+html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit span {
+  font-size: 0.78cqw;
 }
 
 .carousel-control {
@@ -1814,8 +2205,9 @@ button {
   }
 
   .hero-stage {
-    height: 45vw;
-    min-height: 320px;
+    aspect-ratio: 3 / 1;
+    height: auto;
+    min-height: 0;
   }
 
   .carousel-control {

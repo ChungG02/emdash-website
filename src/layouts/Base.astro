@@ -69,7 +69,7 @@ if (uiLocale !== "vi" && Astro.cache.enabled) {
 ---
 
 <!doctype html>
-<html lang="vi" data-ui-locale={uiLocale}>
+<html lang={uiLocale} data-ui-locale={uiLocale}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />

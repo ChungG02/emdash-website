@@ -1,5 +1,6 @@
 ---
 import type { HeroSlide } from "../../data/heroSlides";
+import { getUiLocale, useTranslations } from "../../i18n/ui";
 
 interface Props {
   slide: HeroSlide;
@@ -8,6 +9,8 @@ interface Props {
 }
 
 const { slide, index, isActive = false } = Astro.props;
+const t = useTranslations(getUiLocale(Astro.cookies));
+const alt = t(slide.altKey);
 ---
 
 <div
@@ -18,32 +21,61 @@ const { slide, index, isActive = false } = Astro.props;
   aria-roledescription="slide"
   aria-label={`Slide ${index + 1}`}
   aria-hidden={!isActive}
+  data-layout={slide.layout}
 >
-  {
-    slide.href ? (
-      <a href={slide.href} aria-label={slide.alt}>
-        <img
-          src={slide.image}
-          alt={slide.alt}
-          width="2048"
-          height="682"
-          loading={index === 0 ? "eager" : "lazy"}
-          fetchpriority={index === 0 ? "high" : "auto"}
-          decoding="async"
-          draggable={false}
-        />
-      </a>
-    ) : (
-      <img
-        src={slide.image}
-        alt={slide.alt}
-        width="2048"
-        height="682"
-        loading={index === 0 ? "eager" : "lazy"}
-        fetchpriority={index === 0 ? "high" : "auto"}
-        decoding="async"
-        draggable={false}
-      />
-    )
-  }
+  <img
+    class="hero-background"
+    src={slide.image}
+    alt=""
+    width="2048"
+    height="682"
+    loading={index === 0 ? "eager" : "lazy"}
+    fetchpriority={index === 0 ? "high" : "auto"}
+    decoding="async"
+    draggable={false}
+  />
+
+  <div class="hero-copy">
+    <div class="hero-brand-copy">
+      <strong>{t("hero.brand")}</strong>
+      <span>{t("hero.tagline")}</span>
+    </div>
+
+    <div class="hero-headline">
+      {slide.headlineKeys.map((key, lineIndex) => (
+        <span class:list={["hero-headline-line", `line-${lineIndex + 1}`]}>
+          {t(key)}
+        </span>
+      ))}
+    </div>
+
+    {slide.subheadingKey && (
+      <p class="hero-subheading">{t(slide.subheadingKey)}</p>
+    )}
+
+    {slide.productLabelKeys && (
+      <div class="hero-product-labels">
+        {slide.productLabelKeys.map((key) => <span>{t(key)}</span>)}
+      </div>
+    )}
+
+    {slide.benefits && (
+      <div class="hero-benefits">
+        {slide.benefits.map((benefit) => (
+          <div class="hero-benefit">
+            <strong>{t(benefit.titleKey)}</strong>
+            {benefit.descriptionKey && <span>{t(benefit.descriptionKey)}</span>}
+          </div>
+        ))}
+      </div>
+    )}
+
+    {slide.footerKey && <p class="hero-footer-copy">{t(slide.footerKey)}</p>}
+  </div>
+
+  {slide.href && (
+    <a class="carousel-slide-link" href={slide.href} aria-label={alt}>
+      <span class="visually-hidden">{alt}</span>
+    </a>
+  )}
 </div>
