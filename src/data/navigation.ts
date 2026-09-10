@@ -90,6 +90,13 @@ const navigationDefinitions: NavigationDefinition[] = [
   { labelKey: "nav.contact", href: "/lien-he" },
 ];
 
+const productCategoryPathPrefix = "/product-category/";
+
+export const productCategoryNavigationOrder = navigationDefinitions
+  .flatMap((item) => [item, ...(item.children ?? [])])
+  .filter((item) => item.href.startsWith(productCategoryPathPrefix))
+  .map((item) => item.href.slice(productCategoryPathPrefix.length));
+
 export const getNavigationItems = (translate: Translate): NavigationItem[] =>
   navigationDefinitions.map((item) => ({
     label: translate(item.labelKey),

@@ -16,6 +16,7 @@ import NewsSection from "../components/home/NewsSection.astro";
 
 import type { ProductSectionData } from "../modules/types/product.type";
 
+import { productCategoryNavigationOrder } from "../data/navigation";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 
 const [productResult, postResult, settings] = await Promise.all([
@@ -81,12 +82,25 @@ for (const entry of productResult.entries) {
   }
 }
 
-const displaySections = Array.from(sectionsBySlug.values()).map(
-  (section, index) => ({
+const categoryOrder = new Map(
+  productCategoryNavigationOrder.map((slug, index) => [slug, index]),
+);
+
+const displaySections = Array.from(sectionsBySlug.values())
+  .sort((firstSection, secondSection) => {
+    const firstIndex = categoryOrder.get(firstSection.id);
+    const secondIndex = categoryOrder.get(secondSection.id);
+
+    if (firstIndex === undefined && secondIndex === undefined) return 0;
+    if (firstIndex === undefined) return 1;
+    if (secondIndex === undefined) return -1;
+
+    return firstIndex - secondIndex;
+  })
+  .map((section, index) => ({
     ...section,
     alternate: index % 2 === 1,
-  }),
-);
+  }));
 
 const cmsNews = postResult.entries.map((post) => ({
   title: post.data.title,
