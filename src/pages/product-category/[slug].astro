@@ -11,22 +11,26 @@ import ProductCard from "../../modules/products/components/ProductCard.astro";
 import {
   getProductsByCategory,
 } from "../../modules/services/product.service";
+import { getRequestLocale, getRouteSlug, localizePath, useTranslations } from "../../i18n/ui";
 
-const slug = decodeSlug(Astro.params.slug);
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
+
+const slug = decodeSlug(getRouteSlug(Astro));
 
 const category = slug
-  ? await getTerm("product_category", slug)
+  ? await getTerm("product_category", slug, { locale })
   : null;
 
 if (!category) {
-  return Astro.redirect("/404");
+  return Astro.redirect(localizePath("/404", locale));
 }
 
 const {
   entries: products,
   error,
   cacheHint,
-} = await getProductsByCategory(category.slug);
+} = await getProductsByCategory(category.slug, 100, locale);
 
 if (Astro.cache?.enabled) {
   Astro.cache.set(cacheHint);
@@ -42,7 +46,7 @@ if (error) {
 
 <Base
   title={category.label}
-  description={`Danh sách sản phẩm thuộc danh mục ${category.label}`}
+  description={t("products.categoryDescription", { name: category.label })}
 >
   <main class="category-page">
     <!-- <a href="/" class="category-page__back">
@@ -57,25 +61,25 @@ if (error) {
       <h1>{category.label}</h1>
 
       <p>
-        Hiện có {products.length} sản phẩm
+        {t("products.count", { count: products.length })}
       </p>
     </header>
 
     {
       error ? (
         <p class="category-page__message">
-          Không thể tải danh sách sản phẩm.
+          {t("products.loadError")}
         </p>
       ) : products.length === 0 ? (
         <p class="category-page__message">
-          Danh mục này chưa có sản phẩm nào được xuất bản.
+          {t("products.emptyCategory")}
         </p>
       ) : (
         <div class="category-page__grid">
           {products.map((product) => (
             <ProductCard
               title={product.data.title}
-              href={`/products/${product.id}`}
+              href={localizePath(`/products/${product.id}`, locale)}
               featuredImage={
                 product.data.featured_image
               }

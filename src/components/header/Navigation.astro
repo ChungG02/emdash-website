@@ -1,10 +1,11 @@
 ---
 import Container from "../common/Container.astro";
 import { getNavigationItems } from "../../data/navigation";
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, localizePath, useTranslations } from "../../i18n/ui";
 
-const t = useTranslations(getUiLocale(Astro.cookies));
-const navigationItems = getNavigationItems(t);
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
+const navigationItems = getNavigationItems(t, locale);
 ---
 
 <div class="nav-shell" id="main-navigation">
@@ -12,7 +13,7 @@ const navigationItems = getNavigationItems(t);
     <Container>
       <ul class="nav-list">
         <li class="nav-item">
-          <a href="/" class="nav-link home-link" style="font-weight: normal;">
+          <a href={localizePath("/", locale)} class="nav-link home-link" style="font-weight: normal;">
             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
             </svg>

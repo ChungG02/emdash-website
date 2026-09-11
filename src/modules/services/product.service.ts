@@ -1,15 +1,17 @@
 import {
   getEmDashCollection,
-  getTermsForEntries,
 } from "emdash";
 
 import type {
   Product,
 } from "../../../.emdash/types";
+import { DEFAULT_UI_LOCALE, type UiLocale } from "../../i18n/ui";
+import { getTermsForEntriesWithFallback } from "../../i18n/content";
 
 export async function getProductsByCategory(
   categorySlug: string,
   limit = 100,
+  locale: UiLocale = "vi",
 ) {
   const directResult = await getEmDashCollection<"products", Product>(
     "products",
@@ -22,6 +24,7 @@ export async function getProductsByCategory(
         published_at: "desc",
       },
       limit,
+      locale,
     },
   );
 
@@ -38,6 +41,7 @@ export async function getProductsByCategory(
       orderBy: {
         published_at: "desc",
       },
+      locale: DEFAULT_UI_LOCALE,
     },
   );
 
@@ -45,10 +49,11 @@ export async function getProductsByCategory(
     return fallbackResult;
   }
 
-  const termsByProduct = await getTermsForEntries(
+  const termsByProduct = await getTermsForEntriesWithFallback(
     "products",
     fallbackResult.entries.map((product) => product.data.id),
     "product_category",
+    locale,
   );
 
   const entries = fallbackResult.entries

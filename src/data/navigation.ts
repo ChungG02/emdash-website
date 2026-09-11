@@ -1,4 +1,4 @@
-import type { UiMessageKey } from "../i18n/ui";
+import { localizePath, type UiLocale, type UiMessageKey } from "../i18n/ui";
 
 export interface NavigationItem {
   label: string;
@@ -97,13 +97,13 @@ export const productCategoryNavigationOrder = navigationDefinitions
   .filter((item) => item.href.startsWith(productCategoryPathPrefix))
   .map((item) => item.href.slice(productCategoryPathPrefix.length));
 
-export const getNavigationItems = (translate: Translate): NavigationItem[] =>
+export const getNavigationItems = (translate: Translate, locale: UiLocale): NavigationItem[] =>
   navigationDefinitions.map((item) => ({
     label: translate(item.labelKey),
-    href: item.href,
+    href: localizePath(item.href, locale),
     children: item.children?.map((child) => ({
       label: translate(child.labelKey),
-      href: child.href,
+      href: localizePath(child.href, locale),
       disabled: child.disabled,
     })),
   }));

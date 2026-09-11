@@ -12,14 +12,14 @@
 			"database_name": "my-emdash-site",
 			"database_id": "ff9c1aca-4c18-4341-bb4d-b6f4b624987a",
 			"migrations_dir": "../../../../../../migrations",
-			"remote": false
+			"remote": true
 		}
 	],
 	"r2_buckets": [
 		{
 			"binding": "MEDIA",
 			"bucket_name": "my-emdash-media",
-			"remote": false
+			"remote": true
 		}
 	],
 	"kv_namespaces": [

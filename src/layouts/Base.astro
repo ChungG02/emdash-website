@@ -7,7 +7,7 @@ import Footer from "../components/footer/Footer.astro";
 import FloatingContact from "../components/footer/FloatingContact.astro";
 import { siteConfig } from "../data/site";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
-import { getUiLocale, useTranslations } from "../i18n/ui";
+import { getRequestLocale, useTranslations } from "../i18n/ui";
 import "../styles/theme.css";
 
 interface Props {
@@ -43,8 +43,13 @@ const { siteTitle, siteTagline, siteLogo } = resolveBlogSiteIdentity(settings);
 const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
 const pageDescription = description ?? siteTagline;
 
+const uiLocale = getRequestLocale(Astro);
+const publicUrl = new URL(Astro.url);
+publicUrl.pathname = Astro.originPathname;
+
 const pageCtx = createPublicPageContext({
-	Astro,
+	url: publicUrl,
+	locale: uiLocale,
 	kind: content ? "content" : "custom",
 	pageType: type,
 	title: fullTitle,
@@ -60,16 +65,11 @@ const pageCtx = createPublicPageContext({
 
 const logoSrc = siteLogo?.url ?? "/images/logo.png";
 const favicon = settings?.favicon?.url ?? "/favicon.svg";
-const uiLocale = getUiLocale(Astro.cookies);
 const t = useTranslations(uiLocale);
-
-if (uiLocale !== "vi" && Astro.cache.enabled) {
-	Astro.cache.set(false);
-}
 ---
 
 <!doctype html>
-<html lang="vi" data-ui-locale={uiLocale}>
+<html lang={uiLocale} data-ui-locale={uiLocale}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -86,6 +86,7 @@ if (uiLocale !== "vi" && Astro.cache.enabled) {
 			companyName={siteTitle}
 			phone={siteConfig.phone}
 			phoneHref={siteConfig.phoneHref}
+			content={content}
 		/>
 
 		<main id="main-content">

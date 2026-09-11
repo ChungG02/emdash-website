@@ -3,7 +3,7 @@ import type { MediaValue } from "emdash";
 import { Image } from "emdash/ui";
 import Container from "../common/Container.astro";
 import SectionHeading from "./SectionHeading.astro";
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, localizePath, useTranslations } from "../../i18n/ui";
 
 interface NewsCardData {
   title: string;
@@ -19,14 +19,15 @@ interface Props {
 }
 
 const { items } = Astro.props;
-const t = useTranslations(getUiLocale(Astro.cookies));
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 const featuredItem = items[0];
 const secondaryItems = items.slice(1);
 ---
 
 <section class="news-section" id="tin-tuc">
   <Container>
-    <SectionHeading title={t("news.title")} linkHref="/posts" />
+    <SectionHeading title={t("news.title")} linkHref={localizePath("/posts", locale)} />
 
     {
       featuredItem ? (

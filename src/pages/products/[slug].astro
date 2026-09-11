@@ -1,36 +1,38 @@
 ---
-import { decodeSlug, getEmDashEntry } from "emdash";
+import { decodeSlug } from "emdash";
 import type { Product } from "../../../.emdash/types";
 import ProductGallery from "../../modules/products/components/ProductGallery.astro";
 import Base from "../../layouts/Base.astro";
 import ProductDescription from "../../modules/products/components/ProductDescription.astro";
 import ProductSpecifications from "../../modules/products/components/ProductSpecifications.astro";
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, getRouteSlug, localizePath, useTranslations } from "../../i18n/ui";
+import { getEntryWithFallback } from "../../i18n/content";
 
-const t = useTranslations(getUiLocale(Astro.cookies));
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 
-const slug = decodeSlug(Astro.params.slug); // Astro lấy slug trên URL
+const slug = decodeSlug(getRouteSlug(Astro)); // Supports localized rewrites too.
 
 if (!slug) {
-  return Astro.redirect("/404");
+  return Astro.redirect(localizePath("/404", locale));
 }
 
 const {
   entry: product,
   error,
   cacheHint,
-} = await getEmDashEntry<"products", Product>("products", slug);
+} = await getEntryWithFallback<"products", Product>("products", slug, locale);
 
 if (error) {
   console.error("Không thể/đọc được sản phẩm:", error);
 
-  return new Response("Không thể tải sản phẩm", {
+  return new Response(t("products.loadError"), {
     status: 500,
   });
 }
 
 if (!product) {
-  return Astro.redirect("/404");
+  return Astro.redirect(localizePath("/404", locale));
 }
 
 if (Astro.cache?.enabled) {
@@ -41,9 +43,10 @@ if (Astro.cache?.enabled) {
 <Base
   title={product.data.title}
   description={t("products.metaDescription", { title: product.data.title })}
+  content={{ collection: "products", id: product.data.id, slug: product.id }}
 >
   <main class="product-detail">
-    <a href="/" class="back-link">← {t("products.back")}</a>
+    <a href={localizePath("/products", locale)} class="back-link">← {t("products.back")}</a>
 
     <section class="product-detail__main">
       <ProductGallery

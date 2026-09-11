@@ -6,9 +6,16 @@ import type { Product } from "../../.emdash/types";
 
 import Base from "../layouts/Base.astro";
 import ProductCard from "../modules/products/components/ProductCard.astro";
-import { getUiLocale, useTranslations } from "../i18n/ui";
+import {
+  DEFAULT_UI_LOCALE,
+  getRequestLocale,
+  intlLocaleByUiLocale,
+  localizePath,
+  useTranslations,
+} from "../i18n/ui";
 
-const t = useTranslations(getUiLocale(Astro.cookies));
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 
 const PAGE_SIZE = 12;
 const COLLECTION_BATCH_SIZE = 100;
@@ -40,7 +47,7 @@ const normalizeSearchText = (value: string) =>
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .replace(/đ/gi, "d")
-    .toLocaleLowerCase("vi")
+    .toLocaleLowerCase(intlLocaleByUiLocale[locale])
     .replace(/\s+/g, " ")
     .trim();
 
@@ -74,14 +81,32 @@ let hasSearchError = false;
 if (query) {
   const allProducts: ProductEntry[] = [];
   let collectionCursor: string | undefined;
+  let contentLocale = locale;
 
   for (let batch = 0; batch < MAX_BATCHES; batch += 1) {
-    const result = await getEmDashCollection<"products", Product>("products", {
+    let result = await getEmDashCollection<"products", Product>("products", {
       status: "published",
       orderBy: { published_at: "desc" },
       limit: COLLECTION_BATCH_SIZE,
       cursor: collectionCursor,
+      locale: contentLocale,
     });
+
+    if (
+      batch === 0 &&
+      !result.error &&
+      result.entries.length === 0 &&
+      locale !== DEFAULT_UI_LOCALE
+    ) {
+      contentLocale = DEFAULT_UI_LOCALE;
+      result = await getEmDashCollection<"products", Product>("products", {
+        status: "published",
+        orderBy: { published_at: "desc" },
+        limit: COLLECTION_BATCH_SIZE,
+        cursor: collectionCursor,
+        locale: contentLocale,
+      });
+    }
 
     Astro.cache.set(result.cacheHint);
 
@@ -117,7 +142,7 @@ if (query) {
       .sort(
         (a, b) =>
           a.score - b.score ||
-          a.entry.data.title.localeCompare(b.entry.data.title, "vi"),
+          a.entry.data.title.localeCompare(b.entry.data.title, intlLocaleByUiLocale[locale]),
       );
 
     totalResults = matchingProducts.length;
@@ -134,7 +159,7 @@ const createPageUrl = (page: number) => {
 
   if (page > 1) params.set("page", String(page));
 
-  return `/search?${params}`;
+  return `${localizePath("/search", locale)}?${params}`;
 };
 
 const previousPageUrl = currentPage > 1 ? createPageUrl(currentPage - 1) : null;
@@ -179,7 +204,7 @@ const nextPageUrl =
           </svg>
           <h2>{t("search.promptTitle")}</h2>
           <p>{t("search.promptDescription")}</p>
-          <a href="/products">{t("search.viewAllProducts")}</a>
+          <a href={localizePath("/products", locale)}>{t("search.viewAllProducts")}</a>
         </div>
       ) : hasSearchError ? (
         <div class="product-search-state product-search-state--error" role="alert">
@@ -190,7 +215,7 @@ const nextPageUrl =
         <div class="product-search-state" aria-live="polite">
           <h2>{t("search.emptyTitle")}</h2>
           <p>{t("search.emptyDescription", { query })}</p>
-          <a href="/products">{t("search.viewAllProducts")}</a>
+          <a href={localizePath("/products", locale)}>{t("search.viewAllProducts")}</a>
         </div>
       ) : (
         <div class="product-search-results">
@@ -199,7 +224,7 @@ const nextPageUrl =
               <li>
                 <ProductCard
                   title={product.title}
-                  href={`/products/${product.slug}`}
+                  href={localizePath(`/products/${product.slug}`, locale)}
                   featuredImage={product.featuredImage}
                 />
               </li>

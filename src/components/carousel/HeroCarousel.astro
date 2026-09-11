@@ -1,7 +1,7 @@
 ---
 import CarouselSlide from "./CarouselSlide.astro";
 import { heroSlides, type HeroSlide } from "../../data/heroSlides";
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, useTranslations } from "../../i18n/ui";
 
 interface Props {
   id?: string;
@@ -14,7 +14,7 @@ const {
   slides = heroSlides,
   autoplayMs = 5000,
 } = Astro.props;
-const t = useTranslations(getUiLocale(Astro.cookies));
+const t = useTranslations(getRequestLocale(Astro));
 ---
 
 <section class="hero" id="home" aria-label={t("carousel.introduction")}>

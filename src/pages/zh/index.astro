@@ -1,0 +1,6 @@
+---
+const target = new URL("/", Astro.url);
+target.search = Astro.url.search;
+
+return Astro.rewrite(target);
+---

@@ -1,6 +1,7 @@
 {
 	"$schema": "https://emdashcms.com/seed.schema.json",
 	"version": "1",
+	"defaultLocale": "vi",
 	"meta": {
 		"name": "Blog Starter",
 		"description": "A blog with posts and pages",
@@ -63,9 +64,130 @@
 					"searchable": true
 				}
 			]
+		},
+		{
+			"slug": "products",
+			"label": "Sản phẩm",
+			"labelSingular": "Sản phẩm",
+			"description": "Quản lý sản phẩm của website",
+			"supports": ["drafts", "revisions", "search"],
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Tên sản phẩm",
+					"type": "string",
+					"required": true,
+					"searchable": true
+				},
+				{
+					"slug": "featured_image",
+					"label": "Ảnh đại diện",
+					"type": "image"
+				},
+				{
+					"slug": "description",
+					"label": "Mô tả sản phẩm",
+					"type": "portableText",
+					"searchable": true
+				},
+				{
+					"slug": "origin",
+					"label": "Xuất xứ",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "availability",
+					"label": "Tình trạng",
+					"type": "select",
+					"required": true,
+					"validation": {
+						"options": ["Còn hàng", "Tạm hết hàng", "Ngừng kinh doanh"]
+					}
+				},
+				{
+					"slug": "sizes",
+					"label": "Kích thước",
+					"type": "multiSelect",
+					"required": true,
+					"validation": {
+						"options": ["10mm x 5m", "20mm x 3m", "40mm x 16.5m"]
+					}
+				},
+				{
+					"slug": "gallery_images",
+					"label": "Thư viện hình ảnh",
+					"type": "repeater",
+					"validation": {
+						"subFields": [
+							{
+								"slug": "h_nh_nh",
+								"type": "image",
+								"label": "Hình ảnh",
+								"required": true
+							}
+						],
+						"minItems": 0,
+						"maxItems": 10
+					}
+				}
+			]
 		}
 	],
 	"taxonomies": [
+		{
+			"id": "tax:product_category:vi",
+			"name": "product_category",
+			"label": "Danh mục sản phẩm",
+			"labelSingular": "Danh mục sản phẩm",
+			"hierarchical": true,
+			"collections": ["products"],
+			"locale": "vi",
+			"terms": [
+				{"id": "term:product_category:hat-nhua-nguyen-sinh:vi", "slug": "hat-nhua-nguyen-sinh", "label": "Hạt nhựa nguyên sinh"},
+				{"id": "term:product_category:mang-quan-pe:vi", "slug": "mang-quan-pe", "label": "Màng quấn PE"},
+				{"id": "term:product_category:day-pet:vi", "slug": "day-pet", "label": "Dây đai PET"},
+				{"id": "term:product_category:cuon-xop-no:vi", "slug": "cuon-xop-no", "label": "Cuộn xốp nổ"},
+				{"id": "term:product_category:thanh-nep:vi", "slug": "thanh-nep", "label": "Thanh nẹp"},
+				{"id": "term:product_category:bang-dinh:vi", "slug": "bang-dinh", "label": "Băng dính"}
+			]
+		},
+		{
+			"id": "tax:product_category:en",
+			"name": "product_category",
+			"label": "Product categories",
+			"labelSingular": "Product category",
+			"hierarchical": true,
+			"collections": ["products"],
+			"locale": "en",
+			"translationOf": "tax:product_category:vi",
+			"terms": [
+				{"slug": "hat-nhua-nguyen-sinh", "label": "Virgin plastic resin", "locale": "en", "translationOf": "term:product_category:hat-nhua-nguyen-sinh:vi"},
+				{"slug": "mang-quan-pe", "label": "PE stretch film", "locale": "en", "translationOf": "term:product_category:mang-quan-pe:vi"},
+				{"slug": "day-pet", "label": "PET strapping", "locale": "en", "translationOf": "term:product_category:day-pet:vi"},
+				{"slug": "cuon-xop-no", "label": "Bubble wrap", "locale": "en", "translationOf": "term:product_category:cuon-xop-no:vi"},
+				{"slug": "thanh-nep", "label": "Edge protectors", "locale": "en", "translationOf": "term:product_category:thanh-nep:vi"},
+				{"slug": "bang-dinh", "label": "Adhesive tape", "locale": "en", "translationOf": "term:product_category:bang-dinh:vi"}
+			]
+		},
+		{
+			"id": "tax:product_category:zh",
+			"name": "product_category",
+			"label": "产品分类",
+			"labelSingular": "产品分类",
+			"hierarchical": true,
+			"collections": ["products"],
+			"locale": "zh",
+			"translationOf": "tax:product_category:vi",
+			"terms": [
+				{"slug": "hat-nhua-nguyen-sinh", "label": "原生塑料颗粒", "locale": "zh", "translationOf": "term:product_category:hat-nhua-nguyen-sinh:vi"},
+				{"slug": "mang-quan-pe", "label": "PE 缠绕膜", "locale": "zh", "translationOf": "term:product_category:mang-quan-pe:vi"},
+				{"slug": "day-pet", "label": "PET 打包带", "locale": "zh", "translationOf": "term:product_category:day-pet:vi"},
+				{"slug": "cuon-xop-no", "label": "气泡膜", "locale": "zh", "translationOf": "term:product_category:cuon-xop-no:vi"},
+				{"slug": "thanh-nep", "label": "护角条", "locale": "zh", "translationOf": "term:product_category:thanh-nep:vi"},
+				{"slug": "bang-dinh", "label": "胶带", "locale": "zh", "translationOf": "term:product_category:bang-dinh:vi"}
+			]
+		},
 		{
 			"name": "category",
 			"label": "Categories",

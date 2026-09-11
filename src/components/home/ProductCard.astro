@@ -1,14 +1,14 @@
 ---
 import { Image } from "emdash/ui";
 import type { ProductCardItem } from "../../modules/types/product.type";
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, useTranslations } from "../../i18n/ui";
 
 interface Props {
   product: ProductCardItem;
 }
 
 const { product } = Astro.props;
-const t = useTranslations(getUiLocale(Astro.cookies));
+const t = useTranslations(getRequestLocale(Astro));
 ---
 
 <article class="product-card" data-product-card>
