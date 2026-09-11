@@ -1,28 +1,32 @@
 ---
-import { getEmDashCollection } from "emdash";
 import { Image } from "emdash/ui";
 import Container from "../../components/common/Container.astro";
 import PageHeading from "../../components/common/PageHeading.astro";
 import BaseLayout from "../../layouts/Base.astro";
+import { getRequestLocale, localizePath, useTranslations } from "../../i18n/ui";
+import { getPostsByTaxonomy } from "../../modules/services/post.service";
 
-const { entries: exportArticles, error, cacheHint } = await getEmDashCollection("posts", {
-  status: "published",
-  where: { category: "tin-xuat-khau" },
-  orderBy: { published_at: "desc" },
-  limit: 50,
-});
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
+
+const { entries: exportArticles, error, cacheHint } = await getPostsByTaxonomy(
+  "category",
+  "tin-xuat-khau",
+  locale,
+  50,
+);
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 if (error) console.error("Không thể tải bài viết Tin xuất khẩu:", error);
 ---
 
 <BaseLayout
-  title="Tin xuất khẩu"
-  description="Thông tin về hoạt động xuất khẩu và giải pháp đóng gói của Thái Sơn Plastic."
+  title={t("posts.exportTitle")}
+  description={t("posts.exportDescription")}
 >
   <Container>
     <article class="mx-auto max-w-5xl py-10 lg:py-14">
-      <PageHeading eyebrow="Tin tức" title="Tin xuất khẩu" />
+      <PageHeading eyebrow={t("posts.news")} title={t("posts.exportTitle")} />
 
       {exportArticles.length > 0 ? (
         <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -30,9 +34,9 @@ if (error) console.error("Không thể tải bài viết Tin xuất khẩu:", er
             <article class="news-card">
               {article.data.featured_image && (
                 <a
-                  href={`/posts/${article.id}`}
+                  href={localizePath(`/posts/${article.id}`, locale)}
                   class="news-image"
-                  aria-label={`Đọc bài viết: ${article.data.title}`}
+                  aria-label={t("news.read", { title: article.data.title })}
                   {...article.edit.featured_image}
                 >
                   <Image image={article.data.featured_image} />
@@ -41,7 +45,7 @@ if (error) console.error("Không thể tải bài viết Tin xuất khẩu:", er
 
               <div class="news-body">
                 <h3 {...article.edit.title}>
-                  <a href={`/posts/${article.id}`}>{article.data.title}</a>
+                  <a href={localizePath(`/posts/${article.id}`, locale)}>{article.data.title}</a>
                 </h3>
                 {article.data.excerpt && <p {...article.edit.excerpt}>{article.data.excerpt}</p>}
               </div>
@@ -50,7 +54,7 @@ if (error) console.error("Không thể tải bài viết Tin xuất khẩu:", er
         </div>
       ) : (
         <div class="mt-10 rounded border border-slate-200 p-8 text-center text-slate-600">
-          Chưa có bài viết Tin xuất khẩu nào được xuất bản.
+          {t("posts.empty")}
         </div>
       )}
     </article>

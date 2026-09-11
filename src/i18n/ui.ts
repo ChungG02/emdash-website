@@ -1,12 +1,14 @@
-export const UI_LOCALE_COOKIE = "ui_locale";
-
 export const supportedUiLocales = ["vi", "en", "zh"] as const;
 
 export type UiLocale = (typeof supportedUiLocales)[number];
 
-interface CookieReader {
-  get(name: string): { value?: string } | undefined;
-}
+export const DEFAULT_UI_LOCALE: UiLocale = "vi";
+
+export const intlLocaleByUiLocale: Record<UiLocale, string> = {
+  vi: "vi-VN",
+  en: "en-US",
+  zh: "zh-CN",
+};
 
 const vi = {
   "common.home": "Trang chủ",
@@ -123,11 +125,47 @@ const vi = {
   "news.title": "TIN TỨC",
   "news.read": "Đọc {title}",
   "news.empty": "Chưa có bài viết nào được xuất bản.",
+  "posts.all": "Tất cả bài viết",
+  "posts.metaDescription": "Xem tất cả bài viết",
+  "posts.count": "{count} bài viết",
+  "posts.empty": "Chưa có bài viết nào.",
+  "posts.author": "Tác giả",
+  "posts.authors": "Tác giả",
+  "posts.published": "Đăng ngày",
+  "posts.readingTime": "Thời gian đọc",
+  "posts.minutes": "{count} phút",
+  "posts.tags": "Thẻ",
+  "posts.related": "Bài viết liên quan",
+  "posts.onThisPage": "Trong bài viết này",
+  "posts.news": "Tin tức",
+  "posts.exportTitle": "Tin xuất khẩu",
+  "posts.exportDescription": "Thông tin về hoạt động xuất khẩu và giải pháp đóng gói của Thái Sơn Plastic.",
+  "posts.productionTitle": "Thông tin sản xuất",
+  "posts.productionDescription": "Kiến thức về băng dính, băng keo và các giải pháp vật tư đóng gói công nghiệp của Thái Sơn Plastic.",
+  "posts.careers": "Cơ hội nghề nghiệp",
+  "posts.recruitmentTitle": "Tuyển dụng",
+  "posts.recruitmentDescription": "Cơ hội nghề nghiệp và thông tin tuyển dụng mới nhất tại Thái Sơn Plastic.",
+  "taxonomy.category": "Danh mục",
+  "taxonomy.tag": "Thẻ",
+  "taxonomy.postCount": "{count} bài viết",
+  "taxonomy.categoryDescription": "Các bài viết trong danh mục {name}",
+  "taxonomy.tagDescription": "Các bài viết có thẻ {name}",
+  "taxonomy.emptyCategory": "Chưa có bài viết trong danh mục này.",
+  "taxonomy.emptyTag": "Chưa có bài viết mang thẻ này.",
+  "products.all": "Sản phẩm",
+  "products.allDescription": "Danh sách sản phẩm",
+  "products.count": "Hiện có {count} sản phẩm",
+  "products.loadError": "Không thể tải danh sách sản phẩm.",
+  "products.empty": "Chưa có sản phẩm nào được xuất bản.",
+  "products.categoryDescription": "Danh sách sản phẩm thuộc danh mục {name}",
   "products.emptyCategory": "Chưa có sản phẩm trong danh mục này.",
   "products.listLabel": "Danh sách {name}",
   "products.next": "Xem các sản phẩm tiếp theo",
   "products.origin": "Xuất xứ",
   "products.availability": "Tình trạng",
+  "products.inStock": "Còn hàng",
+  "products.outOfStock": "Tạm hết hàng",
+  "products.discontinued": "Ngừng kinh doanh",
   "products.contactForPrice": "Báo giá liên hệ",
   "products.sizes": "Kích thước",
   "products.description": "Mô tả sản phẩm",
@@ -137,6 +175,8 @@ const vi = {
   "products.back": "Quay lại danh sách sản phẩm",
   "products.product": "Sản phẩm",
   "products.metaDescription": "Thông tin sản phẩm {title}",
+  "products.quote": "Nhận báo giá",
+  "products.quoteAria": "Cuộn đến biểu mẫu đăng ký thông tin liên hệ",
   "carousel.introduction": "Giới thiệu Thái Sơn Plastic",
   "carousel.featured": "Banner nổi bật",
   "carousel.previous": "Hiển thị slide trước",
@@ -301,11 +341,47 @@ const en = {
   "news.title": "NEWS",
   "news.read": "Read {title}",
   "news.empty": "No articles have been published yet.",
+  "posts.all": "All posts",
+  "posts.metaDescription": "Browse all posts",
+  "posts.count": "{count} posts",
+  "posts.empty": "No posts yet.",
+  "posts.author": "Author",
+  "posts.authors": "Authors",
+  "posts.published": "Published",
+  "posts.readingTime": "Reading time",
+  "posts.minutes": "{count} min",
+  "posts.tags": "Tags",
+  "posts.related": "Related posts",
+  "posts.onThisPage": "On this page",
+  "posts.news": "News",
+  "posts.exportTitle": "Export news",
+  "posts.exportDescription": "Updates on export activities and packaging solutions from Thái Sơn Plastic.",
+  "posts.productionTitle": "Production information",
+  "posts.productionDescription": "Knowledge about adhesive tape and industrial packaging material solutions from Thái Sơn Plastic.",
+  "posts.careers": "Career opportunities",
+  "posts.recruitmentTitle": "Careers",
+  "posts.recruitmentDescription": "The latest career opportunities and recruitment news at Thái Sơn Plastic.",
+  "taxonomy.category": "Category",
+  "taxonomy.tag": "Tag",
+  "taxonomy.postCount": "{count} posts",
+  "taxonomy.categoryDescription": "Posts in {name}",
+  "taxonomy.tagDescription": "Posts tagged with {name}",
+  "taxonomy.emptyCategory": "No posts in this category yet.",
+  "taxonomy.emptyTag": "No posts with this tag yet.",
+  "products.all": "Products",
+  "products.allDescription": "Product list",
+  "products.count": "{count} products available",
+  "products.loadError": "Unable to load the product list.",
+  "products.empty": "No products have been published yet.",
+  "products.categoryDescription": "Products in the {name} category",
   "products.emptyCategory": "There are no products in this category yet.",
   "products.listLabel": "{name} product list",
   "products.next": "View the next products",
   "products.origin": "Origin",
   "products.availability": "Availability",
+  "products.inStock": "In stock",
+  "products.outOfStock": "Temporarily out of stock",
+  "products.discontinued": "Discontinued",
   "products.contactForPrice": "Contact us for pricing",
   "products.sizes": "Sizes",
   "products.description": "Product description",
@@ -315,6 +391,8 @@ const en = {
   "products.back": "Back to product list",
   "products.product": "Product",
   "products.metaDescription": "Product information for {title}",
+  "products.quote": "Request a quote",
+  "products.quoteAria": "Scroll to the contact information form",
   "carousel.introduction": "Introduction to Thái Sơn Plastic",
   "carousel.featured": "Featured banners",
   "carousel.previous": "Show previous slide",
@@ -477,11 +555,47 @@ const zh = {
   "news.title": "新闻",
   "news.read": "阅读{title}",
   "news.empty": "暂无已发布文章。",
+  "posts.all": "所有文章",
+  "posts.metaDescription": "浏览所有文章",
+  "posts.count": "共 {count} 篇文章",
+  "posts.empty": "暂无文章。",
+  "posts.author": "作者",
+  "posts.authors": "作者",
+  "posts.published": "发布日期",
+  "posts.readingTime": "阅读时间",
+  "posts.minutes": "{count} 分钟",
+  "posts.tags": "标签",
+  "posts.related": "相关文章",
+  "posts.onThisPage": "本页内容",
+  "posts.news": "新闻",
+  "posts.exportTitle": "出口资讯",
+  "posts.exportDescription": "了解 Thái Sơn Plastic 的出口业务及包装解决方案。",
+  "posts.productionTitle": "生产资讯",
+  "posts.productionDescription": "了解胶带及工业包装材料解决方案。",
+  "posts.careers": "职业机会",
+  "posts.recruitmentTitle": "招聘",
+  "posts.recruitmentDescription": "了解 Thái Sơn Plastic 最新的职位机会和招聘信息。",
+  "taxonomy.category": "分类",
+  "taxonomy.tag": "标签",
+  "taxonomy.postCount": "共 {count} 篇文章",
+  "taxonomy.categoryDescription": "{name}分类中的文章",
+  "taxonomy.tagDescription": "带有{name}标签的文章",
+  "taxonomy.emptyCategory": "该分类暂无文章。",
+  "taxonomy.emptyTag": "该标签暂无文章。",
+  "products.all": "产品",
+  "products.allDescription": "产品列表",
+  "products.count": "现有 {count} 个产品",
+  "products.loadError": "无法加载产品列表。",
+  "products.empty": "暂无已发布产品。",
+  "products.categoryDescription": "{name}分类中的产品列表",
   "products.emptyCategory": "该分类暂无产品。",
   "products.listLabel": "{name}产品列表",
   "products.next": "查看后续产品",
   "products.origin": "产地",
   "products.availability": "库存状态",
+  "products.inStock": "有货",
+  "products.outOfStock": "暂时缺货",
+  "products.discontinued": "已停产",
   "products.contactForPrice": "价格请联系我们",
   "products.sizes": "规格",
   "products.description": "产品描述",
@@ -491,6 +605,8 @@ const zh = {
   "products.back": "返回产品列表",
   "products.product": "产品",
   "products.metaDescription": "{title}产品信息",
+  "products.quote": "获取报价",
+  "products.quoteAria": "滚动到联系信息表单",
   "carousel.introduction": "Thái Sơn Plastic 简介",
   "carousel.featured": "精选横幅",
   "carousel.previous": "显示上一张幻灯片",
@@ -549,9 +665,81 @@ export function isUiLocale(value: unknown): value is UiLocale {
   );
 }
 
-export function getUiLocale(cookies: CookieReader): UiLocale {
-  const locale = cookies.get(UI_LOCALE_COOKIE)?.value;
-  return isUiLocale(locale) ? locale : "vi";
+interface AstroLocaleContext {
+  currentLocale?: string;
+  originPathname?: string;
+  url: URL;
+}
+
+interface AstroRouteContext extends AstroLocaleContext {
+  params: Record<string, string | undefined>;
+}
+
+export function getUiLocale(locale: unknown): UiLocale {
+  return isUiLocale(locale) ? locale : DEFAULT_UI_LOCALE;
+}
+
+export function getRequestLocale(context: AstroLocaleContext): UiLocale {
+  const pathname = context.originPathname ?? context.url.pathname;
+  const firstSegment = pathname.split("/").filter(Boolean)[0];
+
+  if (isUiLocale(firstSegment)) return firstSegment;
+  return getUiLocale(context.currentLocale);
+}
+
+/**
+ * Astro.rewrite() keeps the params from the localized catch-all route. Read
+ * the final path segment when a rewritten dynamic page has no `slug` param.
+ */
+export function getRouteSlug(context: AstroRouteContext): string | undefined {
+  if (context.params.slug) return context.params.slug;
+
+  const pathname = context.originPathname ?? context.url.pathname;
+  return pathname.split("/").filter(Boolean).at(-1);
+}
+
+export function stripLocalePrefix(pathname: string): string {
+  const parts = pathname.split("/");
+  if (isUiLocale(parts[1])) {
+    const stripped = `/${parts.slice(2).join("/")}`;
+    return stripped === "/" ? "/" : stripped.replace(/\/+$/, "");
+  }
+
+  return pathname || "/";
+}
+
+export function localizePath(path: string, locale: UiLocale): string {
+  if (!path.startsWith("/") || path.startsWith("//") || path.startsWith("/_emdash/")) {
+    return path;
+  }
+
+  const suffixIndex = path.search(/[?#]/);
+  const pathname = suffixIndex >= 0 ? path.slice(0, suffixIndex) : path;
+  const suffix = suffixIndex >= 0 ? path.slice(suffixIndex) : "";
+  const unlocalizedPath = stripLocalePrefix(pathname || "/");
+
+  if (locale === DEFAULT_UI_LOCALE) return `${unlocalizedPath}${suffix}`;
+  return `/${locale}${unlocalizedPath === "/" ? "" : unlocalizedPath}${suffix}`;
+}
+
+/**
+ * EmDash prefixes `entry.id` with the locale for non-default translations
+ * (for example `en/mang-xop-hoi`). Public routes already carry that locale in
+ * their URL prefix, so links must use the entry's unprefixed content slug.
+ */
+export function getPublicEntrySlug(entry: {
+  id: string;
+  data: { slug?: string | null };
+}): string {
+  const contentSlug = entry.data.slug?.trim();
+  if (contentSlug) return contentSlug.replace(/^\/+|\/+$/g, "");
+
+  const idParts = entry.id.split("/").filter(Boolean);
+  if (isUiLocale(idParts[0]) && idParts.length > 1) {
+    return idParts.slice(1).join("/");
+  }
+
+  return entry.id.replace(/^\/+|\/+$/g, "");
 }
 
 export function useTranslations(locale: UiLocale) {

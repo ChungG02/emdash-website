@@ -1,5 +1,5 @@
 ---
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, localizePath, useTranslations } from "../../i18n/ui";
 
 interface Props {
   href?: string;
@@ -18,10 +18,12 @@ const {
 } = Astro.props;
 
 const logoAlt = alt ?? `Logo ${companyName}`;
-const t = useTranslations(getUiLocale(Astro.cookies));
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
+const localizedHref = localizePath(href, locale);
 ---
 
-<a href={href} class="brand" aria-label={t("brand.home", { company: companyName })}>
+<a href={localizedHref} class="brand" aria-label={t("brand.home", { company: companyName })}>
   <img
     src={logoSrc}
     alt={logoAlt}

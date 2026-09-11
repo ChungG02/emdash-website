@@ -2,10 +2,11 @@
 import Container from "../common/Container.astro";
 import ContactSection from "../home/ContactSection.astro";
 import { siteConfig } from "../../data/site";
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, localizePath, useTranslations } from "../../i18n/ui";
 
 const currentYear = new Date().getFullYear();
-const t = useTranslations(getUiLocale(Astro.cookies));
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 
 const productLinks = [
   { label: t("nav.virginResin"), href: "/#hat-nhua-nguyen-sinh" },
@@ -140,7 +141,7 @@ const quickLinks = [
           {
             productLinks.map((item) => (
               <li>
-                <a href={item.href}>{item.label}</a>
+                <a href={localizePath(item.href, locale)}>{item.label}</a>
               </li>
             ))
           }
@@ -153,7 +154,7 @@ const quickLinks = [
           {
             quickLinks.map((item) => (
               <li>
-                <a href={item.href}>{item.label}</a>
+                <a href={localizePath(item.href, locale)}>{item.label}</a>
               </li>
             ))
           }

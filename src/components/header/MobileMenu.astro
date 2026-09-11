@@ -2,11 +2,17 @@
 import Container from "../common/Container.astro";
 import { getNavigationItems, isNavigationItemActive } from "../../data/navigation";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, localizePath, stripLocalePrefix, useTranslations } from "../../i18n/ui";
 
-const currentPath = Astro.url.pathname;
-const t = useTranslations(getUiLocale(Astro.cookies));
-const navigationItems = getNavigationItems(t);
+interface Props {
+  content?: { collection: string; id: string; slug?: string | null };
+}
+
+const { content } = Astro.props;
+const locale = getRequestLocale(Astro);
+const currentPath = stripLocalePrefix(Astro.originPathname);
+const t = useTranslations(locale);
+const navigationItems = getNavigationItems(t, locale);
 
 const isActive = (href: string) => isNavigationItemActive(currentPath, href);
 ---
@@ -52,7 +58,7 @@ const isActive = (href: string) => isNavigationItemActive(currentPath, href);
       <ul class="divide-y divide-slate-100">
         <li>
           <a
-            href="/"
+            href={localizePath("/", locale)}
             class:list={[
               "block py-3 text-sm font-semibold uppercase text-slate-700",
               "transition hover:text-[#1477b9]",
@@ -148,7 +154,7 @@ const isActive = (href: string) => isNavigationItemActive(currentPath, href);
         class="mt-4 flex items-center justify-between border-t border-slate-200 pt-4"
       >
         <span class="text-sm font-semibold text-slate-600">{t("nav.language")}</span>
-        <LanguageSwitcher />
+        <LanguageSwitcher content={content} />
       </div>
     </Container>
   </div>
