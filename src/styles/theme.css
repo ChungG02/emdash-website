@@ -857,8 +857,43 @@ button {
   font-weight: 400;
 }
 
+/* English puts the product before the noun ("PE FILM MANUFACTURER").
+   Keep PE FILM as the visual focal point by swapping the first two lines'
+   presentation without changing their grammatically correct reading order. */
+html[data-ui-locale="en"] .carousel-slide[data-layout="factory"] .hero-headline .line-1 {
+  padding-top: 0.18em;
+  margin-top: -0.18em;
+  color: #c9efff;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #ffffff 42%,
+    #eefaff 66%,
+    #c9efff 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.012em rgba(235, 248, 255, 0.72);
+  paint-order: stroke fill;
+  text-shadow: none;
+  filter: drop-shadow(0 0.055em 0.035em rgba(0, 38, 76, 0.2));
+  font-size: 5cqw;
+  line-height: 0.96;
+  letter-spacing: -0.055em;
+}
+
 html[data-ui-locale="en"] .carousel-slide[data-layout="factory"] .hero-headline .line-2 {
-  font-size: 4.75cqw;
+  padding-top: 0;
+  margin-top: 0;
+  color: #f7fbff;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  -webkit-text-stroke: 0;
+  filter: none;
+  font-size: 3.02cqw;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
 }
 
 html[data-ui-locale="en"] .carousel-slide[data-layout="factory"] .hero-headline .line-3 {
