@@ -1,16 +1,21 @@
 ---
-import { getEmDashCollection } from "emdash";
 import type { Product } from "../../../.emdash/types";
 
 import Base from "../../layouts/Base.astro";
 import ProductCard from "../../modules/products/components/ProductCard.astro";
+import { getPublicEntrySlug, getRequestLocale, localizePath, useTranslations } from "../../i18n/ui";
+import { getCollectionWithFallback } from "../../i18n/content";
+
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 
 const {
   entries: products,
   error,
   cacheHint,
-} = await getEmDashCollection<"products", Product>("products", {
+} = await getCollectionWithFallback<"products", Product>("products", {
   status: "published",
+  locale,
 });
 
 if (Astro.cache?.enabled) {
@@ -22,24 +27,24 @@ if (error) {
 }
 ---
 
-<Base title="Sản phẩm" description="Danh sách sản phẩm">
+<Base title={t("products.all")} description={t("products.allDescription")}>
   <main class="products-page">
     <header class="products-page__header">
-      <h1>Sản phẩm</h1>
-      <p>Hiện có {products.length} sản phẩm</p>
+      <h1>{t("products.all")}</h1>
+      <p>{t("products.count", { count: products.length })}</p>
     </header>
 
     {
       error ? (
-        <p>Không thể tải danh sách sản phẩm.</p>
+        <p>{t("products.loadError")}</p>
       ) : products.length === 0 ? (
-        <p>Chưa có sản phẩm nào được xuất bản.</p>
+        <p>{t("products.empty")}</p>
       ) : (
         <div class="products-grid">
           {products.map((product) => (
             <ProductCard
               title={product.data.title}
-              href={`/products/${product.data.slug ?? product.id}`}
+              href={localizePath(`/products/${getPublicEntrySlug(product)}`, locale)}
               featuredImage={product.data.featured_image}
             />
           ))}

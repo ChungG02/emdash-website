@@ -1,8 +1,8 @@
 ---
 import { siteConfig } from "../../data/site";
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, useTranslations } from "../../i18n/ui";
 
-const t = useTranslations(getUiLocale(Astro.cookies));
+const t = useTranslations(getRequestLocale(Astro));
 ---
 
 <div class="floating-contact" data-floating-contact>

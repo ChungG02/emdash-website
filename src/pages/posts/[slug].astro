@@ -1,8 +1,5 @@
 ---
 import {
-	getEmDashEntry,
-	getEmDashCollection,
-	getTermsForEntries,
 	getSeoMeta,
 	decodeSlug,
 	getSiteSettings,
@@ -18,17 +15,32 @@ import Base from "../../layouts/Base.astro";
 import PostCard from "../../components/PostCard.astro";
 import { getReadingTime } from "../../utils/reading-time";
 import { resolveBlogSiteIdentity } from "../../utils/site-identity";
+import {
+	getRequestLocale,
+	getRouteSlug,
+	intlLocaleByUiLocale,
+	localizePath,
+	useTranslations,
+} from "../../i18n/ui";
+import {
+	getCollectionWithFallback,
+	getEntryWithFallback,
+	getTermsForEntriesWithFallback,
+} from "../../i18n/content";
 
-const slug = decodeSlug(Astro.params.slug);
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
+
+const slug = decodeSlug(getRouteSlug(Astro));
 
 if (!slug) {
-	return Astro.redirect("/404");
+	return Astro.redirect(localizePath("/404", locale));
 }
 
-const { entry: post, cacheHint } = await getEmDashEntry("posts", slug);
+const { entry: post, cacheHint } = await getEntryWithFallback("posts", slug, locale);
 
 if (!post) {
-	return Astro.redirect("/404");
+	return Astro.redirect(localizePath("/404", locale));
 }
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
@@ -61,7 +73,7 @@ const { siteTitle } = resolveBlogSiteIdentity(await getSiteSettings());
 const seo = getSeoMeta(post, {
 	siteTitle,
 	siteUrl: Astro.url.origin,
-	path: `/posts/${slug}`,
+	path: localizePath(`/posts/${post.id}`, locale),
 	defaultOgImage: featuredImageUrl,
 });
 
@@ -73,21 +85,29 @@ const readingTime = getReadingTime(post.data.content);
 
 // This post's tags are already hydrated onto the entry by getEmDashEntry —
 // no extra query needed.
-const tags = post.data.terms?.tag ?? [];
+const postTagsByEntry = await getTermsForEntriesWithFallback(
+	"posts",
+	[post.data.id],
+	"tag",
+	locale,
+);
+const tags = postTagsByEntry.get(post.data.id) ?? [];
 
 // Fetch a few extra recent posts in case the current post is among them.
-const { entries: recentPosts } = await getEmDashCollection("posts", {
+const { entries: recentPosts } = await getCollectionWithFallback("posts", {
 	orderBy: { published_at: "desc" },
 	limit: 4,
+	locale,
 });
 const otherPosts = recentPosts.filter((p) => p.id !== post.id).slice(0, 3);
 
 // Single batched query for related-posts tags, rather than one
 // getEntryTerms() call per related post.
-const otherTagsByEntry = await getTermsForEntries(
+const otherTagsByEntry = await getTermsForEntriesWithFallback(
 	"posts",
 	otherPosts.map((p) => p.data.id),
 	"tag",
+	locale,
 );
 const otherPostsWithTags = otherPosts.map((p) => ({
 	post: p,
@@ -96,7 +116,7 @@ const otherPostsWithTags = otherPosts.map((p) => ({
 }));
 
 const publishDate =
-	post.data.publishedAt?.toLocaleDateString("en-US", {
+	post.data.publishedAt?.toLocaleDateString(intlLocaleByUiLocale[locale], {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
@@ -113,7 +133,7 @@ const publishDate =
 	type="article"
 	publishedTime={post.data.publishedAt?.toISOString() ?? null}
 	modifiedTime={post.data.updatedAt.toISOString()}
-	content={{ collection: "posts", id: post.data.id, slug }}
+	content={{ collection: "posts", id: post.data.id, slug: post.id }}
 >
 	<article class="article">
 		{/* Hero: Full-width featured image */}
@@ -134,7 +154,7 @@ const publishDate =
 						bylines.length > 0 && (
 							<div class="meta-block byline-block">
 								<span class="meta-label">
-									{bylines.length === 1 ? "Author" : "Authors"}
+									{bylines.length === 1 ? t("posts.author") : t("posts.authors")}
 								</span>
 								<div class="bylines">
 									{bylines.map((credit) => (
@@ -163,22 +183,22 @@ const publishDate =
 					{
 						publishDate && (
 							<div class="meta-block">
-								<span class="meta-label">Published</span>
+								<span class="meta-label">{t("posts.published")}</span>
 								<time class="meta-value">{publishDate}</time>
 							</div>
 						)
 					}
 					<div class="meta-block">
-						<span class="meta-label">Reading time</span>
-						<span class="meta-value">{readingTime} min</span>
+						<span class="meta-label">{t("posts.readingTime")}</span>
+						<span class="meta-value">{t("posts.minutes", { count: readingTime })}</span>
 					</div>
 					{
 						tags.length > 0 && (
 							<div class="meta-block">
-								<span class="meta-label">Tags</span>
+								<span class="meta-label">{t("posts.tags")}</span>
 								<div class="meta-tags">
 									{tags.map((t) => (
-										<a href={`/tag/${t.slug}`} class="meta-tag">
+										<a href={localizePath(`/tag/${t.slug}`, locale)} class="meta-tag">
 											{t.label}
 										</a>
 									))}
@@ -216,7 +236,7 @@ const publishDate =
 								</>
 							)
 						}
-						<span>{readingTime} min read</span>
+						<span>{t("posts.minutes", { count: readingTime })}</span>
 					</div>
 					<h1 class="article-title" {...post.edit.title}>{post.data.title}</h1>
 					{
@@ -239,8 +259,8 @@ const publishDate =
 			{/* Right gutter: TOC + Sidebar widgets */}
 			<aside class="article-sidebar">
 				<div class="sidebar-sticky">
-					<nav class="toc" aria-label="Table of contents">
-						<h4 class="toc-title">On this page</h4>
+					<nav class="toc" aria-label={t("posts.onThisPage")}>
+						<h4 class="toc-title">{t("posts.onThisPage")}</h4>
 						<div class="toc-content" id="toc-content">
 							<!-- Populated by JS -->
 						</div>
@@ -257,7 +277,7 @@ const publishDate =
 		otherPostsWithTags.length > 0 && (
 			<section class="more-posts">
 				<div class="more-inner">
-					<h2 class="more-title">Continue reading</h2>
+					<h2 class="more-title">{t("posts.related")}</h2>
 					<div class="more-grid">
 						{otherPostsWithTags.map(
 							({ post: p, tags: postTags, bylines: postBylines }) => (
@@ -265,7 +285,7 @@ const publishDate =
 									title={p.data.title}
 									excerpt={p.data.excerpt}
 									featuredImage={p.data.featured_image}
-									href={`/posts/${p.id}`}
+									href={localizePath(`/posts/${p.id}`, locale)}
 									date={p.data.publishedAt ?? undefined}
 									readingTime={getReadingTime(p.data.content)}
 									tags={postTags.map((t) => ({ slug: t.slug, label: t.label }))}

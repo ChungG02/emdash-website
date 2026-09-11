@@ -1,0 +1,7 @@
+---
+const path = Astro.params.path ?? "";
+const target = new URL(`/${path}`, Astro.url);
+target.search = Astro.url.search;
+
+return Astro.rewrite(target);
+---

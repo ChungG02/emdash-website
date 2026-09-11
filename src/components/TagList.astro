@@ -1,17 +1,20 @@
 ---
+import { getRequestLocale, localizePath } from "../i18n/ui";
+
 interface Props {
   tags: Array<{ slug: string; label: string }>;
   class?: string;
 }
 
 const { tags, class: className } = Astro.props;
+const locale = getRequestLocale(Astro);
 ---
 
 {tags.length > 0 && (
   <ul class:list={["tag-list", className]}>
     {tags.map((tag) => (
       <li>
-        <a href={`/tag/${tag.slug}`} class="tag">{tag.label}</a>
+        <a href={localizePath(`/tag/${tag.slug}`, locale)} class="tag">{tag.label}</a>
       </li>
     ))}
   </ul>

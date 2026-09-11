@@ -2,22 +2,27 @@ import type { APIRoute } from "astro";
 import { getEmDashCollection, getSiteSettings } from "emdash";
 
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import { getRequestLocale, localizePath } from "../i18n/ui";
 
-export const GET: APIRoute = async ({ site, url }) => {
+export const GET: APIRoute = async (context) => {
+	const { site, url } = context;
+	const locale = getRequestLocale(context);
 	const siteUrl = site?.toString() || url.origin;
 	const { siteTitle, siteTagline } = resolveBlogSiteIdentity(await getSiteSettings());
 
-	const { entries: posts } = await getEmDashCollection("posts", {
+	const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
 		orderBy: { published_at: "desc" },
 		limit: 20,
+		locale,
 	});
+	if (context.cache?.enabled) context.cache.set(cacheHint);
 
 	const items = posts
 		.map((post) => {
 			if (!post.data.publishedAt) return null;
 			const pubDate = post.data.publishedAt.toUTCString();
 
-			const postUrl = `${siteUrl}/posts/${post.id}`;
+			const postUrl = new URL(localizePath(`/posts/${post.id}`, locale), siteUrl).toString();
 			const title = escapeXml(post.data.title || "Untitled");
 			const description = escapeXml(post.data.excerpt || "");
 
@@ -37,9 +42,9 @@ export const GET: APIRoute = async ({ site, url }) => {
   <channel>
     <title>${escapeXml(siteTitle)}</title>
     <description>${escapeXml(siteTagline)}</description>
-    <link>${siteUrl}</link>
-    <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml"/>
-    <language>en-us</language>
+    <link>${new URL(localizePath("/", locale), siteUrl).toString()}</link>
+    <atom:link href="${new URL(localizePath("/rss.xml", locale), siteUrl).toString()}" rel="self" type="application/rss+xml"/>
+    <language>${locale}</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items}
   </channel>

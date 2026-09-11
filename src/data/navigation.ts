@@ -1,4 +1,4 @@
-import type { UiMessageKey } from "../i18n/ui";
+import { localizePath, type UiLocale, type UiMessageKey } from "../i18n/ui";
 
 export interface NavigationItem {
   label: string;
@@ -39,7 +39,7 @@ const navigationDefinitions: NavigationDefinition[] = [
         href: "/products/mang-boc-pe-trong-suot",
       },
       { labelKey: "nav.coloredPeFilm", href: "/products/mang-boc-pe-mau" },
-      { labelKey: "nav.customProduction", href: "#", disabled: true },
+      { labelKey: "nav.customProduction", href: "/posts/at-san-xuat-theo-yeu-cau-tai-thai-son" },
     ],
   },
   {
@@ -108,21 +108,19 @@ export const productCategoryNavigationOrder = flattenNavigationDefinitions(
   .filter((item) => item.href.startsWith(productCategoryPathPrefix))
   .map((item) => item.href.slice(productCategoryPathPrefix.length));
 
-const translateNavigationItems = (
-  items: NavigationDefinition[],
-  translate: Translate,
-): NavigationItem[] =>
-  items.map((item) => ({
+export const getNavigationItems = (translate: Translate, locale: UiLocale): NavigationItem[] =>
+  navigationDefinitions.map((item) => ({
     label: translate(item.labelKey),
-    href: item.href,
-    disabled: item.disabled,
-    children: item.children
-      ? translateNavigationItems(item.children, translate)
-      : undefined,
+    href: localizePath(item.href, locale),
+    children: item.children?.map((child) => ({
+      label: translate(child.labelKey),
+      href: localizePath(child.href, locale),
+      disabled: child.disabled,
+    })),
   }));
 
-export const getNavigationItems = (translate: Translate): NavigationItem[] =>
-  translateNavigationItems(navigationDefinitions, translate);
+// export const getNavigationItems = (translate: Translate): NavigationItem[] =>
+//   translateNavigationItems(navigationDefinitions, translate);
 
 export const isNavigationItemActive = (
   currentPath: string,

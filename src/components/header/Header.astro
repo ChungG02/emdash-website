@@ -8,12 +8,14 @@ import SearchBar from "./SearchBar.astro";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
 import MobileMenu from "./MobileMenu.astro";
 import { siteConfig } from "../../data/site";
+import { getRequestLocale, localizePath } from "../../i18n/ui";
 
 interface Props {
   logoSrc?: string;
   companyName?: string;
   phone?: string;
   phoneHref?: string;
+  content?: { collection: string; id: string; slug?: string | null };
 }
 
 const {
@@ -21,7 +23,10 @@ const {
   companyName = "THÁI SƠN",
   phone = siteConfig.phone,
   phoneHref = siteConfig.phoneHref,
+  content,
 } = Astro.props;
+
+const locale = getRequestLocale(Astro);
 ---
 
 <!-- ---
@@ -228,7 +233,7 @@ const {
         <BrandLogo logoSrc={logoSrc} companyName={companyName} />
       </div>
       <div class="shrink-0 min-[821px]:hidden">
-        <a href="/" class="block">
+        <a href={localizePath("/", locale)} class="block">
           <img src={logoSrc} alt={companyName} width="46" height="46" class="object-contain" />
         </a>
       </div>
@@ -245,7 +250,7 @@ const {
           phoneHref={phoneHref}
         />
         <span class="h-13 w-px bg-slate-200" aria-hidden="true"></span>
-        <LanguageSwitcher />
+        <LanguageSwitcher content={content} />
       </div>
 
       {/* Phần bên phải - Mobile */}
@@ -266,7 +271,7 @@ const {
 
   <div class="nav-shell relative min-[821px]:hidden">
     <Container>
-      <MobileMenu />
+      <MobileMenu content={content} />
     </Container>
   </div>
 </header>

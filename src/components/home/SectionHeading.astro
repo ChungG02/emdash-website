@@ -1,5 +1,5 @@
 ---
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, useTranslations } from "../../i18n/ui";
 
 interface Props {
   title: string;
@@ -7,7 +7,7 @@ interface Props {
   linkLabel?: string;
 }
 
-const t = useTranslations(getUiLocale(Astro.cookies));
+const t = useTranslations(getRequestLocale(Astro));
 const { title, linkHref = "#lien-he", linkLabel = t("common.viewMore") } = Astro.props;
 ---
 

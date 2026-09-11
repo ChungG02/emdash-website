@@ -1,9 +1,5 @@
 ---
-import {
-  getEmDashCollection,
-  getSiteSettings,
-  getTermsForEntries,
-} from "emdash";
+import { getSiteSettings } from "emdash";
 
 import type { Product as EmDashProduct } from "../../.emdash/types";
 
@@ -18,22 +14,36 @@ import type { ProductSectionData } from "../modules/types/product.type";
 
 import { productCategoryNavigationOrder } from "../data/navigation";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import {
+  getPublicEntrySlug,
+  getRequestLocale,
+  intlLocaleByUiLocale,
+  localizePath,
+} from "../i18n/ui";
+import {
+  getCollectionWithFallback,
+  getTermsForEntriesWithFallback,
+} from "../i18n/content";
+
+const locale = getRequestLocale(Astro);
 
 const [productResult, postResult, settings] = await Promise.all([
-  getEmDashCollection<"products", EmDashProduct>("products", {
+  getCollectionWithFallback<"products", EmDashProduct>("products", {
     status: "published",
     orderBy: {
       published_at: "desc",
     },
     limit: 50,
+    locale,
   }),
 
-  getEmDashCollection("posts", {
+  getCollectionWithFallback("posts", {
     status: "published",
     orderBy: {
       published_at: "desc",
     },
     limit: 8,
+    locale,
   }),
 
   getSiteSettings(),
@@ -51,10 +61,11 @@ if (postResult.error) {
   console.error("Không thể tải tin tức từ EmDash:", postResult.error);
 }
 
-const categoryTermsByProduct = await getTermsForEntries(
+const categoryTermsByProduct = await getTermsForEntriesWithFallback(
   "products",
   productResult.entries.map((product) => product.data.id),
   "product_category",
+  locale,
 );
 
 const sectionsBySlug = new Map<string, ProductSectionData>();
@@ -75,7 +86,7 @@ for (const entry of productResult.entries) {
       name: entry.data.title,
       image: entry.data.featured_image,
       alt: entry.data.featured_image?.alt ?? entry.data.title,
-      href: `/products/${entry.id}`,
+      href: localizePath(`/products/${getPublicEntrySlug(entry)}`, locale),
     });
 
     sectionsBySlug.set(category.slug, section);
@@ -107,8 +118,8 @@ const cmsNews = postResult.entries.map((post) => ({
   description: post.data.excerpt,
   image: post.data.featured_image,
   alt: post.data.featured_image?.alt ?? post.data.title,
-  href: `/posts/${post.id}`,
-  date: post.data.publishedAt?.toLocaleDateString("vi-VN", {
+  href: localizePath(`/posts/${post.id}`, locale),
+  date: post.data.publishedAt?.toLocaleDateString(intlLocaleByUiLocale[locale], {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
