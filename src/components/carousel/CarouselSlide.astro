@@ -1,15 +1,16 @@
 ---
 import type { HeroSlide } from "../../data/heroSlides";
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { useTranslations, type UiLocale } from "../../i18n/ui";
 
 interface Props {
   slide: HeroSlide;
   index: number;
+  locale: UiLocale;
   isActive?: boolean;
 }
 
-const { slide, index, isActive = false } = Astro.props;
-const t = useTranslations(getUiLocale(Astro.cookies));
+const { slide, index, locale, isActive = false } = Astro.props;
+const t = useTranslations(locale);
 const alt = t(slide.altKey);
 ---
 
