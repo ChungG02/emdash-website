@@ -14,13 +14,13 @@ const {
   slides = heroSlides,
   autoplayMs = 5000,
 } = Astro.props;
-const t = useTranslations(getRequestLocale(Astro));
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 ---
 
 <section class="hero" id="home" aria-label={t("carousel.introduction")}>
   <h1 class="visually-hidden">
-    Thái Sơn Plastic - Nhà máy sản xuất màng PE và giải pháp đóng gói công
-    nghiệp
+    {t("hero.slide1.alt")}
   </h1>
 
   {
@@ -35,7 +35,12 @@ const t = useTranslations(getRequestLocale(Astro));
       >
         <div class="hero-stage">
           {slides.map((slide, index) => (
-            <CarouselSlide slide={slide} index={index} isActive={index === 0} />
+            <CarouselSlide
+              slide={slide}
+              index={index}
+              locale={locale}
+              isActive={index === 0}
+            />
           ))}
         </div>
 

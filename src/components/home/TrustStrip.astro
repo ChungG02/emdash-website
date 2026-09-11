@@ -1,16 +1,39 @@
 ---
 import Container from "../common/Container.astro";
+import { getRequestLocale, useTranslations } from "../../i18n/ui";
+
+const t = useTranslations(getRequestLocale(Astro));
 
 const commitments = [
-  { icon: "▦", lineOne: "NHÀ SẢN XUẤT", lineTwo: "CHUYÊN NGHIỆP" },
-  { icon: "✓", lineOne: "CHẤT LƯỢNG", lineTwo: "ỔN ĐỊNH" },
-  { icon: "◇", lineOne: "ĐỐI TÁC TIN CẬY", lineTwo: "CỦA DOANH NGHIỆP" },
-  { icon: "↗", lineOne: "GIAO HÀNG", lineTwo: "TOÀN QUỐC" },
-  { icon: "☎", lineOne: "HỖ TRỢ", lineTwo: "TẬN TÂM" },
+  {
+    icon: "▦",
+    lineOne: t("trustStrip.manufacturerLineOne"),
+    lineTwo: t("trustStrip.manufacturerLineTwo"),
+  },
+  {
+    icon: "✓",
+    lineOne: t("trustStrip.qualityLineOne"),
+    lineTwo: t("trustStrip.qualityLineTwo"),
+  },
+  {
+    icon: "◇",
+    lineOne: t("trustStrip.partnerLineOne"),
+    lineTwo: t("trustStrip.partnerLineTwo"),
+  },
+  {
+    icon: "↗",
+    lineOne: t("trustStrip.deliveryLineOne"),
+    lineTwo: t("trustStrip.deliveryLineTwo"),
+  },
+  {
+    icon: "☎",
+    lineOne: t("trustStrip.supportLineOne"),
+    lineTwo: t("trustStrip.supportLineTwo"),
+  },
 ];
 ---
 
-<section class="factory-strip" aria-label="Cam kết của Thái Sơn Plastic">
+<section class="factory-strip" aria-label={t("trustStrip.label")}>
   <Container class="factory-grid">
     {
       commitments.map((commitment) => (

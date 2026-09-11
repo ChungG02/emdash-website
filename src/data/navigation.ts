@@ -108,6 +108,19 @@ export const productCategoryNavigationOrder = flattenNavigationDefinitions(
   .filter((item) => item.href.startsWith(productCategoryPathPrefix))
   .map((item) => item.href.slice(productCategoryPathPrefix.length));
 
+// Homepage section headings use the same translation keys as the primary
+// navigation. The taxonomy slug remains stable for queries and anchors, while
+// the visible label follows the current UI locale even when older database
+// records only have a Vietnamese taxonomy label.
+export const productCategoryLabelKeys = new Map<string, UiMessageKey>(
+  flattenNavigationDefinitions(navigationDefinitions)
+    .filter((item) => item.href.startsWith(productCategoryPathPrefix))
+    .map((item) => [
+      item.href.slice(productCategoryPathPrefix.length),
+      item.labelKey,
+    ]),
+);
+
 export const getNavigationItems = (translate: Translate, locale: UiLocale): NavigationItem[] =>
   navigationDefinitions.map((item) => ({
     label: translate(item.labelKey),
