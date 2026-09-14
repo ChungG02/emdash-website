@@ -224,7 +224,7 @@ button {
   place-items: center;
   border: 0;
   color: #fff;
-  background: linear-gradient(135deg, var(--blue), #47a4d6);
+  background: var(--navy);
   transition: filter 0.2s;
 }
 
@@ -298,7 +298,7 @@ button {
 }
 
 .nav-shell {
-  background: linear-gradient(90deg, #0875c8, #0869b6);
+  background: var(--navy);
 }
 
 .nav-list {
@@ -500,33 +500,11 @@ button {
   pointer-events: none;
 }
 
-.hero-brand-copy,
 .hero-headline,
 .hero-headline-line,
 .hero-benefit {
   display: flex;
   flex-direction: column;
-}
-
-.hero-brand-copy {
-  position: absolute;
-  left: 10.2%;
-  top: 9.7%;
-  gap: 0.35cqw;
-  white-space: nowrap;
-}
-
-.hero-brand-copy strong {
-  font-size: 1.78cqw;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.035em;
-}
-
-.hero-brand-copy span {
-  font-size: 0.92cqw;
-  line-height: 1;
-  font-weight: 400;
 }
 
 .hero-headline {
@@ -559,22 +537,8 @@ button {
 }
 
 /* Banner 1: copy coordinates measured against banner1.1.png. */
-.carousel-slide[data-layout="factory"] .hero-brand-copy {
-  top: 7.1%;
-  left: 10.7%;
-  gap: 0.3cqw;
-}
-
-.carousel-slide[data-layout="factory"] .hero-brand-copy strong {
-  font-size: 1.62cqw;
-}
-
-.carousel-slide[data-layout="factory"] .hero-brand-copy span {
-  font-size: 0.84cqw;
-}
-
 .carousel-slide[data-layout="factory"] .hero-headline {
-  top: 23.3%;
+  top: 13.2%;
   left: 4.8%;
   gap: 0.05cqw;
 }
@@ -700,7 +664,7 @@ button {
 
 /* Banner 2: copy coordinates measured against banner2.2.png. */
 .carousel-slide[data-layout="catalogue"] .hero-headline {
-  top: 25.1%;
+  top: 12.5%;
   left: 4.3%;
   gap: 0.48cqw;
 }
@@ -730,7 +694,7 @@ button {
 }
 
 .carousel-slide[data-layout="catalogue"] .hero-subheading {
-  top: 50.4%;
+  top: 37.8%;
   left: 4.35%;
   font-size: 1.45cqw;
   line-height: 1;
@@ -783,13 +747,8 @@ button {
 }
 
 /* Banner 3: copy coordinates measured against banner3.3.png. */
-.carousel-slide[data-layout="logistics"] .hero-brand-copy {
-  top: 12.9%;
-  transform: translateY(-50%);
-}
-
 .carousel-slide[data-layout="logistics"] .hero-headline {
-  top: 24.2%;
+  top: 10.5%;
   left: 4.35%;
   gap: 0.1cqw;
 }
@@ -1086,7 +1045,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
   flex: 0 1 auto;
   margin: 0;
   padding: 0 10px 0 2px;
-  color: var(--blue);
+  color: var(--navy);
   font-size: clamp(16px, 1.35vw, 18px);
   font-weight: 800;
   line-height: 1.2;
@@ -1105,7 +1064,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
   align-items: center;
   gap: 5px;
   padding-block: 8px;
-  color: var(--blue);
+  color: var(--navy);
   font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
@@ -1271,7 +1230,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
 
 .product-name {
   min-height: 46px;
-  color: #2380bf;
+  color: var(--navy);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.45;
@@ -1292,7 +1251,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
   justify-content: center;
   padding: 8px 18px;
   border: 1.5px solid var(--blue);
-  color: var(--blue);
+  color: var(--navy);
   background: transparent;
   font-size: 12px;
   font-weight: 750;
@@ -1317,7 +1276,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
 .factory-strip {
   padding: 35px 0;
   color: #fff;
-  background: linear-gradient(90deg, var(--navy), #0862a7);
+  background: #073563;
 }
 
 .factory-grid {
@@ -1475,7 +1434,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
 
 .news-list::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: var(--blue);
+  background: var(--navy);
 }
 
 .news-card--compact {
