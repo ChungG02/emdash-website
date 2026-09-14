@@ -71,7 +71,9 @@ p,
 ul {
   margin: 0;
 }
-
+h2, h3, p {
+  color: var(--navy)
+}
 img {
   display: block;
   max-width: 100%;
@@ -1250,7 +1252,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
   align-items: center;
   justify-content: center;
   padding: 8px 18px;
-  border: 1.5px solid var(--blue);
+  border: 1.5px solid var(--navy);
   color: var(--navy);
   background: transparent;
   font-size: 12px;
