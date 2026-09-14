@@ -1,9 +1,5 @@
 ---
-import {
-  getEmDashCollection,
-  getSiteSettings,
-  getTermsForEntries,
-} from "emdash";
+import { getSiteSettings } from "emdash";
 
 import type { Product as EmDashProduct } from "../../.emdash/types";
 
@@ -16,24 +12,55 @@ import NewsSection from "../components/home/NewsSection.astro";
 
 import type { ProductSectionData } from "../modules/types/product.type";
 
-import { productCategoryNavigationOrder } from "../data/navigation";
+import {
+  productCategoryLabelKeys,
+  productCategoryNavigationOrder,
+} from "../data/navigation";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import {
+  DEFAULT_UI_LOCALE,
+  getPublicEntrySlug,
+  getRequestLocale,
+  intlLocaleByUiLocale,
+  localizePath,
+  useTranslations,
+} from "../i18n/ui";
+import {
+  getCollectionWithFallback,
+  getTermsForEntriesWithFallback,
+} from "../i18n/content";
 
-const [productResult, postResult, settings] = await Promise.all([
-  getEmDashCollection<"products", EmDashProduct>("products", {
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
+
+const [productResult, defaultProductResult, postResult, settings] = await Promise.all([
+  getCollectionWithFallback<"products", EmDashProduct>("products", {
     status: "published",
     orderBy: {
       published_at: "desc",
     },
     limit: 50,
+    locale,
   }),
 
-  getEmDashCollection("posts", {
+  locale === DEFAULT_UI_LOCALE
+    ? Promise.resolve(null)
+    : getCollectionWithFallback<"products", EmDashProduct>("products", {
+        status: "published",
+        orderBy: {
+          published_at: "desc",
+        },
+        limit: 50,
+        locale: DEFAULT_UI_LOCALE,
+      }),
+
+  getCollectionWithFallback("posts", {
     status: "published",
     orderBy: {
       published_at: "desc",
     },
     limit: 8,
+    locale,
   }),
 
   getSiteSettings(),
@@ -41,6 +68,7 @@ const [productResult, postResult, settings] = await Promise.all([
 
 
 Astro.cache.set(productResult.cacheHint);
+if (defaultProductResult) Astro.cache.set(defaultProductResult.cacheHint);
 Astro.cache.set(postResult.cacheHint);
 
 if (productResult.error) {
@@ -51,23 +79,48 @@ if (postResult.error) {
   console.error("Không thể tải tin tức từ EmDash:", postResult.error);
 }
 
-const categoryTermsByProduct = await getTermsForEntries(
+// A translated collection can be incomplete while editors are still working
+// on it. Keep every default-locale product on localized homepages, replacing a
+// Vietnamese item with its translated version whenever the same slug exists.
+const productEntries = defaultProductResult
+  ? (() => {
+      const localizedBySlug = new Map(
+        productResult.entries.map((entry) => [getPublicEntrySlug(entry), entry]),
+      );
+      const defaultSlugs = new Set(
+        defaultProductResult.entries.map((entry) => getPublicEntrySlug(entry)),
+      );
+
+      return [
+        ...defaultProductResult.entries.map(
+          (entry) => localizedBySlug.get(getPublicEntrySlug(entry)) ?? entry,
+        ),
+        ...productResult.entries.filter(
+          (entry) => !defaultSlugs.has(getPublicEntrySlug(entry)),
+        ),
+      ];
+    })()
+  : productResult.entries;
+
+const categoryTermsByProduct = await getTermsForEntriesWithFallback(
   "products",
-  productResult.entries.map((product) => product.data.id),
+  productEntries.map((product) => product.data.id),
   "product_category",
+  locale,
 );
 
 const sectionsBySlug = new Map<string, ProductSectionData>();
 
-for (const entry of productResult.entries) {
+for (const entry of productEntries) {
   const categories = categoryTermsByProduct.get(entry.data.id) ?? [];
 
   for (const category of categories) {
     const existingSection = sectionsBySlug.get(category.slug);
+    const categoryLabelKey = productCategoryLabelKeys.get(category.slug);
 
     const section: ProductSectionData = existingSection ?? {
       id: category.slug,
-      title: category.label,
+      title: categoryLabelKey ? t(categoryLabelKey) : category.label,
       products: [],
     };
 
@@ -75,7 +128,7 @@ for (const entry of productResult.entries) {
       name: entry.data.title,
       image: entry.data.featured_image,
       alt: entry.data.featured_image?.alt ?? entry.data.title,
-      href: `/products/${entry.id}`,
+      href: localizePath(`/products/${getPublicEntrySlug(entry)}`, locale),
     });
 
     sectionsBySlug.set(category.slug, section);
@@ -107,8 +160,8 @@ const cmsNews = postResult.entries.map((post) => ({
   description: post.data.excerpt,
   image: post.data.featured_image,
   alt: post.data.featured_image?.alt ?? post.data.title,
-  href: `/posts/${post.id}`,
-  date: post.data.publishedAt?.toLocaleDateString("vi-VN", {
+  href: localizePath(`/posts/${post.id}`, locale),
+  date: post.data.publishedAt?.toLocaleDateString(intlLocaleByUiLocale[locale], {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

@@ -1,15 +1,16 @@
 ---
 import Base from "../layouts/Base.astro";
-import { getUiLocale, useTranslations } from "../i18n/ui";
+import { getRequestLocale, localizePath, useTranslations } from "../i18n/ui";
 
-const t = useTranslations(getUiLocale(Astro.cookies));
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 ---
 
 <Base title={t("notFound.title")}>
 	<div class="not-found">
 		<h1>404</h1>
 		<p>{t("notFound.description")}</p>
-		<a href="/">{t("notFound.backHome")}</a>
+	<a href={localizePath("/", locale)}>{t("notFound.backHome")}</a>
 	</div>
 </Base>
 

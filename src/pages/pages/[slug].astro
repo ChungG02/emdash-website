@@ -1,18 +1,22 @@
 ---
-import { getEmDashEntry, decodeSlug } from "emdash";
+import { decodeSlug } from "emdash";
 import { PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
+import { getRequestLocale, getRouteSlug, localizePath } from "../../i18n/ui";
+import { getEntryWithFallback } from "../../i18n/content";
 
-const slug = decodeSlug(Astro.params.slug);
+const locale = getRequestLocale(Astro);
+
+const slug = decodeSlug(getRouteSlug(Astro));
 
 if (!slug) {
-	return Astro.redirect("/404");
+	return Astro.redirect(localizePath("/404", locale));
 }
 
-const { entry: page, cacheHint } = await getEmDashEntry("pages", slug);
+const { entry: page, cacheHint } = await getEntryWithFallback("pages", slug, locale);
 
 if (!page) {
-	return Astro.redirect("/404");
+	return Astro.redirect(localizePath("/404", locale));
 }
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
@@ -20,7 +24,7 @@ if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 
 <Base
 	title={page.data.title}
-	content={{ collection: "pages", id: page.data.id, slug }}
+	content={{ collection: "pages", id: page.data.id, slug: page.id }}
 >
 	<article class="page-article">
 		<header class="page-header">

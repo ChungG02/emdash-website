@@ -1,6 +1,7 @@
 ---
 import ProductCard from "./ProductCard.astro";
 import { getProductsByCategory } from "../../services/product.service";
+import { getPublicEntrySlug, getRequestLocale, localizePath, useTranslations } from "../../../i18n/ui";
 
 interface Props {
   title: string;
@@ -9,10 +10,13 @@ interface Props {
 }
 
 const { title, categorySlug, limit = 4 } = Astro.props;
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 
 const { entries: products, error } = await getProductsByCategory(
   categorySlug,
   limit,
+  locale,
 );
 
 if (error) {
@@ -31,17 +35,17 @@ if (error) {
 
   {
     error ? (
-      <p class="product-section__message">Không thể tải sản phẩm.</p>
+      <p class="product-section__message">{t("products.loadError")}</p>
     ) : products.length === 0 ? (
       <p class="product-section__message">
-        Chưa có sản phẩm trong danh mục này.
+        {t("products.emptyCategory")}
       </p>
     ) : (
       <div class="product-section__grid">
         {products.map((product) => (
           <ProductCard
             title={product.data.title}
-            href={`/products/${product.data.slug ?? product.id}`}
+            href={localizePath(`/products/${getPublicEntrySlug(product)}`, locale)}
             featuredImage={product.data.featured_image}
           />
         ))}

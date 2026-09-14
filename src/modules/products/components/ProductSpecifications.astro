@@ -1,6 +1,10 @@
 ---
 // import { contactInfo } from "../../../data/contact";
-import { getUiLocale, useTranslations } from "../../../i18n/ui";
+import {
+  getRequestLocale,
+  useTranslations,
+  type UiMessageKey,
+} from "../../../i18n/ui";
 
 interface Props {
   origin?: string;
@@ -9,7 +13,14 @@ interface Props {
 }
 
 const { origin, availability, sizes = [] } = Astro.props;
-const t = useTranslations(getUiLocale(Astro.cookies));
+const t = useTranslations(getRequestLocale(Astro));
+const availabilityKeys: Record<string, UiMessageKey> = {
+  "Còn hàng": "products.inStock",
+  "Tạm hết hàng": "products.outOfStock",
+  "Ngừng kinh doanh": "products.discontinued",
+};
+const availabilityKey = availability ? availabilityKeys[availability] : undefined;
+const availabilityLabel = availabilityKey ? t(availabilityKey) : availability;
 ---
 
 <div class="product-specifications">
@@ -26,7 +37,7 @@ const t = useTranslations(getUiLocale(Astro.cookies));
     availability && (
       <p class="product-specifications__row">
         <strong>{t("products.availability")}:</strong>
-        <span class="product-specifications__availability">{availability}</span>
+        <span class="product-specifications__availability">{availabilityLabel}</span>
       </p>
     )
   }
@@ -89,9 +100,9 @@ const t = useTranslations(getUiLocale(Astro.cookies));
     <a
       href="#lien-he"
       class="product-specifications__quote-button"
-      aria-label="Cuộn đến biểu mẫu đăng ký thông tin liên hệ"
+      aria-label={t("products.quoteAria")}
     >
-      Nhận báo giá
+      {t("products.quote")}
     </a>
   </div>
 </div>

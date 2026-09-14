@@ -1,5 +1,5 @@
 ---
-import { getUiLocale, useTranslations } from "../../i18n/ui";
+import { getRequestLocale, localizePath, stripLocalePrefix, useTranslations } from "../../i18n/ui";
 
 interface Props {
   id?: string;
@@ -19,10 +19,12 @@ const {
   value,
 } = Astro.props;
 
-const t = useTranslations(getUiLocale(Astro.cookies));
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 const resolvedPlaceholder = placeholder ?? t("search.placeholder");
+const resolvedAction = localizePath(action, locale);
 
-const isSearchPage = Astro.url.pathname.replace(/\/+$/, "") === "/search";
+const isSearchPage = stripLocalePrefix(Astro.originPathname).replace(/\/+$/, "") === "/search";
 const currentValue = (
   value ??
   (isSearchPage ? Astro.url.searchParams.get(inputName) : "") ??
@@ -32,7 +34,7 @@ const currentValue = (
 
 <form
   id={formId}
-  action={action}
+  action={resolvedAction}
   method="get"
   role="search"
   class="search-box w-full"

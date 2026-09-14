@@ -1,6 +1,12 @@
 ---
 import type { MediaValue, ContentBylineCredit } from "emdash";
 import { Image } from "emdash/ui";
+import {
+	getRequestLocale,
+	intlLocaleByUiLocale,
+	localizePath,
+	useTranslations,
+} from "../i18n/ui";
 
 interface Props {
 	title: string;
@@ -23,9 +29,11 @@ const {
 	tags,
 	bylines,
 } = Astro.props;
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 
 const formattedDate = date
-	? date.toLocaleDateString("en-US", {
+	? date.toLocaleDateString(intlLocaleByUiLocale[locale], {
 			year: "numeric",
 			month: "short",
 			day: "numeric",
@@ -87,7 +95,7 @@ const formattedDate = date
 				}
 				{formattedDate && <time>{formattedDate}</time>}
 				{formattedDate && readingTime && <span class="meta-dot" />}
-				{readingTime && <span>{readingTime} min</span>}
+				{readingTime && <span>{t("posts.minutes", { count: readingTime })}</span>}
 			</div>
 			<h2 class="card-title">{title}</h2>
 			{excerpt && <p class="card-excerpt">{excerpt}</p>}
@@ -97,7 +105,7 @@ const formattedDate = date
 		tags && tags.length > 0 && (
 			<div class="card-tags">
 				{tags.slice(0, 2).map((tag) => (
-					<a href={`/tag/${tag.slug}`} class="card-tag">
+					<a href={localizePath(`/tag/${tag.slug}`, locale)} class="card-tag">
 						{tag.label}
 					</a>
 				))}

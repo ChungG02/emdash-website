@@ -13,14 +13,14 @@
 			"database_name": "thaison-migration-test-db",
 			"database_id": "73df82e3-3c9f-4919-bfae-38766d899590",
 			"migrations_dir": "../../../../../../migrations",
-			"remote": false
+			"remote": true
 		}
 	],
 	"r2_buckets": [
 		{
 			"binding": "MEDIA",
-			"bucket_name": "thaison-migration-test-media",
-			"remote": false
+			"bucket_name": "my-emdash-media",
+			"remote": true
 		}
 	],
 	"kv_namespaces": [

@@ -12,6 +12,10 @@ import { thaiSonEmailTemplate } from "./src/plugins/thai-son-email-template.ts";
 export default defineConfig({
   site: "https://my-emdash-site.chungg02.workers.dev",
   output: "server",
+  i18n: {
+    defaultLocale: "vi",
+    locales: ["vi", "en", "zh"],
+  },
   adapter: cloudflare(),
   image: {
     layout: "constrained",

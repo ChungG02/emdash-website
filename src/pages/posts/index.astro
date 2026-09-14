@@ -1,12 +1,25 @@
 ---
-import { getEmDashCollection, getTermsForEntries } from "emdash";
 import Base from "../../layouts/Base.astro";
 import { getReadingTime } from "../../utils/reading-time";
+import {
+	getRequestLocale,
+	intlLocaleByUiLocale,
+	localizePath,
+	useTranslations,
+} from "../../i18n/ui";
+import {
+	getCollectionWithFallback,
+	getTermsForEntriesWithFallback,
+} from "../../i18n/content";
+
+const locale = getRequestLocale(Astro);
+const t = useTranslations(locale);
 
 // Sort in the database rather than in JS — lets the DB use its index on
 // published_at and avoids a full-table scan on the client.
-const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
+const { entries: posts, cacheHint } = await getCollectionWithFallback("posts", {
 	orderBy: { published_at: "desc" },
+	locale,
 });
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
@@ -14,10 +27,11 @@ if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 // Single batched query for tags across all posts, instead of one
 // getEntryTerms() call per post (which would be N round-trips).
 // Bylines are already hydrated on entry.data.bylines.
-const tagsByEntry = await getTermsForEntries(
+const tagsByEntry = await getTermsForEntriesWithFallback(
 	"posts",
 	posts.map((p) => p.data.id),
 	"tag",
+	locale,
 );
 
 const postsWithTags = posts.map((post) => ({
@@ -27,31 +41,30 @@ const postsWithTags = posts.map((post) => ({
 }));
 
 const formatDate = (date: Date) =>
-	date.toLocaleDateString("en-US", {
+	date.toLocaleDateString(intlLocaleByUiLocale[locale], {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
 	});
 ---
 
-<Base title="All Posts" description="Browse all blog posts">
+<Base title={t("posts.all")} description={t("posts.metaDescription")}>
 	<div class="posts-page">
 		<header class="page-header">
-			<h1 class="page-title">All Posts</h1>
+			<h1 class="page-title">{t("posts.all")}</h1>
 			<p class="page-description">
-				{posts.length}
-				{posts.length === 1 ? "article" : "articles"}
+				{t("posts.count", { count: posts.length })}
 			</p>
 		</header>
 
 		{
 			posts.length === 0 ? (
-				<p class="empty">No posts yet.</p>
+				<p class="empty">{t("posts.empty")}</p>
 			) : (
 				<div class="posts-list">
 					{postsWithTags.map(({ post, tags, bylines }) => (
 						<article class="post-item">
-							<a href={`/posts/${post.id}`} class="post-link">
+							<a href={localizePath(`/posts/${post.id}`, locale)} class="post-link">
 								<div class="post-meta">
 									{bylines.length > 0 && (
 										<>
@@ -84,7 +97,7 @@ const formatDate = (date: Date) =>
 										<time>{formatDate(post.data.publishedAt)}</time>
 									)}
 									{post.data.publishedAt && <span class="meta-dot" />}
-									<span>{getReadingTime(post.data.content)} min read</span>
+									<span>{t("posts.minutes", { count: getReadingTime(post.data.content) })}</span>
 								</div>
 								<h2 class="post-title">{post.data.title}</h2>
 								{post.data.excerpt && (
@@ -94,7 +107,7 @@ const formatDate = (date: Date) =>
 							{tags.length > 0 && (
 								<div class="post-tags">
 									{tags.slice(0, 3).map((t) => (
-										<a href={`/tag/${t.slug}`} class="post-tag">
+										<a href={localizePath(`/tag/${t.slug}`, locale)} class="post-tag">
 											{t.label}
 										</a>
 									))}
