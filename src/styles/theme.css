@@ -1086,7 +1086,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
   flex: 0 1 auto;
   margin: 0;
   padding: 0 10px 0 2px;
-  color: var(--blue);
+  color: var(--navy);
   font-size: clamp(16px, 1.35vw, 18px);
   font-weight: 800;
   line-height: 1.2;
@@ -1105,7 +1105,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
   align-items: center;
   gap: 5px;
   padding-block: 8px;
-  color: var(--blue);
+  color: var(--navy);
   font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
@@ -1271,7 +1271,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
 
 .product-name {
   min-height: 46px;
-  color: #2380bf;
+  color: var(--navy);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.45;
@@ -1292,7 +1292,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
   justify-content: center;
   padding: 8px 18px;
   border: 1.5px solid var(--blue);
-  color: var(--blue);
+  color: var(--navy);
   background: transparent;
   font-size: 12px;
   font-weight: 750;
@@ -1317,7 +1317,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
 .factory-strip {
   padding: 35px 0;
   color: #fff;
-  background: linear-gradient(90deg, var(--navy), #0862a7);
+  background: #073563;
 }
 
 .factory-grid {
@@ -1475,7 +1475,7 @@ html[data-ui-locale="en"] .carousel-slide[data-layout="logistics"] .hero-benefit
 
 .news-list::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: var(--blue);
+  background: var(--navy);
 }
 
 .news-card--compact {
