@@ -224,7 +224,7 @@ button {
   place-items: center;
   border: 0;
   color: #fff;
-  background: linear-gradient(135deg, var(--blue), #47a4d6);
+  background: var(--navy);
   transition: filter 0.2s;
 }
 
@@ -298,7 +298,7 @@ button {
 }
 
 .nav-shell {
-  background: linear-gradient(90deg, #0875c8, #0869b6);
+  background: var(--navy);
 }
 
 .nav-list {
