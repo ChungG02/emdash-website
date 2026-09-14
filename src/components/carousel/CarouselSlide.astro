@@ -37,11 +37,6 @@ const alt = t(slide.altKey);
   />
 
   <div class="hero-copy">
-    <div class="hero-brand-copy">
-      <strong>{t("hero.brand")}</strong>
-      <span>{t("hero.tagline")}</span>
-    </div>
-
     <div class="hero-headline">
       {slide.headlineKeys.map((key, lineIndex) => (
         <span class:list={["hero-headline-line", `line-${lineIndex + 1}`]}>
