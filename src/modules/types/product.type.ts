@@ -1,5 +1,9 @@
 import type { Product as EmDashProduct } from "../../../.emdash/types";
 
+export type ProductWithAlt = EmDashProduct & {
+  featured_image_alt?: string;
+};
+
 export interface ProductCardItem {
   name: string;
   image?: EmDashProduct["featured_image"];

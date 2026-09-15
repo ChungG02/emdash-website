@@ -1,5 +1,5 @@
 ---
-import type { Product } from "../../../.emdash/types";
+import type { ProductWithAlt } from "../../modules/types/product.type";
 
 import Base from "../../layouts/Base.astro";
 import ProductCard from "../../modules/products/components/ProductCard.astro";
@@ -13,7 +13,7 @@ const {
   entries: products,
   error,
   cacheHint,
-} = await getCollectionWithFallback<"products", Product>("products", {
+} = await getCollectionWithFallback<"products", ProductWithAlt>("products", {
   status: "published",
   locale,
 });
@@ -46,6 +46,7 @@ if (error) {
               title={product.data.title}
               href={localizePath(`/products/${getPublicEntrySlug(product)}`, locale)}
               featuredImage={product.data.featured_image}
+              featuredImageAlt={typeof product.data.featured_image_alt === "string" ? product.data.featured_image_alt.trim() : product.data.featured_image?.alt ?? product.data.title}
             />
           ))}
         </div>

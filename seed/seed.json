@@ -85,6 +85,12 @@
 					"type": "image"
 				},
 				{
+					"slug": "featured_image_alt",
+					"label": "ALT ảnh đại diện",
+					"type": "string",
+					"description": "Mô tả ngắn, chính xác nội dung của ảnh; để trống nếu ảnh trang trí"
+				},
+				{
 					"slug": "description",
 					"label": "Mô tả sản phẩm",
 					"type": "portableText",
@@ -125,6 +131,12 @@
 								"type": "image",
 								"label": "Hình ảnh",
 								"required": true
+							},
+							{
+								"slug": "alt_text",
+								"type": "string",
+								"label": "ALT hình ảnh",
+								"description": "Mô tả đúng nội dung ảnh; để trống cho ảnh trang trí"
 							}
 						],
 						"minItems": 0,

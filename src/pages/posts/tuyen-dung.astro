@@ -5,6 +5,7 @@ import PageHeading from "../../components/common/PageHeading.astro";
 import BaseLayout from "../../layouts/Base.astro";
 import { getRequestLocale, localizePath, useTranslations } from "../../i18n/ui";
 import { getPostsByTaxonomy } from "../../modules/services/post.service";
+import { getCanonicalPostSlug } from "../../utils/content-slugs";
 
 const locale = getRequestLocale(Astro);
 const t = useTranslations(locale);
@@ -34,7 +35,7 @@ if (error) console.error("Không thể tải bài viết Tuyển dụng:", error
             <article class="news-card">
               {post.data.featured_image && (
                 <a
-                  href={localizePath(`/posts/${post.id}`, locale)}
+					href={localizePath(`/posts/${getCanonicalPostSlug(post)}`, locale)}
                   class="news-image"
                   aria-label={t("news.read", { title: post.data.title })}
                   {...post.edit.featured_image}
@@ -45,7 +46,7 @@ if (error) console.error("Không thể tải bài viết Tuyển dụng:", error
 
               <div class="news-body">
                 <h3 {...post.edit.title}>
-                  <a href={localizePath(`/posts/${post.id}`, locale)}>{post.data.title}</a>
+					<a href={localizePath(`/posts/${getCanonicalPostSlug(post)}`, locale)}>{post.data.title}</a>
                 </h3>
                 {post.data.excerpt && <p {...post.edit.excerpt}>{post.data.excerpt}</p>}
               </div>

@@ -7,9 +7,10 @@ interface Props {
   title: string;
   href: string;
   featuredImage?: MediaValue | string;
+  featuredImageAlt?: string;
 }
 
-const { title, href, featuredImage } = Astro.props;
+const { title, href, featuredImage, featuredImageAlt } = Astro.props;
 const t = useTranslations(getRequestLocale(Astro));
 ---
 
@@ -18,7 +19,7 @@ const t = useTranslations(getRequestLocale(Astro));
     <div class="product-card__image">
       {
         featuredImage ? (
-          <Image image={featuredImage} />
+          <Image image={featuredImage} alt={featuredImageAlt ?? title} />
         ) : (
           <div class="product-card__placeholder">{t("common.noImage")}</div>
         )

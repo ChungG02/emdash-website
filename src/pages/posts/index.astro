@@ -11,6 +11,7 @@ import {
 	getCollectionWithFallback,
 	getTermsForEntriesWithFallback,
 } from "../../i18n/content";
+import { getCanonicalPostSlug } from "../../utils/content-slugs";
 
 const locale = getRequestLocale(Astro);
 const t = useTranslations(locale);
@@ -64,7 +65,7 @@ const formatDate = (date: Date) =>
 				<div class="posts-list">
 					{postsWithTags.map(({ post, tags, bylines }) => (
 						<article class="post-item">
-							<a href={localizePath(`/posts/${post.id}`, locale)} class="post-link">
+							<a href={localizePath(`/posts/${getCanonicalPostSlug(post)}`, locale)} class="post-link">
 								<div class="post-meta">
 									{bylines.length > 0 && (
 										<>

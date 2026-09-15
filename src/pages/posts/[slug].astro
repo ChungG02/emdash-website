@@ -23,6 +23,10 @@ import {
 	useTranslations,
 } from "../../i18n/ui";
 import {
+	canonicalizePostSlug,
+	getCanonicalPostSlug,
+} from "../../utils/content-slugs";
+import {
 	getCollectionWithFallback,
 	getEntryWithFallback,
 	getTermsForEntriesWithFallback,
@@ -37,13 +41,35 @@ if (!slug) {
 	return Astro.redirect(localizePath("/404", locale));
 }
 
-const { entry: post, cacheHint } = await getEntryWithFallback("posts", slug, locale);
+const canonicalSlug = canonicalizePostSlug(slug);
+
+const primaryPostResult = await getEntryWithFallback(
+	"posts",
+	canonicalSlug,
+	locale,
+);
+let post = primaryPostResult.entry;
+
+// This fallback keeps old CMS rows renderable while their stored slug is being
+// migrated. It also supports Unicode/percent-encoded legacy slugs without
+// requiring a hand-written redirect for every accented title.
+if (!post) {
+	const legacyPostsResult = await getCollectionWithFallback("posts", {
+		status: "published",
+		locale,
+	});
+	if (Astro.cache?.enabled) Astro.cache.set(legacyPostsResult.cacheHint);
+	post =
+		legacyPostsResult.entries.find(
+			(candidate) => getCanonicalPostSlug(candidate) === canonicalSlug,
+		) ?? null;
+}
 
 if (!post) {
 	return Astro.redirect(localizePath("/404", locale));
 }
 
-if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+if (Astro.cache?.enabled) Astro.cache.set(primaryPostResult.cacheHint);
 
 // Get featured image URL for OG fallback
 // The image may have src (external) or meta.storageKey (local)
@@ -73,7 +99,7 @@ const { siteTitle } = resolveBlogSiteIdentity(await getSiteSettings());
 const seo = getSeoMeta(post, {
 	siteTitle,
 	siteUrl: Astro.url.origin,
-	path: localizePath(`/posts/${post.id}`, locale),
+	path: localizePath(`/posts/${canonicalSlug}`, locale),
 	defaultOgImage: featuredImageUrl,
 });
 
@@ -133,7 +159,7 @@ const publishDate =
 	type="article"
 	publishedTime={post.data.publishedAt?.toISOString() ?? null}
 	modifiedTime={post.data.updatedAt.toISOString()}
-	content={{ collection: "posts", id: post.data.id, slug: post.id }}
+	content={{ collection: "posts", id: post.data.id, slug: canonicalSlug }}
 >
 	<article class="article">
 		{/* Hero: Full-width featured image */}
@@ -285,7 +311,7 @@ const publishDate =
 									title={p.data.title}
 									excerpt={p.data.excerpt}
 									featuredImage={p.data.featured_image}
-									href={localizePath(`/posts/${p.id}`, locale)}
+									href={localizePath(`/posts/${getCanonicalPostSlug(p)}`, locale)}
 									date={p.data.publishedAt ?? undefined}
 									readingTime={getReadingTime(p.data.content)}
 									tags={postTags.map((t) => ({ slug: t.slug, label: t.label }))}

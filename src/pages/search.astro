@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getEmDashCollection } from "emdash";
-import type { Product } from "../../.emdash/types";
+import type { ProductWithAlt } from "../modules/types/product.type";
 
 import Base from "../layouts/Base.astro";
 import ProductCard from "../modules/products/components/ProductCard.astro";
@@ -24,13 +24,14 @@ const MAX_BATCHES = 100;
 
 type ProductEntry = {
   id: string;
-  data: Product;
+  data: ProductWithAlt;
 };
 
 interface ProductSearchItem {
   slug: string;
   title: string;
-  featuredImage?: Product["featured_image"];
+  featuredImage?: ProductWithAlt["featured_image"];
+  featuredImageAlt?: string;
 }
 
 const query = (Astro.url.searchParams.get("q")?.trim() ?? "").slice(0, 120);
@@ -71,6 +72,10 @@ const toSearchItem = (entry: ProductEntry): ProductSearchItem => ({
   slug: getPublicEntrySlug(entry),
   title: entry.data.title,
   featuredImage: entry.data.featured_image,
+  featuredImageAlt:
+    typeof entry.data.featured_image_alt === "string"
+      ? entry.data.featured_image_alt.trim()
+      : entry.data.featured_image?.alt ?? entry.data.title,
 });
 
 let products: ProductSearchItem[] = [];
@@ -85,7 +90,7 @@ if (query) {
   let contentLocale = locale;
 
   for (let batch = 0; batch < MAX_BATCHES; batch += 1) {
-    let result = await getEmDashCollection<"products", Product>("products", {
+    let result = await getEmDashCollection<"products", ProductWithAlt>("products", {
       status: "published",
       orderBy: { published_at: "desc" },
       limit: COLLECTION_BATCH_SIZE,
@@ -100,7 +105,7 @@ if (query) {
       locale !== DEFAULT_UI_LOCALE
     ) {
       contentLocale = DEFAULT_UI_LOCALE;
-      result = await getEmDashCollection<"products", Product>("products", {
+      result = await getEmDashCollection<"products", ProductWithAlt>("products", {
         status: "published",
         orderBy: { published_at: "desc" },
         limit: COLLECTION_BATCH_SIZE,
@@ -227,6 +232,7 @@ const nextPageUrl =
                   title={product.title}
                   href={localizePath(`/products/${product.slug}`, locale)}
                   featuredImage={product.featuredImage}
+                  featuredImageAlt={product.featuredImageAlt}
                 />
               </li>
             ))}

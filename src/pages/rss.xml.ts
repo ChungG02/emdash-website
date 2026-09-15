@@ -3,6 +3,7 @@ import { getEmDashCollection, getSiteSettings } from "emdash";
 
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 import { getRequestLocale, localizePath } from "../i18n/ui";
+import { getCanonicalPostSlug } from "../utils/content-slugs";
 
 export const GET: APIRoute = async (context) => {
 	const { site, url } = context;
@@ -22,7 +23,10 @@ export const GET: APIRoute = async (context) => {
 			if (!post.data.publishedAt) return null;
 			const pubDate = post.data.publishedAt.toUTCString();
 
-			const postUrl = new URL(localizePath(`/posts/${post.id}`, locale), siteUrl).toString();
+			const postUrl = new URL(
+				localizePath(`/posts/${getCanonicalPostSlug(post)}`, locale),
+				siteUrl,
+			).toString();
 			const title = escapeXml(post.data.title || "Untitled");
 			const description = escapeXml(post.data.excerpt || "");
 

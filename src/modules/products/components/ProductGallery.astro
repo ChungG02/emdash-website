@@ -6,13 +6,18 @@ import { getRequestLocale, useTranslations } from "../../../i18n/ui";
 interface Props {
   title: string;
   featuredImage?: MediaValue | string;
+  featuredImageAlt?: string;
   galleryImages?: unknown;
 }
 
-const { title, featuredImage, galleryImages } = Astro.props;
+const { title, featuredImage, featuredImageAlt, galleryImages } = Astro.props;
 const t = useTranslations(getRequestLocale(Astro));
 
 type GalleryImage = MediaValue | string;
+type GalleryImageItem = {
+  image: GalleryImage;
+  alt?: string;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -30,26 +35,40 @@ function isMediaValue(value: unknown): value is GalleryImage {
   return typeof value.id === "string" || typeof value.src === "string";
 }
 
-function getImageFromRepeaterItem(item: unknown): GalleryImage | null {
+function getMediaAlt(image: GalleryImage | undefined): string | undefined {
+  if (!isRecord(image) || typeof image.alt !== "string") {
+    return undefined;
+  }
+
+  const alt = image.alt.trim();
+  return alt || undefined;
+}
+
+function getImageFromRepeaterItem(item: unknown): GalleryImageItem | null {
   if (!isRecord(item)) {
     return null;
   }
 
   // EmDash có thể tự tạo một trong các slug này.
+  const explicitAlt = ["alt_text", "alt", "altText"]
+    .map((key) => item[key])
+    .find((value): value is string => typeof value === "string")
+    ?.trim();
+
   const knownKeys = ["image", "hinh_anh"];
 
   for (const key of knownKeys) {
     const value = item[key];
 
     if (isMediaValue(value)) {
-      return value;
+      return { image: value, alt: explicitAlt ?? getMediaAlt(value) };
     }
   }
 
   // Dự phòng nếu EmDash sinh một slug khác.
   for (const value of Object.values(item)) {
     if (isMediaValue(value)) {
-      return value;
+      return { image: value, alt: explicitAlt ?? getMediaAlt(value) };
     }
   }
 
@@ -59,13 +78,19 @@ function getImageFromRepeaterItem(item: unknown): GalleryImage | null {
 const additionalImages = Array.isArray(galleryImages)
   ? galleryImages
       .map(getImageFromRepeaterItem)
-      .filter((image): image is GalleryImage => image !== null)
+      .filter((image): image is GalleryImageItem => image !== null)
   : [];
 
-const images: GalleryImage[] = [];
+const images: GalleryImageItem[] = [];
 
 if (featuredImage) {
-  images.push(featuredImage);
+  images.push({
+    image: featuredImage,
+    alt:
+      typeof featuredImageAlt === "string"
+        ? featuredImageAlt.trim()
+        : getMediaAlt(featuredImage) || title,
+  });
 }
 
 images.push(...additionalImages);
@@ -75,15 +100,15 @@ images.push(...additionalImages);
   <div class="product-gallery__main">
     {
       images.length > 0 ? (
-        images.map((image, index) => (
+        images.map((item, index) => (
           <div
             class="product-gallery__slide"
             data-gallery-slide
             hidden={index !== 0}
           >
             <Image
-              image={image}
-              alt={t("products.imageAlt", { title, index: index + 1 })}
+              image={item.image}
+              alt={item.alt ?? title}
               width={900}
               height={900}
               class="product-gallery__main-image"
@@ -102,7 +127,7 @@ images.push(...additionalImages);
         class="product-gallery__thumbnails"
         aria-label={t("products.images")}
       >
-        {images.map((image, index) => (
+        {images.map((item, index) => (
           <button
             type="button"
             class="product-gallery__thumbnail"
@@ -112,7 +137,7 @@ images.push(...additionalImages);
             aria-pressed={index === 0 ? "true" : "false"}
           >
             <Image
-              image={image}
+              image={item.image}
               alt=""
               width={120}
               height={120}

@@ -1,6 +1,6 @@
 ---
 import { decodeSlug } from "emdash";
-import type { Product } from "../../../.emdash/types";
+import type { ProductWithAlt } from "../../modules/types/product.type";
 import ProductGallery from "../../modules/products/components/ProductGallery.astro";
 import Base from "../../layouts/Base.astro";
 import ProductDescription from "../../modules/products/components/ProductDescription.astro";
@@ -21,7 +21,7 @@ const {
   entry: product,
   error,
   cacheHint,
-} = await getEntryWithFallback<"products", Product>("products", slug, locale);
+} = await getEntryWithFallback<"products", ProductWithAlt>("products", slug, locale);
 
 if (error) {
   console.error("Không thể/đọc được sản phẩm:", error);
@@ -52,6 +52,7 @@ if (Astro.cache?.enabled) {
       <ProductGallery
         title={product.data.title}
         featuredImage={product.data.featured_image}
+        featuredImageAlt={typeof product.data.featured_image_alt === "string" ? product.data.featured_image_alt.trim() : product.data.featured_image?.alt ?? product.data.title}
         galleryImages={product.data.gallery_images}
       />
 
