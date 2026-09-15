@@ -176,7 +176,7 @@ const cmsNews = postResult.entries.map((post) => ({
 const { siteTitle, siteTagline } = resolveBlogSiteIdentity(settings);
 ---
 
-<Base title={siteTitle} description={siteTagline}>
+<Base title={`${siteTitle} | ${t("seo.homeTitle")}`} description={siteTagline}>
   <HeroCarousel />
 
   {

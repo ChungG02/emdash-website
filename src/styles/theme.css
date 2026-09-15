@@ -511,6 +511,7 @@ button {
 
 .hero-headline {
   position: absolute;
+  margin: 0;
   text-transform: uppercase;
 }
 
