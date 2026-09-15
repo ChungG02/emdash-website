@@ -47,6 +47,7 @@ if (error) {
             title={product.data.title}
             href={localizePath(`/products/${getPublicEntrySlug(product)}`, locale)}
             featuredImage={product.data.featured_image}
+            featuredImageAlt={typeof product.data.featured_image_alt === "string" ? product.data.featured_image_alt.trim() : product.data.featured_image?.alt ?? product.data.title}
           />
         ))}
       </div>

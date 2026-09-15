@@ -9,6 +9,7 @@ import { getReadingTime } from "../../utils/reading-time";
 import { getRequestLocale, getRouteSlug, localizePath, useTranslations } from "../../i18n/ui";
 import { getTermsForEntriesWithFallback } from "../../i18n/content";
 import { getPostsByTaxonomy } from "../../modules/services/post.service";
+import { getCanonicalPostSlug } from "../../utils/content-slugs";
 
 const locale = getRequestLocale(Astro);
 const t = useTranslations(locale);
@@ -63,7 +64,7 @@ const filteredPosts = posts.map((post) => ({
 							title={post.data.title}
 							excerpt={post.data.excerpt}
 							featuredImage={post.data.featured_image}
-							href={localizePath(`/posts/${post.id}`, locale)}
+							href={localizePath(`/posts/${getCanonicalPostSlug(post)}`, locale)}
 							date={post.data.publishedAt ?? undefined}
 							readingTime={getReadingTime(post.data.content)}
 							tags={tags.map((t) => ({ slug: t.slug, label: t.label }))}

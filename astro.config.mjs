@@ -6,8 +6,32 @@ import webhookNotifier from "@emdash-cms/plugin-webhook-notifier";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, fontProviders } from "astro/config";
 import emdash from "emdash/astro";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { cloudflareEmail } from "@emdash-cms/cloudflare/plugins";
+import { mediaFilenameNormalizer } from "./src/plugins/media-filename-normalizer.ts";
 import { thaiSonEmailTemplate } from "./src/plugins/thai-son-email-template.ts";
+
+const canonicalSlugifyPath = fileURLToPath(
+  new URL("./src/utils/slugify-runtime.js", import.meta.url),
+);
+const canonicalSlugifySource = readFileSync(canonicalSlugifyPath, "utf8");
+
+const canonicalSlugifyPlugin = {
+  name: "canonical-emdash-slugify",
+  enforce: "pre",
+  resolveId(source) {
+    return source === "@emdash-cms/admin/slugify"
+      ? canonicalSlugifyPath
+      : undefined;
+  },
+  load(id) {
+    const normalizedId = id.replaceAll("\\", "/");
+    return normalizedId.endsWith("/@emdash-cms/admin/dist/slugify.js")
+      ? canonicalSlugifySource
+      : undefined;
+  },
+};
 
 export default defineConfig({
   site: "https://my-emdash-site.chungg02.workers.dev",
@@ -26,10 +50,14 @@ export default defineConfig({
     emdash({
       database: d1({ binding: "DB", session: "auto" }),
       storage: r2({ binding: "MEDIA" }),
+      middleware: {
+        outer: "./src/middleware.ts",
+      },
       plugins: [
         formsPlugin({
           defaultSpamProtection: "honeypot",
         }),
+        mediaFilenameNormalizer(),
         thaiSonEmailTemplate(),
         cloudflareEmail({
           binding: "EMAIL",
@@ -63,7 +91,37 @@ export default defineConfig({
   ],
   devToolbar: { enabled: false },
   vite: {
-    plugins: [tailwindcss()],
+    optimizeDeps: {
+      rolldownOptions: {
+        plugins: [
+          {
+            name: "canonical-emdash-slugify-optimize",
+            resolveId(source) {
+              return source === "@emdash-cms/admin/slugify"
+                ? canonicalSlugifyPath
+                : undefined;
+            },
+            load(id) {
+              const normalizedId = id.replaceAll("\\", "/");
+              return normalizedId.endsWith("/@emdash-cms/admin/dist/slugify.js")
+                ? canonicalSlugifySource
+                : undefined;
+            },
+          },
+        ],
+      },
+    },
+    resolve: {
+      alias: {
+        // EmDash's default slugifier preserves Unicode. Use the site's
+        // canonical ASCII/Vietnamese-aware implementation for new content.
+        "@emdash-cms/admin/slugify": canonicalSlugifyPath,
+      },
+    },
+    plugins: [
+      canonicalSlugifyPlugin,
+      tailwindcss(),
+    ],
     server: {
       hmr: false,
     },

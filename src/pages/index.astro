@@ -1,8 +1,6 @@
 ---
 import { getSiteSettings } from "emdash";
 
-import type { Product as EmDashProduct } from "../../.emdash/types";
-
 import Base from "../layouts/Base.astro";
 import HeroCarousel from "../components/carousel/HeroCarousel.astro";
 import ProductSection from "../components/home/ProductSection.astro";
@@ -10,13 +8,17 @@ import TrustStrip from "../components/home/TrustStrip.astro";
 import CatalogueBanner from "../components/home/CatalogueBanner.astro";
 import NewsSection from "../components/home/NewsSection.astro";
 
-import type { ProductSectionData } from "../modules/types/product.type";
+import type {
+  ProductSectionData,
+  ProductWithAlt,
+} from "../modules/types/product.type";
 
 import {
   productCategoryLabelKeys,
   productCategoryNavigationOrder,
 } from "../data/navigation";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
+import { getCanonicalPostSlug } from "../utils/content-slugs";
 import {
   DEFAULT_UI_LOCALE,
   getPublicEntrySlug,
@@ -34,7 +36,7 @@ const locale = getRequestLocale(Astro);
 const t = useTranslations(locale);
 
 const [productResult, defaultProductResult, postResult, settings] = await Promise.all([
-  getCollectionWithFallback<"products", EmDashProduct>("products", {
+  getCollectionWithFallback<"products", ProductWithAlt>("products", {
     status: "published",
     orderBy: {
       published_at: "desc",
@@ -45,7 +47,7 @@ const [productResult, defaultProductResult, postResult, settings] = await Promis
 
   locale === DEFAULT_UI_LOCALE
     ? Promise.resolve(null)
-    : getCollectionWithFallback<"products", EmDashProduct>("products", {
+    : getCollectionWithFallback<"products", ProductWithAlt>("products", {
         status: "published",
         orderBy: {
           published_at: "desc",
@@ -127,7 +129,10 @@ for (const entry of productEntries) {
     section.products.push({
       name: entry.data.title,
       image: entry.data.featured_image,
-      alt: entry.data.featured_image?.alt ?? entry.data.title,
+      alt:
+        typeof entry.data.featured_image_alt === "string"
+          ? entry.data.featured_image_alt.trim()
+          : entry.data.featured_image?.alt ?? entry.data.title,
       href: localizePath(`/products/${getPublicEntrySlug(entry)}`, locale),
     });
 
@@ -160,7 +165,7 @@ const cmsNews = postResult.entries.map((post) => ({
   description: post.data.excerpt,
   image: post.data.featured_image,
   alt: post.data.featured_image?.alt ?? post.data.title,
-  href: localizePath(`/posts/${post.id}`, locale),
+  href: localizePath(`/posts/${getCanonicalPostSlug(post)}`, locale),
   date: post.data.publishedAt?.toLocaleDateString(intlLocaleByUiLocale[locale], {
     day: "2-digit",
     month: "2-digit",

@@ -2,9 +2,7 @@ import {
   getEmDashCollection,
 } from "emdash";
 
-import type {
-  Product,
-} from "../../../.emdash/types";
+import type { ProductWithAlt } from "../types/product.type";
 import { DEFAULT_UI_LOCALE, type UiLocale } from "../../i18n/ui";
 import { getTermsForEntriesWithFallback } from "../../i18n/content";
 
@@ -13,7 +11,7 @@ export async function getProductsByCategory(
   limit = 100,
   locale: UiLocale = "vi",
 ) {
-  const directResult = await getEmDashCollection<"products", Product>(
+  const directResult = await getEmDashCollection<"products", ProductWithAlt>(
     "products",
     {
       status: "published",
@@ -34,7 +32,7 @@ export async function getProductsByCategory(
 
   // An assignment can appear in Admin while the optimized taxonomy query
   // misses it. Fall back to the hydrated term mapping only in that case.
-  const fallbackResult = await getEmDashCollection<"products", Product>(
+  const fallbackResult = await getEmDashCollection<"products", ProductWithAlt>(
     "products",
     {
       status: "published",
