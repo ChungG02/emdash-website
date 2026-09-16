@@ -699,7 +699,8 @@ button {
 .carousel-slide[data-layout="catalogue"] .hero-subheading {
   top: 42.2%;
   left: 4.35%;
-  font-size: 1.72cqw;
+  color: #ffffff;
+  font-size: 1.9cqw;
   line-height: 1;
   font-weight: 500;
   white-space: nowrap;
