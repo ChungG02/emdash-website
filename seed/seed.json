@@ -16,6 +16,7 @@
 			"slug": "posts",
 			"label": "Posts",
 			"labelSingular": "Post",
+			"urlPattern": "/tin-tuc/{slug}",
 			"supports": ["drafts", "revisions", "search", "seo"],
 			"commentsEnabled": true,
 			"fields": [
@@ -282,7 +283,7 @@
 				{
 					"type": "custom",
 					"label": "Posts",
-					"url": "/posts"
+					"url": "/tin-tuc"
 				}
 			]
 		}
