@@ -60,7 +60,7 @@ const seo = getSeoMeta(product, {
   content={{ collection: "products", id: product.data.id, slug: getPublicEntrySlug(product) }}
 >
   <main class="product-detail">
-    <a href={localizePath("/products", locale)} class="back-link">← {t("products.back")}</a>
+    <a href={localizePath("/", locale)} class="back-link">← {t("products.back")}</a>
 
     <section class="product-detail__main">
       <ProductGallery

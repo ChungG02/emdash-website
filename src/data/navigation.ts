@@ -62,7 +62,7 @@ const navigationDefinitions: NavigationDefinition[] = [
   },
   {
     labelKey: "nav.otherProducts",
-    href: "/#san-pham-khac",
+    href: "/product-category/san-pham-khac",
     children: [
       {
         labelKey: "nav.edgeProtector",
@@ -78,7 +78,7 @@ const navigationDefinitions: NavigationDefinition[] = [
   },
   { 
     labelKey: "nav.news",
-    href: "/#tin-tuc",
+    href: "/posts",
     children: [
       { labelKey: "nav.aboutUs", href: "/gioi-thieu" },
       { labelKey: "nav.exportNews", href: "/posts/tin-xuat-khau" },
